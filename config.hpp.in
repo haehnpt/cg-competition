@@ -1,0 +1,5 @@
+#pragma once
+
+#include <string>
+
+#define SHADER_ROOT std::string("@PROJECT_SOURCE_DIR@/shaders/")
