@@ -1,10 +1,10 @@
 #include "terrain.hpp"
 
-float * terrain::getHeights(float range)
+float * terrain::getHeights(float range, float rigidity)
 {
 	float * heights = new float[resolution * resolution];
-	perlin_noise noise = perlin_noise(22, 1.0, 0.0, 1.0);
-	perlin_noise noise2 = perlin_noise(32, 0.8, 0.0, 1.0);
+	perlin_noise noise = perlin_noise(300, 2.0, 0.5, 3.0);
+	perlin_noise noise2 = perlin_noise(300, 1.5, 0.5, 3.0);
 
 	for (int z = 0; z < resolution; z++)
 	{
@@ -12,11 +12,23 @@ float * terrain::getHeights(float range)
 		{
 			float x1 = x * range / resolution;
 			float x2 = z * range / resolution;
-			heights[(z * resolution) + x] = 0.6 * noise.get_noise(x1,x2) + noise2.get_noise(x1,x2) * 0.4;
+			float v = 0.6 * noise.get_noise(x1, x2) + noise2.get_noise(x1, x2) * 0.4;
+			v = glm::max<float>(min_height, (v < 0.0 ? -1.0 : 1.0) * pow(abs(v), rigidity));
+			heights[(z * resolution) + x] = v;
+			if (v < lowest_height) lowest_height = v;
+			if (v > highest_height) highest_height = v;
 		}
 	}
 
 	return heights;
+}
+
+void terrain::clampHeights()
+{
+	for (int i = 0; i < resolution * resolution; i++)
+	{
+		heights[i] = min_height + (heights[i] - lowest_height) / (highest_height - lowest_height) * (max_height - min_height);
+	}
 }
 
 // done TODO: Höhenberechnung in GPU
@@ -42,7 +54,7 @@ void terrain::build(int frame)
 		glm::vec3 pos(-size/2 + (i % resolution) * deltaX, heights[i], -size/2 + (i / resolution) * deltaZ);
 		
 		glm::vec3 nrm;
-		if (frame)
+		if (frame != 0)
 		{
 			float delta = frame / (float)frames;
 			float hl = i-1 < 0 ? 0.0 : heights[i - 1];
@@ -70,6 +82,11 @@ void terrain::build(int frame)
 		m.positions[i] = pos;
 		m.normals[i] = nrm;
 		m.colors[i] = col;
+
+		float one = 2.0;
+		float scaling = 1.0;
+		col[0] = modf(i / scaling, &one);//1.0 / resolution * (i % resolution);
+		col[1] = modf(i / resolution / scaling, &one);//1.0 / resolution * (i / resolution);
 
 		vbo_data[10 * i + 0] = pos[0];
 		vbo_data[10 * i + 1] = pos[1];
@@ -133,7 +150,8 @@ terrain::terrain(float size, int resolution, int frames)
 	this->frames = frames;
 	this->size = size;
 	this->resolution = resolution;
-	heights = getHeights(size);
+	heights = getHeights(size, 0.8);
+	clampHeights();
 	build(0);
 }
 

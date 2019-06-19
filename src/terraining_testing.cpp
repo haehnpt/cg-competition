@@ -4,6 +4,8 @@
 #include "camera.hpp"
 #include "terrain.hpp"
 
+#define DEBUG
+
 const int WINDOW_WIDTH =  800;
 const int WINDOW_HEIGHT = 800;
 const float FOV = 45.f;
@@ -26,8 +28,13 @@ main(int, char* argv[]) {
 
     camera cam(window);
 
-	int resolution = 10;
-	terrain terr = terrain(10.0, resolution, 180);
+	#ifdef DEBUG
+		int resolution = 100;
+	#else
+		int resolution = 1000;
+	#endif
+
+	terrain terr = terrain(50.0, resolution, 180);
 
     // load and compile shaders and link program
     unsigned int vertexShader = compileShader("shading_models.vert", GL_VERTEX_SHADER);
@@ -57,17 +64,26 @@ main(int, char* argv[]) {
 	int max_frame_loc = glGetUniformLocation(shaderProgram, "max_frame");
 	// Add location for height values
 	int heights_loc = glGetUniformLocation(shaderProgram, "heights");
+	// Add location for colors
+	int hill_color_loc = glGetUniformLocation(shaderProgram, "hill_color");
+	int mountain_color_loc = glGetUniformLocation(shaderProgram, "mountain_color");
+	int snow_color_loc = glGetUniformLocation(shaderProgram, "snow_color");
+	int ground_color_loc = glGetUniformLocation(shaderProgram, "ground_color");
+
+	// Add location for textures
+	int tex_loc_1 = glGetUniformLocation(shaderProgram, "stone_tex");
+	int tex_loc_2 = glGetUniformLocation(shaderProgram, "grass_tex");
 
     proj_matrix = glm::perspective(FOV, 1.f, NEAR_VALUE, FAR_VALUE);
 
     glEnable(GL_DEPTH_TEST);
 
     float light_phi = 0.0f;
-    float light_theta = 0.0f;
-    float roughness = 0.5f;
+    float light_theta = 0.5f;
+    float roughness = 0.0f;
     float refraction_index = 0.5f;
 	// Add variable for albedo
-	float albedo = 0.6f;
+	float albedo = 0.5f;
     int use_oren_nayar = 1;
     const char* diffuse_models[] = { "Lambert", "Oren-Nayar" };
     glm::vec4 diffuse_color(0.7f, 0.7f, 0.7f, 1.f);
@@ -75,12 +91,29 @@ main(int, char* argv[]) {
 
 	float frame = 0.0;
 	float max_frame = 180.0;
+	int image_width, image_height;
+
+	// Stone texture
+	float* image_tex_data = terrain::load_texture_data("C:\\users\\patrick\\desktop\\cg-competition\\data\\stone.jpg", &image_width, &image_height);
+	unsigned int image_tex1 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
+	glBindTextureUnit(0, image_tex1);
+	delete[] image_tex_data;
+
+	// Grass texture
+	image_tex_data = terrain::load_texture_data("C:\\users\\patrick\\desktop\\cg-competition\\data\\grass.jpg", &image_width, &image_height);
+	unsigned int image_tex2 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
+	glBindTextureUnit(1, image_tex2);
+	delete[] image_tex_data;
 
     // rendering loop
     while (glfwWindowShouldClose(window) == false) {
         glfwPollEvents();
         glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Texture
+		glUniform1i(tex_loc_1, 0);
+		glUniform1i(tex_loc_2, 1);
 
 		glUniform1f(frame_loc, frame++);
 		glUniform1f(max_frame_loc, max_frame);
@@ -103,6 +136,11 @@ main(int, char* argv[]) {
         glUniform4f(diffuse_loc, diffuse_color.x, diffuse_color.y, diffuse_color.z, diffuse_color.w);
         glUniform4f(specular_loc, specular_color.x, specular_color.y, specular_color.z, specular_color.w);
 
+		// Colors
+		glUniform4f(hill_color_loc, terr.hill_color.x, terr.hill_color.y, terr.hill_color.z, terr.hill_color.w);
+		glUniform4f(mountain_color_loc, terr.mountain_color.x, terr.mountain_color.y, terr.mountain_color.z, terr.mountain_color.w);
+		glUniform4f(snow_color_loc, terr.snow_color.x, terr.snow_color.y, terr.snow_color.z, terr.snow_color.w);
+		glUniform4f(ground_color_loc, terr.ground_color.x, terr.ground_color.y, terr.ground_color.z, terr.ground_color.w);
 		// Render terrain
 		glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &terr.terra.transform[0][0]);
 		terr.terra.bind();
@@ -118,6 +156,7 @@ main(int, char* argv[]) {
         }
 		*/
 
+		light_phi = (light_phi += 0.01) > 2 * M_PI ? 0.0 : light_phi;
 		terr.build(frame);
 
         // render UI

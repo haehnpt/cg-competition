@@ -3,10 +3,16 @@
 in vec4 interp_color;
 in vec3 interp_normal;
 in vec3 interp_light_dir;
+in vec2 uv;
+in float use_stone_tex;
+
 
 out vec4 frag_color;
 
 uniform bool useOrenNayar;
+
+uniform sampler2D stone_tex;
+uniform sampler2D grass_tex;
 
 uniform float albedo; // albedo
 uniform float roughness; // sigma
@@ -99,5 +105,11 @@ void main() {
     // as specular part we compute the Cook-Torrance term
     float specularTerm = cooktorranceTerm(interp_normal, interp_light_dir);
     // combine both terms (diffuse+specular) using our material properties (colors)
-    frag_color = vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
+
+	if (use_stone_tex == 1.0){
+		frag_color = texture2D(stone_tex, uv) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
+	}
+	else{
+		frag_color = texture2D(grass_tex, uv) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
+	}
 }

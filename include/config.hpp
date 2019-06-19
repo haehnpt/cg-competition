@@ -2,4 +2,4 @@
 
 #include <string>
 
-#define SHADER_ROOT std::string("C:/Users/patrick/Desktop/cg-competition/shaders/")
+#define SHADER_ROOT std::string("C:/Users/Patrick/Desktop/cg-competition/shaders/")
