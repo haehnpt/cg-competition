@@ -28,7 +28,7 @@ public:
 	float lowest_height = 0.0;
 	float highest_height = 1.0;
 
-	static unsigned int terrain::create_texture_rgba32f(int width, int height, float* data) {
+	static unsigned create_texture_rgba32f(int width, int height, float* data) {
 		unsigned int handle;
 		glCreateTextures(GL_TEXTURE_2D, 1, &handle);
 		glTextureStorage2D(handle, 1, GL_RGBA32F, width, height);
@@ -59,4 +59,3 @@ public:
 		return data;
 	}
 };
-
