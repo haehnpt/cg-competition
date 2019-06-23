@@ -53,6 +53,7 @@ main(int, char* argv[]) {
     start_time = std::chrono::system_clock::now();
 
     testPhysicsLibraryLinking();
+    object testObject = createObject(0, 0, 0, 0, 2, 0);
 
     // rendering loop
     while (glfwWindowShouldClose(window) == false) {
@@ -68,6 +69,11 @@ main(int, char* argv[]) {
         glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
 
         // render sphere
+        testObject.step(0.05);
+
+        sphere.transform = glm::translate(glm::vec3(testObject.x[0], testObject.x[1],
+                                                    testObject.x[2]));
+
         glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere.transform[0][0]);
         sphere.bind();
         glDrawElements(GL_TRIANGLES, sphere.vertex_count, GL_UNSIGNED_INT, (void*) 0);
