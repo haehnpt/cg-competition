@@ -31,10 +31,8 @@ phySphere::step(float deltaT) {
         }
     }
 
-    // FIXME: remove hard-coded scaling/size
     geo.transform = glm::translate(glm::vec3(x[0], x[1], x[2]))
         * glm::scale(glm::vec3(radius));
-    // std::cout << geo.transform;
 }
 
 phySphere
@@ -62,7 +60,7 @@ createPhySphere(float x1, float x2, float x3,
 
     s.geo = loadMesh("sphere.obj", false, color);
     s.radius = radius;
-    // FIXME: remove hard-coded scaling/size
+
     s.geo.transform = glm::translate(glm::vec3(s.x[0], s.x[1], s.x[2]))
         * glm::scale(glm::vec3(s.radius));
     return s;
