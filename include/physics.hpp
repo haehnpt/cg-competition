@@ -19,4 +19,4 @@ struct phySphere {
 };
 
 // x1..x3: Position, v1..v3: velocity
-phySphere createPhySphere(float x1, float x2, float x3, float v1, float v2, float v3);
+phySphere createPhySphere(float x1, float x2, float x3, float v1, float v2, float v3, glm::vec4 color);

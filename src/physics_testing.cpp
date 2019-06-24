@@ -37,7 +37,9 @@ main(int, char* argv[]) {
     glDeleteShader(fragmentShader);
     glDeleteShader(vertexShader);
 
-    phySphere sphere = createPhySphere(10, 10, 10, -30, -20, -10);
+    phySphere sphere1 = createPhySphere(10, 10, 10, -30, -20, -10, glm::vec4(0.f, 0.f, 1.f, 1.f));
+    phySphere sphere2 = createPhySphere(-7, -8, -9, 20, 10, 30, glm::vec4(1.f, 0.f, 0.f, 1.f));
+    phySphere sphere3 = createPhySphere(7, 5, -9, 0, 50, 80, glm::vec4(0.f, 1.f, 0.f, 1.f));
 
     glUseProgram(shaderProgram);
     int model_mat_loc = glGetUniformLocation(shaderProgram, "model_mat");
@@ -70,11 +72,21 @@ main(int, char* argv[]) {
         glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
 
         // render sphere
-        sphere.step(0.05);
+        sphere1.step(0.05);
+        sphere2.step(0.05);
+        sphere3.step(0.05);
 
-        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere.geo.transform[0][0]);
-        sphere.geo.bind();
-        glDrawElements(GL_TRIANGLES, sphere.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere1.geo.transform[0][0]);
+        sphere1.geo.bind();
+        glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere2.geo.transform[0][0]);
+        sphere2.geo.bind();
+        glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere3.geo.transform[0][0]);
+        sphere3.geo.bind();
+        glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
 
         // swap buffers == show rendered content
         glfwSwapBuffers(window);

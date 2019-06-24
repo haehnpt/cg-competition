@@ -38,7 +38,8 @@ phySphere::step(float deltaT) {
 
 phySphere
 createPhySphere(float x1, float x2, float x3,
-                float v1, float v2, float v3) {
+                float v1, float v2, float v3,
+                glm::vec4 color) {
 
     phySphere s{};
 
@@ -57,7 +58,7 @@ createPhySphere(float x1, float x2, float x3,
     s.a[1] = -10;                 // y
     s.a[0] = 0;                   // z
 
-    s.geo = loadMesh("sphere.obj", false, glm::vec4(1.f, 0.f, 1.f, 1.f));
+    s.geo = loadMesh("sphere.obj", false, color);
     // FIXME: remove hard-coded scaling/size
     s.geo.transform = glm::scale(glm::vec3(0.1f)) * glm::translate(glm::vec3(s.x[0], s.x[1], s.x[2]));
     return s;
