@@ -3,8 +3,8 @@
 float * terrain::getHeights(float range, float rigidity)
 {
 	float * heights = new float[resolution * resolution];
-	perlin_noise noise = perlin_noise(300, 2.0, 0.5, 3.0);
-	perlin_noise noise2 = perlin_noise(300, 1.5, 0.5, 3.0);
+	perlin_noise noise = perlin_noise(100, 1.0, 0.3, 1.0);
+	perlin_noise noise2 = perlin_noise(300, 0.333333, 0.3, 1.0);
 
 	for (int z = 0; z < resolution; z++)
 	{
@@ -32,9 +32,9 @@ void terrain::clampHeights()
 }
 
 // done TODO: Höhenberechnung in GPU
-// TODO: Texturen
-// TODO: Korrekte normalen auf GPU
-void terrain::build(int frame)
+// done TODO: Texturen
+// done TODO: Korrekte normalen auf GPU
+void terrain::build()
 {
 	geometry m;
 	int nVertices = resolution * resolution;
@@ -53,20 +53,13 @@ void terrain::build(int frame)
 
 		glm::vec3 pos(-size/2 + (i % resolution) * deltaX, heights[i], -size/2 + (i / resolution) * deltaZ);
 		
+		// Calculate final normal after every vertex has reached its height
 		glm::vec3 nrm;
-		if (frame != 0)
-		{
-			float delta = frame / (float)frames;
-			float hl = i-1 < 0 ? 0.0 : heights[i - 1];
-			float hr = ((i + 1) % resolution) == 0 ? 0.0 : heights[i + 1];
-			float hu = (i + resolution) / resolution < resolution ? heights[i + resolution] : 0.0;
-			float hd = i >= resolution ? heights[i - resolution] : 0.0;
-			nrm = glm::normalize(glm::vec3(delta * (hl - hr), 2.0, delta * (hd - hu)));
-		}
-		else
-		{
-			nrm = glm::vec3(0.0, 1.0, 0.0);
-		}
+		float hl = i-1 < 0 ? 0.0 : heights[i - 1];
+		float hr = ((i + 1) % resolution) == 0 ? 0.0 : heights[i + 1];
+		float hu = (i + resolution) / resolution < resolution ? heights[i + resolution] : 0.0;
+		float hd = i >= resolution ? heights[i - resolution] : 0.0;
+		nrm = glm::normalize(glm::vec3(hl - hr, 2.0, hd - hu));
 		
 		glm::vec4 col = m.colors[0];
 
@@ -83,8 +76,9 @@ void terrain::build(int frame)
 		m.normals[i] = nrm;
 		m.colors[i] = col;
 
-		float one = 2.0;
-		float scaling = 1.0;
+		// Texture coordinates
+		float one = 1.0;
+		float scaling = resolution;
 		col[0] = modf(i / scaling, &one);//1.0 / resolution * (i % resolution);
 		col[1] = modf(i / resolution / scaling, &one);//1.0 / resolution * (i / resolution);
 
@@ -139,20 +133,14 @@ void terrain::build(int frame)
 	delete[] ibo_data;
 }
 
-void terrain::calculateNormals(int frame)
-{
-	float delta = frame / (float)this->frames;
-	
-}
-
 terrain::terrain(float size, int resolution, int frames)
 {
 	this->frames = frames;
 	this->size = size;
 	this->resolution = resolution;
-	heights = getHeights(size, 0.8);
+	heights = getHeights(size, 1.0);
 	clampHeights();
-	build(0);
+	build();
 }
 
 

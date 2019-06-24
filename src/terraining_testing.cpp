@@ -29,12 +29,12 @@ main(int, char* argv[]) {
     camera cam(window);
 
 	#ifdef DEBUG
-		int resolution = 100;
+		int resolution = 1000;
 	#else
 		int resolution = 1000;
 	#endif
 
-	terrain terr = terrain(50.0, resolution, 180);
+	terrain terr = terrain(10.0, resolution, 180);
 
     // load and compile shaders and link program
     unsigned int vertexShader = compileShader("shading_models.vert", GL_VERTEX_SHADER);
@@ -73,6 +73,7 @@ main(int, char* argv[]) {
 	// Add location for textures
 	int tex_loc_1 = glGetUniformLocation(shaderProgram, "stone_tex");
 	int tex_loc_2 = glGetUniformLocation(shaderProgram, "grass_tex");
+	int tex_loc_3 = glGetUniformLocation(shaderProgram, "snow_tex");
 
     proj_matrix = glm::perspective(FOV, 1.f, NEAR_VALUE, FAR_VALUE);
 
@@ -83,7 +84,7 @@ main(int, char* argv[]) {
     float roughness = 0.0f;
     float refraction_index = 0.5f;
 	// Add variable for albedo
-	float albedo = 0.5f;
+	float albedo = 0.8f;
     int use_oren_nayar = 1;
     const char* diffuse_models[] = { "Lambert", "Oren-Nayar" };
     glm::vec4 diffuse_color(0.7f, 0.7f, 0.7f, 1.f);
@@ -94,15 +95,21 @@ main(int, char* argv[]) {
 	int image_width, image_height;
 
 	// Stone texture
-	float* image_tex_data = terrain::load_texture_data("C:\\users\\patrick\\desktop\\cg-competition\\data\\stone.jpg", &image_width, &image_height);
+	float* image_tex_data = terrain::load_texture_data("C:\\users\\patrick\\desktop\\cg-competition\\data\\schotter.jpg", &image_width, &image_height);
 	unsigned int image_tex1 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
 	glBindTextureUnit(0, image_tex1);
 	delete[] image_tex_data;
 
 	// Grass texture
-	image_tex_data = terrain::load_texture_data("C:\\users\\patrick\\desktop\\cg-competition\\data\\grass.jpg", &image_width, &image_height);
+	image_tex_data = terrain::load_texture_data("C:\\users\\patrick\\desktop\\cg-competition\\data\\grass_large.jpg", &image_width, &image_height);
 	unsigned int image_tex2 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
 	glBindTextureUnit(1, image_tex2);
+	delete[] image_tex_data;
+
+	// Snow texture
+	image_tex_data = terrain::load_texture_data("C:\\users\\patrick\\desktop\\cg-competition\\data\\snow_large.jpg", &image_width, &image_height);
+	unsigned int image_tex3 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
+	glBindTextureUnit(2, image_tex3);
 	delete[] image_tex_data;
 
     // rendering loop
@@ -111,9 +118,19 @@ main(int, char* argv[]) {
         glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		// Set properties
+		terrain::set_texture_filter_mode(image_tex1, GL_LINEAR);
+		terrain::set_texture_filter_mode(image_tex2, GL_LINEAR);
+		terrain::set_texture_filter_mode(image_tex3, GL_LINEAR);
+
+		terrain::set_texture_wrap_mode(image_tex1, GL_REPEAT);
+		terrain::set_texture_wrap_mode(image_tex2, GL_REPEAT);
+		terrain::set_texture_wrap_mode(image_tex3, GL_REPEAT);
+
 		// Texture
 		glUniform1i(tex_loc_1, 0);
 		glUniform1i(tex_loc_2, 1);
+		glUniform1i(tex_loc_3, 2);
 
 		glUniform1f(frame_loc, frame++);
 		glUniform1f(max_frame_loc, max_frame);
@@ -157,7 +174,6 @@ main(int, char* argv[]) {
 		*/
 
 		light_phi = (light_phi += 0.01) > 2 * M_PI ? 0.0 : light_phi;
-		terr.build(frame);
 
         // render UI
         glfwSwapBuffers(window);

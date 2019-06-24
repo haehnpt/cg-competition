@@ -8,11 +8,10 @@
 class terrain
 {
 	float * getHeights(float range, float rigidity);
-	void calculateNormals(int frame);
+	void build();
 	void clampHeights();
 public:
 	terrain(float size, int resolution, int frames);
-	void build(int frame);
 	~terrain();
 	geometry terra;
 	float * heights;
@@ -23,13 +22,13 @@ public:
 	const glm::vec4 mountain_color = glm::vec4(0.5,0.5,0.5, 1.0);
 	const glm::vec4 snow_color = glm::vec4(1.0,1.0,1.0, 1.0);
 	const glm::vec4 ground_color = glm::vec4(0.2,0.5,0.2, 1.0);
-	const float min_height = 0.0;
-	const float max_height = 1.0;
+	float min_height = 0.0;
+	float max_height = 1.0;
 	float lowest_height = 0.0;
 	float highest_height = 1.0;
 
-	static unsigned int terrain::create_texture_rgba32f(int width, int height, float* data) {
-		unsigned int handle;
+	static unsigned create_texture_rgba32f(int width, int height, float* data) {
+		unsigned handle;
 		glCreateTextures(GL_TEXTURE_2D, 1, &handle);
 		glTextureStorage2D(handle, 1, GL_RGBA32F, width, height);
 		glTextureSubImage2D(handle, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, data);
@@ -57,6 +56,15 @@ public:
 		delete[] file_data;
 
 		return data;
+	}
+
+	static void set_texture_filter_mode(unsigned int texture, GLenum mode) {
+		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, mode);
+	}
+
+	static void set_texture_wrap_mode(unsigned int texture, GLenum mode) {
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_S, mode);
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_T, mode);
 	}
 };
 

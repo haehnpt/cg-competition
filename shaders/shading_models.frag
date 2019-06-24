@@ -4,7 +4,7 @@ in vec4 interp_color;
 in vec3 interp_normal;
 in vec3 interp_light_dir;
 in vec2 uv;
-in float use_stone_tex;
+in vec2 tex_height;
 
 
 out vec4 frag_color;
@@ -13,6 +13,7 @@ uniform bool useOrenNayar;
 
 uniform sampler2D stone_tex;
 uniform sampler2D grass_tex;
+uniform sampler2D snow_tex;
 
 uniform float albedo; // albedo
 uniform float roughness; // sigma
@@ -87,7 +88,8 @@ float orennayarTerm(float lambert, vec3 n, vec3 l) {
 	vec3 ortho_L = normalize(l - cdot(l,n) * n);
 	float cos_azimuth = cdot(ortho_L, ortho_V);
 
-	float LV = rho * cos(theta_L) * (A + (B * max(0, cos_azimuth) * sin(alpha) * tan(beta)));
+	// rho * cos(theta_L)
+	float LV = albedo * (A + (B * max(0, cos_azimuth) * sin(alpha) * tan(beta)));
 
     return lambert * LV;
 }
@@ -106,7 +108,10 @@ void main() {
     float specularTerm = cooktorranceTerm(interp_normal, interp_light_dir);
     // combine both terms (diffuse+specular) using our material properties (colors)
 
-	if (use_stone_tex == 1.0){
+	if (tex_height.x > 0.8){
+		frag_color = texture2D(snow_tex, uv) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
+	}
+	else if (tex_height.x > 0.4){
 		frag_color = texture2D(stone_tex, uv) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
 	}
 	else{
