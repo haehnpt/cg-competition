@@ -56,7 +56,7 @@ createPhySphere(float x1, float x2, float x3,
     // acceleration (hard-coded for now!)
     s.a[0] = 0;                   // x
     s.a[1] = -10;                 // y
-    s.a[0] = 0;                   // z
+    s.a[2] = 0;                   // z
 
     s.geo = loadMesh("sphere.obj", false, color);
     // FIXME: remove hard-coded scaling/size
