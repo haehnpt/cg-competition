@@ -24,21 +24,23 @@ phySphere::step(float deltaT) {
 
 
         // for TESTING: a hard-coded bounding box
-        if (x[i] < -10 && v[i] < 0) {
+        if (x[i] - radius < -6 && v[i] < 0) {
             v[i] = -0.90 * v[i];
-        } else if (x[i] > 10 && v[i] > 0) {
+        } else if (x[i] + radius > 6 && v[i] > 0) {
             v[i] = -0.90 * v[i];
         }
     }
 
     // FIXME: remove hard-coded scaling/size
-    geo.transform = glm::scale(glm::vec3(0.1f)) * glm::translate(glm::vec3(x[0], x[1], x[2]));
+    geo.transform = glm::translate(glm::vec3(x[0], x[1], x[2]))
+        * glm::scale(glm::vec3(radius));
     // std::cout << geo.transform;
 }
 
 phySphere
 createPhySphere(float x1, float x2, float x3,
                 float v1, float v2, float v3,
+                float radius,
                 glm::vec4 color) {
 
     phySphere s{};
@@ -59,7 +61,9 @@ createPhySphere(float x1, float x2, float x3,
     s.a[2] = 0;                   // z
 
     s.geo = loadMesh("sphere.obj", false, color);
+    s.radius = radius;
     // FIXME: remove hard-coded scaling/size
-    s.geo.transform = glm::scale(glm::vec3(0.1f)) * glm::translate(glm::vec3(s.x[0], s.x[1], s.x[2]));
+    s.geo.transform = glm::translate(glm::vec3(s.x[0], s.x[1], s.x[2]))
+        * glm::scale(glm::vec3(s.radius));
     return s;
 }

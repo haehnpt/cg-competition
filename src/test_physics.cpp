@@ -37,9 +37,15 @@ main(int, char* argv[]) {
     glDeleteShader(fragmentShader);
     glDeleteShader(vertexShader);
 
-    phySphere sphere1 = createPhySphere(10, 10, 10, -30, -20, -10, glm::vec4(0.f, 0.f, 1.f, 1.f));
-    phySphere sphere2 = createPhySphere(-7, -8, -9, 20, 10, 30, glm::vec4(1.f, 0.f, 0.f, 1.f));
-    phySphere sphere3 = createPhySphere(7, 5, -9, 0, 50, 80, glm::vec4(0.f, 1.f, 0.f, 1.f));
+    phySphere sphere1 = createPhySphere(-3.f, 5.f, -10.f,
+                                        0.f, 0.f, 0.f,
+                                        0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f));
+    phySphere sphere2 = createPhySphere(0.f, 5.f, -10.f,
+                                        0.f, 0.f, 0.f,
+                                        0.4f, glm::vec4(1.f, 0.f, 0.f, 1.f));
+    phySphere sphere3 = createPhySphere(3.f, 5.f, -10.f,
+                                        0.f, 0.f, 0.f,
+                                        0.8f, glm::vec4(0.f, 1.f, 0.f, 1.f));
 
     glUseProgram(shaderProgram);
     int model_mat_loc = glGetUniformLocation(shaderProgram, "model_mat");
