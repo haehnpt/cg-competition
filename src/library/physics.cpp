@@ -88,9 +88,11 @@ createPhyPlane(float xlength, float zlength) {
     //     {0.f, 0.0f, 0.0f, 0.0f, 0.f}
     // };
 
-    float heightMap[2][2] {
-      {0.f, 0.f},
-      {0.f, 0.f}
+    float heightMap[4][3] {
+        {0.f, 0.f, 0.f},
+        {0.f, 0.f, 0.f},
+        {0.f, 0.f, 0.f},
+        {0.f, 0.f, 0.f}
     };
 
     // If you can't be bothered to learn C++ ... ;)
@@ -174,8 +176,8 @@ createPhyPlane(float xlength, float zlength) {
                     p.vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
                 }
                 // default color
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.f; // r
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.f; // g
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.5f; // r
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.5f; // g
                 p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 1.f; // b
                 p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.f; // a
             }
@@ -209,8 +211,8 @@ createPhyPlane(float xlength, float zlength) {
                 }
                 // default color
                 p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 1.f; // r
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.f; // g
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.f; // b
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.5f; // g
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.5f; // b
                 p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.f; // a
             }
 
@@ -222,14 +224,14 @@ createPhyPlane(float xlength, float zlength) {
 
     // DEBUG print
     for (int i = 0; i < p.mVertices; i++) {
-      std::cout << "====== Vertix " << i << ":\n";
+        std::cout << "====== Vertix " << i << ":\n";
 
-      for (int j = 0; j < 10; j++) {
-        std::cout << p.vbo_data[i * 10 + j] << " ";
-        std::cout << ((j == 2 || j == 5) ? "\n" : " ");
-      }
+        for (int j = 0; j < 10; j++) {
+            std::cout << p.vbo_data[i * 10 + j] << " ";
+            std::cout << ((j == 2 || j == 5) ? "\n" : " ");
+        }
 
-      std::cout << "\n\n";
+        std::cout << "\n\n";
     }
 
     glGenVertexArrays(1, &p.vao);
