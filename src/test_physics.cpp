@@ -47,6 +47,9 @@ main(int, char* argv[]) {
                                         0.f, 0.f, 0.f,
                                         0.8f, glm::vec4(0.f, 1.f, 0.f, 1.f));
 
+    phyPlane plane = createPhyPlane(20.f, 20.f);
+    std::cout << "vdo_size: " << plane.vbo_size << "\n";
+
     glUseProgram(shaderProgram);
     int model_mat_loc = glGetUniformLocation(shaderProgram, "model_mat");
     int view_mat_loc = glGetUniformLocation(shaderProgram, "view_mat");
@@ -93,6 +96,13 @@ main(int, char* argv[]) {
         glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere3.geo.transform[0][0]);
         sphere3.geo.bind();
         glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+
+        // reset the model matrix before rendering the plane
+        glm::mat4 m = glm::mat4(1.f);
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &m[0][0]);
+
+        plane.bind();
+        glDrawArrays(GL_TRIANGLES, 0, plane.vbo_size);
 
         // swap buffers == show rendered content
         glfwSwapBuffers(window);

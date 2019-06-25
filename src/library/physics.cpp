@@ -73,17 +73,18 @@ createPhyPlane(float xlength, float zlength) {
 
   // This will later come from Patrick's generted data
   float heightMap[5][5] {
-    {1.f, 0.f, 0.f, 1.f, 0.f},
-    {0.f, 0.f, 0.f, 1.f, 0.f},
-    {1.f, 0.f, 0.f, 1.f, 1.f},
-    {1.f, 0.f, 0.f, 0.f, 0.f},
-    {1.f, 0.f, 1.f, 1.f, 1.f}
+    {0.05f, 0.f, 0.f, 0.05f, 0.f},
+    {0.f, 0.f, 0.f, 0.05f, 0.f},
+    {0.05f, 0.f, 0.f, 0.05f, 0.05f},
+    {0.05f, 0.f, 0.f, 0.f, 0.f},
+    {0.05f, 0.f, 0.05f, 0.05f, 0.05f}
   };
 
   // If you can't be bothered to learn C++ ... ;)
   int zNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
   int xNumPoints = sizeof(heightMap[0]) / sizeof(heightMap[0][0]);
 
+  std::cout << "heightMap dimension: " << zNumPoints << "x" << xNumPoints << "\n";
   // Set vertex coordinates using the heightMap for the y-value.
   //
   // Each square of the (m-1)*(n-1) squares is separated into two
@@ -115,8 +116,8 @@ createPhyPlane(float xlength, float zlength) {
   // Thus the total number of vertices needed is:
   // (m-2)*(n-2)*6 + 2*(n-2)*3 + 2*(m-2)*3 + 1 + 1 + 2 + 2
   //  = 6*(n*m - n - m + 1)
-
-  p.vbo_data = new float[6 * (xNumPoints * zNumPoints - xNumPoints - zNumPoints + 1)];
+  p.vbo_size = 6 * (xNumPoints * zNumPoints - xNumPoints - zNumPoints + 1);
+  p.vbo_data = new float[p.vbo_size];
   float deltaX = xlength / xNumPoints;
   float deltaZ = zlength / zNumPoints;
 
@@ -147,14 +148,14 @@ createPhyPlane(float xlength, float zlength) {
       glm::vec3 b = glm::vec3(p.vbo_data[topLeftIndex + 20 + 0] - p.vbo_data[topLeftIndex + 0],
                               p.vbo_data[topLeftIndex + 20 + 1] - p.vbo_data[topLeftIndex + 1],
                               p.vbo_data[topLeftIndex + 20 + 2] - p.vbo_data[topLeftIndex + 2]);
-      glm::vec3 nrm = glm::normalize(glm::cross(a, b));
+      glm::vec3 nrm = glm::normalize(glm::cross(b, a));
       for (int vert = 0; vert < 3; vert++) {
         for (int coord = 0; coord < 3; coord++) {
           // normal's x,y,z values start at index 3
           p.vbo_data[topLeftIndex + (vert * 10) + 3 + coord] = nrm[coord];
         }
         // default color
-        p.vbo_data[topLeftIndex + (vert * 10) + 6 + 0] = 0.5f; // r
+        p.vbo_data[topLeftIndex + (vert * 10) + 6 + 0] = 1.f; // r
         p.vbo_data[topLeftIndex + (vert * 10) + 6 + 1] = 0.5f; // g
         p.vbo_data[topLeftIndex + (vert * 10) + 6 + 2] = 0.5f; // b
         p.vbo_data[topLeftIndex + (vert * 10) + 6 + 3] = 1.f; // a
@@ -186,18 +187,21 @@ createPhyPlane(float xlength, float zlength) {
           // normal's x,y,z values start at index 3
           p.vbo_data[topLeftIndex + (vert * 10) + 3 + coord] = nrm[coord];
           // default color
-          p.vbo_data[topLeftIndex + (vert * 10) + 6 + 0] = 0.5f; // r
+          p.vbo_data[topLeftIndex + (vert * 10) + 6 + 0] = 1.f; // r
           p.vbo_data[topLeftIndex + (vert * 10) + 6 + 1] = 0.5f; // g
           p.vbo_data[topLeftIndex + (vert * 10) + 6 + 2] = 0.5f; // b
-          p.vbo_data[topLeftIndex + (vert * 10) + 6 + 3] = 1.f; // a
+          p.vbo_data[topLeftIndex + (vert * 10) + 6 + 3] = 1.f;  // a
         }
       }
     }
   }
 
-  glGenVertexArrays(1, &p.vbo);
+  glGenVertexArrays(1, &p.vao);
+  glBindVertexArray(p.vao);
+
+  glGenBuffers(1, &p.vbo);
   glBindBuffer(GL_ARRAY_BUFFER, p.vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(p.vbo_data), p.vbo_data, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(p.vbo_data), &p.vbo_data, GL_STATIC_DRAW);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)0);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)(3*sizeof(float)));
@@ -213,4 +217,9 @@ createPhyPlane(float xlength, float zlength) {
   // delete [p.vbo_data];
 
   return p;
+}
+
+void
+phyPlane::bind() {
+  glBindVertexArray(vao);
 }
