@@ -30,5 +30,6 @@ phySphere createPhySphere(float x1, float x2, float x3,
 
 
 struct phyPlane {
-
+  unsigned int vbo;
+  float *vbo_data;
 };
