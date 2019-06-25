@@ -27,3 +27,8 @@ phySphere createPhySphere(float x1, float x2, float x3,
 phySphere createPhySphere(float x1, float x2, float x3,
                           float v1, float v2, float v3,
                           float radius, glm::vec4 color);
+
+
+struct phyPlane {
+
+};
