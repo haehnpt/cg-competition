@@ -10,4 +10,5 @@ void main()
 {
     float light = dot(interp_normal, light_dir);
     frag_color = clamp(light, 0.1, 1.0) * interp_color;
+    // frag_color = vec4(1., 0., 0., 1.);
 }

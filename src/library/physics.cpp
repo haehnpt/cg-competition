@@ -72,13 +72,26 @@ createPhyPlane(float xlength, float zlength) {
   phyPlane p{};
 
   // This will later come from Patrick's generted data
+  // float heightMap[5][5] {
+  //   {0.05f, 0.f, 0.f, 0.05f, 0.f},
+  //   {0.f, 0.f, 0.f, 0.05f, 0.f},
+  //   {0.05f, 0.f, 0.f, 0.05f, 0.05f},
+  //   {0.05f, 0.f, 0.f, 0.f, 0.f},
+  //   {0.05f, 0.f, 0.05f, 0.05f, 0.05f}
+  // };
+
   float heightMap[5][5] {
-    {0.05f, 0.f, 0.f, 0.05f, 0.f},
-    {0.f, 0.f, 0.f, 0.05f, 0.f},
-    {0.05f, 0.f, 0.f, 0.05f, 0.05f},
-    {0.05f, 0.f, 0.f, 0.f, 0.f},
-    {0.05f, 0.f, 0.05f, 0.05f, 0.05f}
+    {0.f, 0.0f, 0.0f, 0.0f, 0.f},
+    {0.f, 0.1f, 0.1f, 0.1f, 0.f},
+    {0.f, 0.1f, 0.2f, 0.1f, 0.f},
+    {0.f, 0.1f, 0.1f, 0.1f, 0.f},
+    {0.f, 0.0f, 0.0f, 0.0f, 0.f}
   };
+
+  // float heightMap[][2] {
+  //   {0.f, 0.f},
+  //     {0.f, 0.f}
+  // };
 
   // If you can't be bothered to learn C++ ... ;)
   int zNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
@@ -116,8 +129,8 @@ createPhyPlane(float xlength, float zlength) {
   // Thus the total number of vertices needed is:
   // (m-2)*(n-2)*6 + 2*(n-2)*3 + 2*(m-2)*3 + 1 + 1 + 2 + 2
   //  = 6*(n*m - n - m + 1)
-  p.vbo_size = 6 * (xNumPoints * zNumPoints - xNumPoints - zNumPoints + 1);
-  p.vbo_data = new float[p.vbo_size];
+  p.mVertices = 6 * (xNumPoints * zNumPoints - xNumPoints - zNumPoints + 1);
+  p.vbo_data = new float[p.mVertices];
   float deltaX = xlength / xNumPoints;
   float deltaZ = zlength / zNumPoints;
 
@@ -136,9 +149,9 @@ createPhyPlane(float xlength, float zlength) {
       // bottom-left vertex of the square
       p.vbo_data[topLeftIndex + 10 + 0] = x * deltaX;
       p.vbo_data[topLeftIndex + 10 + 1] = heightMap[x][z + 1];
-      p.vbo_data[topLeftIndex + 10 + 2] = z * deltaZ;
+      p.vbo_data[topLeftIndex + 10 + 2] = (z + 1) * deltaZ;
       // top-right vertex of the square
-      p.vbo_data[topLeftIndex + 20 + 0] = x * deltaX;
+      p.vbo_data[topLeftIndex + 20 + 0] = (x + 1) * deltaX;
       p.vbo_data[topLeftIndex + 20 + 1] = heightMap[x + 1][z];
       p.vbo_data[topLeftIndex + 20 + 2] = z * deltaZ;
       // add the same normal to all three vertices:
@@ -155,9 +168,9 @@ createPhyPlane(float xlength, float zlength) {
           p.vbo_data[topLeftIndex + (vert * 10) + 3 + coord] = nrm[coord];
         }
         // default color
-        p.vbo_data[topLeftIndex + (vert * 10) + 6 + 0] = 1.f; // r
-        p.vbo_data[topLeftIndex + (vert * 10) + 6 + 1] = 0.5f; // g
-        p.vbo_data[topLeftIndex + (vert * 10) + 6 + 2] = 0.5f; // b
+        p.vbo_data[topLeftIndex + (vert * 10) + 6 + 0] = 0.f; // r
+        p.vbo_data[topLeftIndex + (vert * 10) + 6 + 1] = 0.f; // g
+        p.vbo_data[topLeftIndex + (vert * 10) + 6 + 2] = 1.f; // b
         p.vbo_data[topLeftIndex + (vert * 10) + 6 + 3] = 1.f; // a
       }
 
@@ -165,15 +178,15 @@ createPhyPlane(float xlength, float zlength) {
       // bottom-left vertex of the square
       p.vbo_data[topLeftIndex + 30 + 0] = x * deltaX;
       p.vbo_data[topLeftIndex + 30 + 1] = heightMap[x][z + 1];
-      p.vbo_data[topLeftIndex + 30 + 2] = z * deltaZ;
+      p.vbo_data[topLeftIndex + 30 + 2] = (z + 1) * deltaZ;
       // top-right vertex of the square
-      p.vbo_data[topLeftIndex + 40 + 0] = x * deltaX;
+      p.vbo_data[topLeftIndex + 40 + 0] = (x + 1) * deltaX;
       p.vbo_data[topLeftIndex + 40 + 1] = heightMap[x + 1][z];
       p.vbo_data[topLeftIndex + 40 + 2] = z * deltaZ;
       // bottom-right vertex of the square
-      p.vbo_data[topLeftIndex + 50 + 0] = x * deltaX;
+      p.vbo_data[topLeftIndex + 50 + 0] = (x + 1) * deltaX;
       p.vbo_data[topLeftIndex + 50 + 1] = heightMap[x + 1][z + 1];
-      p.vbo_data[topLeftIndex + 50 + 2] = z * deltaZ;
+      p.vbo_data[topLeftIndex + 50 + 2] = (z + 1) * deltaZ;
       // add the same normal to all three vertices:
       a = glm::vec3(p.vbo_data[topLeftIndex + 40 + 0] - p.vbo_data[topLeftIndex + 50 + 0],
                     p.vbo_data[topLeftIndex + 40 + 1] - p.vbo_data[topLeftIndex + 50 + 1],
@@ -188,8 +201,8 @@ createPhyPlane(float xlength, float zlength) {
           p.vbo_data[topLeftIndex + (vert * 10) + 3 + coord] = nrm[coord];
           // default color
           p.vbo_data[topLeftIndex + (vert * 10) + 6 + 0] = 1.f; // r
-          p.vbo_data[topLeftIndex + (vert * 10) + 6 + 1] = 0.5f; // g
-          p.vbo_data[topLeftIndex + (vert * 10) + 6 + 2] = 0.5f; // b
+          p.vbo_data[topLeftIndex + (vert * 10) + 6 + 1] = 0.f; // g
+          p.vbo_data[topLeftIndex + (vert * 10) + 6 + 2] = 0.f; // b
           p.vbo_data[topLeftIndex + (vert * 10) + 6 + 3] = 1.f;  // a
         }
       }
@@ -201,7 +214,7 @@ createPhyPlane(float xlength, float zlength) {
 
   glGenBuffers(1, &p.vbo);
   glBindBuffer(GL_ARRAY_BUFFER, p.vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(p.vbo_data), &p.vbo_data, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, p.mVertices * 10 * sizeof(float), p.vbo_data, GL_STATIC_DRAW);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)0);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)(3*sizeof(float)));

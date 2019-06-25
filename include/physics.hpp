@@ -33,7 +33,7 @@ struct phyPlane {
   unsigned int vao;
   unsigned int vbo;
   float *vbo_data;
-  unsigned int vbo_size;
+  unsigned int mVertices;
 
   void bind();
 };
