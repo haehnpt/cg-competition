@@ -140,6 +140,7 @@ createPhyPlane(float xlength, float zlength) {
   // top-left and bottom-right triangle) are added to the VBO data.
   for (int z = 0; z < zNumPoints - 1; z++) {
     for (int x = 0; x < xNumPoints - 1; x++) {
+      glm::vec3 a, b, nrm;
       //// TOP-LEFT TRIANGLE ////
       // top-left vertex of the square
       int topLeftIndex = (z * xNumPoints + x) * 10;
@@ -155,13 +156,13 @@ createPhyPlane(float xlength, float zlength) {
       p.vbo_data[topLeftIndex + 20 + 1] = heightMap[x + 1][z];
       p.vbo_data[topLeftIndex + 20 + 2] = z * deltaZ;
       // add the same normal to all three vertices:
-      glm::vec3 a = glm::vec3(p.vbo_data[topLeftIndex + 10 + 0] - p.vbo_data[topLeftIndex + 0],
+      a = glm::vec3(p.vbo_data[topLeftIndex + 10 + 0] - p.vbo_data[topLeftIndex + 0],
                               p.vbo_data[topLeftIndex + 10 + 1] - p.vbo_data[topLeftIndex + 1],
                               p.vbo_data[topLeftIndex + 10 + 2] - p.vbo_data[topLeftIndex + 2]);
-      glm::vec3 b = glm::vec3(p.vbo_data[topLeftIndex + 20 + 0] - p.vbo_data[topLeftIndex + 0],
+      b = glm::vec3(p.vbo_data[topLeftIndex + 20 + 0] - p.vbo_data[topLeftIndex + 0],
                               p.vbo_data[topLeftIndex + 20 + 1] - p.vbo_data[topLeftIndex + 1],
                               p.vbo_data[topLeftIndex + 20 + 2] - p.vbo_data[topLeftIndex + 2]);
-      glm::vec3 nrm = glm::normalize(glm::cross(b, a));
+      nrm = glm::normalize(glm::cross(b, a));
       for (int vert = 0; vert < 3; vert++) {
         for (int coord = 0; coord < 3; coord++) {
           // normal's x,y,z values start at index 3
@@ -203,7 +204,7 @@ createPhyPlane(float xlength, float zlength) {
           p.vbo_data[topLeftIndex + (vert * 10) + 6 + 0] = 1.f; // r
           p.vbo_data[topLeftIndex + (vert * 10) + 6 + 1] = 0.f; // g
           p.vbo_data[topLeftIndex + (vert * 10) + 6 + 2] = 0.f; // b
-          p.vbo_data[topLeftIndex + (vert * 10) + 6 + 3] = 1.f;  // a
+          p.vbo_data[topLeftIndex + (vert * 10) + 6 + 3] = 1.f; // a
         }
       }
     }
