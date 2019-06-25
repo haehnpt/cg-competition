@@ -47,7 +47,7 @@ main(int, char* argv[]) {
                                         0.f, 0.f, 0.f,
                                         0.8f, glm::vec4(0.f, 1.f, 0.f, 1.f));
 
-    phyPlane plane = createPhyPlane(1.1f, 1.1f);
+    phyPlane plane = createPhyPlane(4.f, 4.f);
     std::cout << "vdo_size: " << plane.mVertices << "\n";
 
     glUseProgram(shaderProgram);
@@ -65,20 +65,30 @@ main(int, char* argv[]) {
     // time per frame?
     start_time = std::chrono::system_clock::now();
 
-    testPhysicsLibraryLinking();
-
     // rendering loop
+    int i = 0;
     while (glfwWindowShouldClose(window) == false) {
+        std::cout << "i = " << i++ << "\n";
+
         // set background color...
         glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
+        std::cout << "i = " << i++ << "\n";
         // and fill screen with it (therefore clearing the window)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
+        std::cout << "i = " << i++ << "\n";
+
+        // glUseProgram(shaderProgram);
+
+        std::cout << "i = " << i++ << "\n";
 
         glm::mat4 view_matrix = cam.view_matrix();
+
+        std::cout << "i = " << i++ << "\n";
+
         glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &view_matrix[0][0]);
         glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
+
 
         // render sphere
         sphere1.step(0.05);

@@ -80,24 +80,23 @@ createPhyPlane(float xlength, float zlength) {
     //   {0.05f, 0.f, 0.05f, 0.05f, 0.05f}
     // };
 
-    float heightMap[5][5] {
-        {0.f, 0.0f, 0.0f, 0.0f, 0.f},
-        {0.f, 0.1f, 0.1f, 0.1f, 0.f},
-        {0.f, 0.1f, 0.2f, 0.1f, 0.f},
-        {0.f, 0.1f, 0.1f, 0.1f, 0.f},
-        {0.f, 0.0f, 0.0f, 0.0f, 0.f}
-    };
-
-    // float heightMap[2][2] {
-    //   {0.f, 0.f},
-    //     {0.f, 0.f}
+    // float heightMap[5][5] {
+    //     {0.f, 0.0f, 0.0f, 0.0f, 0.f},
+    //     {0.f, 0.1f, 0.1f, 0.1f, 0.f},
+    //     {0.f, 0.1f, 0.2f, 0.1f, 0.f},
+    //     {0.f, 0.1f, 0.1f, 0.1f, 0.f},
+    //     {0.f, 0.0f, 0.0f, 0.0f, 0.f}
     // };
+
+    float heightMap[2][2] {
+      {0.f, 0.f},
+      {0.f, 0.f}
+    };
 
     // If you can't be bothered to learn C++ ... ;)
     int zNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
     int xNumPoints = sizeof(heightMap[0]) / sizeof(heightMap[0][0]);
 
-    std::cout << "heightMap dimension: " << zNumPoints << "x" << xNumPoints << "\n";
     // Set vertex coordinates using the heightMap for the y-value.
     //
     // Each square of the (m-1)*(n-1) squares is separated into two
@@ -131,84 +130,106 @@ createPhyPlane(float xlength, float zlength) {
     //  = 6*(n*m - n - m + 1)
     p.mVertices = 6 * (xNumPoints * zNumPoints - xNumPoints - zNumPoints + 1);
     p.vbo_data = new float[p.mVertices];
-    float deltaX = xlength / xNumPoints;
-    float deltaZ = zlength / zNumPoints;
+    float deltaX = xlength / (xNumPoints - 1);
+    float deltaZ = zlength / (zNumPoints - 1);
+
+    // DEBUG:
+    std::cout << "heightMap dimension: " << zNumPoints << "x" << xNumPoints << "\n";
+    std::cout << "xlength = " << xlength << ", zlength  = " << zlength << "\n";
+    std::cout << "deltaX = " << deltaX << ", deltaZ  = " << deltaZ << "\n";
+    std::cout << "p.mVertices = " << p.mVertices << "\n";
 
     // This for-loop loops over the squares between the data
     // points. (x,z) represents the upper-left vertex of the current
     // square. For each square the two contained triangles (called
     // top-left and bottom-right triangle) are added to the VBO data.
+    int indexRectTopLeft = 0;
     for (int z = 0; z < zNumPoints - 1; z++) {
         for (int x = 0; x < xNumPoints - 1; x++) {
             glm::vec3 a, b, nrm;
             //// TOP-LEFT TRIANGLE ////
             // top-left vertex of the square
-            int topLeftIndex = (z * xNumPoints + x) * 10;
-            p.vbo_data[topLeftIndex + 0] = x * deltaX;
-            p.vbo_data[topLeftIndex + 1] = heightMap[x][z];
-            p.vbo_data[topLeftIndex + 2] = z * deltaZ;
+            p.vbo_data[indexRectTopLeft + 0] = x * deltaX;
+            p.vbo_data[indexRectTopLeft + 1] = heightMap[x][z];
+            p.vbo_data[indexRectTopLeft + 2] = z * deltaZ;
             // bottom-left vertex of the square
-            p.vbo_data[topLeftIndex + 10 + 0] = x * deltaX;
-            p.vbo_data[topLeftIndex + 10 + 1] = heightMap[x][z + 1];
-            p.vbo_data[topLeftIndex + 10 + 2] = (z + 1) * deltaZ;
+            p.vbo_data[indexRectTopLeft + 10 + 0] = x * deltaX;
+            p.vbo_data[indexRectTopLeft + 10 + 1] = heightMap[x][z + 1];
+            p.vbo_data[indexRectTopLeft + 10 + 2] = (z + 1) * deltaZ;
             // top-right vertex of the square
-            p.vbo_data[topLeftIndex + 20 + 0] = (x + 1) * deltaX;
-            p.vbo_data[topLeftIndex + 20 + 1] = heightMap[x + 1][z];
-            p.vbo_data[topLeftIndex + 20 + 2] = z * deltaZ;
+            p.vbo_data[indexRectTopLeft + 20 + 0] = (x + 1) * deltaX;
+            p.vbo_data[indexRectTopLeft + 20 + 1] = heightMap[x + 1][z];
+            p.vbo_data[indexRectTopLeft + 20 + 2] = z * deltaZ;
             // add the same normal to all three vertices:
-            a = glm::vec3(p.vbo_data[topLeftIndex + 10 + 0] - p.vbo_data[topLeftIndex + 0],
-                          p.vbo_data[topLeftIndex + 10 + 1] - p.vbo_data[topLeftIndex + 1],
-                          p.vbo_data[topLeftIndex + 10 + 2] - p.vbo_data[topLeftIndex + 2]);
-            b = glm::vec3(p.vbo_data[topLeftIndex + 20 + 0] - p.vbo_data[topLeftIndex + 0],
-                          p.vbo_data[topLeftIndex + 20 + 1] - p.vbo_data[topLeftIndex + 1],
-                          p.vbo_data[topLeftIndex + 20 + 2] - p.vbo_data[topLeftIndex + 2]);
-            nrm = glm::normalize(glm::cross(b, a));
+            a = glm::vec3(p.vbo_data[indexRectTopLeft + 10 + 0] - p.vbo_data[indexRectTopLeft + 0],
+                          p.vbo_data[indexRectTopLeft + 10 + 1] - p.vbo_data[indexRectTopLeft + 1],
+                          p.vbo_data[indexRectTopLeft + 10 + 2] - p.vbo_data[indexRectTopLeft + 2]);
+            b = glm::vec3(p.vbo_data[indexRectTopLeft + 20 + 0] - p.vbo_data[indexRectTopLeft + 0],
+                          p.vbo_data[indexRectTopLeft + 20 + 1] - p.vbo_data[indexRectTopLeft + 1],
+                          p.vbo_data[indexRectTopLeft + 20 + 2] - p.vbo_data[indexRectTopLeft + 2]);
+            nrm = glm::normalize(glm::cross(a, b));
             for (int vert = 0; vert < 3; vert++) {
                 for (int coord = 0; coord < 3; coord++) {
                     // normal's x,y,z values start at index 3
-                    p.vbo_data[topLeftIndex + (vert * 10) + 3 + coord] = nrm[coord];
+                    p.vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
                 }
                 // default color
-                p.vbo_data[topLeftIndex + (vert * 10) + 6 + 0] = 0.f; // r
-                p.vbo_data[topLeftIndex + (vert * 10) + 6 + 1] = 0.f; // g
-                p.vbo_data[topLeftIndex + (vert * 10) + 6 + 2] = 1.f; // b
-                p.vbo_data[topLeftIndex + (vert * 10) + 6 + 3] = 1.f; // a
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.f; // r
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.f; // g
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 1.f; // b
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.f; // a
             }
 
             //// BOTTOM-RIGHT TRIANGLE ////
             // bottom-left vertex of the square
-            p.vbo_data[topLeftIndex + 30 + 0] = x * deltaX;
-            p.vbo_data[topLeftIndex + 30 + 1] = heightMap[x][z + 1];
-            p.vbo_data[topLeftIndex + 30 + 2] = (z + 1) * deltaZ;
+            p.vbo_data[indexRectTopLeft + 30 + 0] = x * deltaX;
+            p.vbo_data[indexRectTopLeft + 30 + 1] = heightMap[x][z + 1];
+            p.vbo_data[indexRectTopLeft + 30 + 2] = (z + 1) * deltaZ;
             // top-right vertex of the square
-            p.vbo_data[topLeftIndex + 40 + 0] = (x + 1) * deltaX;
-            p.vbo_data[topLeftIndex + 40 + 1] = heightMap[x + 1][z];
-            p.vbo_data[topLeftIndex + 40 + 2] = z * deltaZ;
+            p.vbo_data[indexRectTopLeft + 40 + 0] = (x + 1) * deltaX;
+            p.vbo_data[indexRectTopLeft + 40 + 1] = heightMap[x + 1][z];
+            p.vbo_data[indexRectTopLeft + 40 + 2] = z * deltaZ;
             // bottom-right vertex of the square
-            p.vbo_data[topLeftIndex + 50 + 0] = (x + 1) * deltaX;
-            p.vbo_data[topLeftIndex + 50 + 1] = heightMap[x + 1][z + 1];
-            p.vbo_data[topLeftIndex + 50 + 2] = (z + 1) * deltaZ;
+            p.vbo_data[indexRectTopLeft + 50 + 0] = (x + 1) * deltaX;
+            p.vbo_data[indexRectTopLeft + 50 + 1] = heightMap[x + 1][z + 1];
+            p.vbo_data[indexRectTopLeft + 50 + 2] = (z + 1) * deltaZ;
             // add the same normal to all three vertices:
-            a = glm::vec3(p.vbo_data[topLeftIndex + 40 + 0] - p.vbo_data[topLeftIndex + 50 + 0],
-                          p.vbo_data[topLeftIndex + 40 + 1] - p.vbo_data[topLeftIndex + 50 + 1],
-                          p.vbo_data[topLeftIndex + 40 + 2] - p.vbo_data[topLeftIndex + 50 + 2]);
-            b = glm::vec3(p.vbo_data[topLeftIndex + 30 + 0] - p.vbo_data[topLeftIndex + 50 + 0],
-                          p.vbo_data[topLeftIndex + 30 + 1] - p.vbo_data[topLeftIndex + 50 + 1],
-                          p.vbo_data[topLeftIndex + 30 + 2] - p.vbo_data[topLeftIndex + 50 + 2]);
+            a = glm::vec3(p.vbo_data[indexRectTopLeft + 40 + 0] - p.vbo_data[indexRectTopLeft + 50 + 0],
+                          p.vbo_data[indexRectTopLeft + 40 + 1] - p.vbo_data[indexRectTopLeft + 50 + 1],
+                          p.vbo_data[indexRectTopLeft + 40 + 2] - p.vbo_data[indexRectTopLeft + 50 + 2]);
+            b = glm::vec3(p.vbo_data[indexRectTopLeft + 30 + 0] - p.vbo_data[indexRectTopLeft + 50 + 0],
+                          p.vbo_data[indexRectTopLeft + 30 + 1] - p.vbo_data[indexRectTopLeft + 50 + 1],
+                          p.vbo_data[indexRectTopLeft + 30 + 2] - p.vbo_data[indexRectTopLeft + 50 + 2]);
             nrm = glm::normalize(glm::cross(a, b));
 
             for (int vert = 3; vert < 6; vert++) {
                 for (int coord = 0; coord < 3; coord++) {
                     // normal's x,y,z values start at index 3
-                    p.vbo_data[topLeftIndex + (vert * 10) + 3 + coord] = nrm[coord];
+                    p.vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
                 }
                 // default color
-                p.vbo_data[topLeftIndex + (vert * 10) + 6 + 0] = 1.f; // r
-                p.vbo_data[topLeftIndex + (vert * 10) + 6 + 1] = 0.f; // g
-                p.vbo_data[topLeftIndex + (vert * 10) + 6 + 2] = 0.f; // b
-                p.vbo_data[topLeftIndex + (vert * 10) + 6 + 3] = 1.f; // a
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 1.f; // r
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.f; // g
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.f; // b
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.f; // a
             }
+
+            // Per square (= 2 triangles) 6 vertices are added, update index
+            indexRectTopLeft += 6 * 10;
         }
+    }
+
+
+    // DEBUG print
+    for (int i = 0; i < p.mVertices; i++) {
+      std::cout << "====== Vertix " << i << ":\n";
+
+      for (int j = 0; j < 10; j++) {
+        std::cout << p.vbo_data[i * 10 + j] << " ";
+        std::cout << ((j == 2 || j == 5) ? "\n" : " ");
+      }
+
+      std::cout << "\n\n";
     }
 
     glGenVertexArrays(1, &p.vao);
