@@ -68,8 +68,8 @@ float perlin_noise::get_noise(float x, float y)
     int x_index_1 = x_index + 1;
     int y_index_1 = y_index + 1;
 
-    float sx = fade(x - (-max_distance + x_index * gradient_grid_distance));
-    float sy = fade(y - (-max_distance + y_index * gradient_grid_distance));
+	float sx = fade((x - (-max_distance + x_index * gradient_grid_distance)) / gradient_grid_distance); //fade(x - (-max_distance + x_index * gradient_grid_distance));
+	float sy = fade((y - (-max_distance + y_index * gradient_grid_distance)) / gradient_grid_distance); //fade(y - (-max_distance + y_index * gradient_grid_distance));
 
     float n1 = dotGridGradient(x_index, y_index, x, y);
     float n2 = dotGridGradient(x_index_1, y_index, x, y);
