@@ -67,7 +67,7 @@ createPhySphere(float x1, float x2, float x3,
 }
 
 phyPlane
-createPhyPlane(float xlength, float zlength) {
+createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     // TODO: heightMap as parameter
     phyPlane p{};
 
@@ -80,20 +80,27 @@ createPhyPlane(float xlength, float zlength) {
     //   {0.05f, 0.f, 0.05f, 0.05f, 0.05f}
     // };
 
-    // float heightMap[5][5] {
-    //     {0.f, 0.0f, 0.0f, 0.0f, 0.f},
-    //     {0.f, 0.1f, 0.1f, 0.1f, 0.f},
-    //     {0.f, 0.1f, 0.2f, 0.1f, 0.f},
-    //     {0.f, 0.1f, 0.1f, 0.1f, 0.f},
-    //     {0.f, 0.0f, 0.0f, 0.0f, 0.f}
-    // };
-
-    float heightMap[4][3] {
-        {0.f, 0.f, 0.f},
-        {0.f, 0.f, 0.f},
-        {0.f, 0.f, 0.f},
-        {0.f, 0.f, 0.f}
+    float heightMap[6][5] {
+        {0.1f, 2.0f, 0.0f, 0.0f, 0.1f},
+        {0.0f, 0.1f, 0.1f, 0.1f, 0.0f},
+        {0.3f, 0.1f, 0.5f, 0.3f, 0.2f},
+        {0.5f, 0.1f, 0.1f, 0.1f, 0.0f},
+        {0.4f, 0.2f, 0.2f, 0.4f, 0.2f},
+        {0.1f, 0.0f, 0.0f, 0.0f, 0.5f}
     };
+
+    for (int i = 0; i < 6; i++) {
+        for (int j = 0; j < 5; j++) {
+            heightMap[i][j] -= 4.f;
+        }
+    }
+
+    // float heightMap[4][3] {
+    //     {0.f, 0.f, 0.f},
+    //     {0.f, 0.f, 0.f},
+    //     {0.f, 0.f, 0.f},
+    //     {0.f, 0.f, 0.f}
+    // };
 
     // If you can't be bothered to learn C++ ... ;)
     int zNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
@@ -132,12 +139,11 @@ createPhyPlane(float xlength, float zlength) {
     //  = 6*(n*m - n - m + 1)
     p.mVertices = 6 * (xNumPoints * zNumPoints - xNumPoints - zNumPoints + 1);
     p.vbo_data = new float[p.mVertices];
-    float deltaX = xlength / (xNumPoints - 1);
-    float deltaZ = zlength / (zNumPoints - 1);
+    float deltaX = (xEnd - xStart) / (xNumPoints - 1);
+    float deltaZ = (zEnd - zStart) / (zNumPoints - 1);
 
     // DEBUG:
     std::cout << "heightMap dimension: " << zNumPoints << "x" << xNumPoints << "\n";
-    std::cout << "xlength = " << xlength << ", zlength  = " << zlength << "\n";
     std::cout << "deltaX = " << deltaX << ", deltaZ  = " << deltaZ << "\n";
     std::cout << "p.mVertices = " << p.mVertices << "\n";
 
@@ -151,17 +157,17 @@ createPhyPlane(float xlength, float zlength) {
             glm::vec3 a, b, nrm;
             //// TOP-LEFT TRIANGLE ////
             // top-left vertex of the square
-            p.vbo_data[indexRectTopLeft + 0] = x * deltaX;
+            p.vbo_data[indexRectTopLeft + 0] = xStart + x * deltaX;
             p.vbo_data[indexRectTopLeft + 1] = heightMap[x][z];
-            p.vbo_data[indexRectTopLeft + 2] = z * deltaZ;
+            p.vbo_data[indexRectTopLeft + 2] = zStart + z * deltaZ;
             // bottom-left vertex of the square
-            p.vbo_data[indexRectTopLeft + 10 + 0] = x * deltaX;
+            p.vbo_data[indexRectTopLeft + 10 + 0] = xStart + x * deltaX;
             p.vbo_data[indexRectTopLeft + 10 + 1] = heightMap[x][z + 1];
-            p.vbo_data[indexRectTopLeft + 10 + 2] = (z + 1) * deltaZ;
+            p.vbo_data[indexRectTopLeft + 10 + 2] = zStart + (z + 1) * deltaZ;
             // top-right vertex of the square
-            p.vbo_data[indexRectTopLeft + 20 + 0] = (x + 1) * deltaX;
+            p.vbo_data[indexRectTopLeft + 20 + 0] = xStart + (x + 1) * deltaX;
             p.vbo_data[indexRectTopLeft + 20 + 1] = heightMap[x + 1][z];
-            p.vbo_data[indexRectTopLeft + 20 + 2] = z * deltaZ;
+            p.vbo_data[indexRectTopLeft + 20 + 2] = zStart + z * deltaZ;
             // add the same normal to all three vertices:
             a = glm::vec3(p.vbo_data[indexRectTopLeft + 10 + 0] - p.vbo_data[indexRectTopLeft + 0],
                           p.vbo_data[indexRectTopLeft + 10 + 1] - p.vbo_data[indexRectTopLeft + 1],
@@ -184,17 +190,17 @@ createPhyPlane(float xlength, float zlength) {
 
             //// BOTTOM-RIGHT TRIANGLE ////
             // bottom-left vertex of the square
-            p.vbo_data[indexRectTopLeft + 30 + 0] = x * deltaX;
+            p.vbo_data[indexRectTopLeft + 30 + 0] = xStart + x * deltaX;
             p.vbo_data[indexRectTopLeft + 30 + 1] = heightMap[x][z + 1];
-            p.vbo_data[indexRectTopLeft + 30 + 2] = (z + 1) * deltaZ;
+            p.vbo_data[indexRectTopLeft + 30 + 2] = zStart + (z + 1) * deltaZ;
             // top-right vertex of the square
-            p.vbo_data[indexRectTopLeft + 40 + 0] = (x + 1) * deltaX;
+            p.vbo_data[indexRectTopLeft + 40 + 0] = xStart + (x + 1) * deltaX;
             p.vbo_data[indexRectTopLeft + 40 + 1] = heightMap[x + 1][z];
-            p.vbo_data[indexRectTopLeft + 40 + 2] = z * deltaZ;
+            p.vbo_data[indexRectTopLeft + 40 + 2] = zStart + z * deltaZ;
             // bottom-right vertex of the square
-            p.vbo_data[indexRectTopLeft + 50 + 0] = (x + 1) * deltaX;
+            p.vbo_data[indexRectTopLeft + 50 + 0] = xStart + (x + 1) * deltaX;
             p.vbo_data[indexRectTopLeft + 50 + 1] = heightMap[x + 1][z + 1];
-            p.vbo_data[indexRectTopLeft + 50 + 2] = (z + 1) * deltaZ;
+            p.vbo_data[indexRectTopLeft + 50 + 2] = zStart + (z + 1) * deltaZ;
             // add the same normal to all three vertices:
             a = glm::vec3(p.vbo_data[indexRectTopLeft + 40 + 0] - p.vbo_data[indexRectTopLeft + 50 + 0],
                           p.vbo_data[indexRectTopLeft + 40 + 1] - p.vbo_data[indexRectTopLeft + 50 + 1],

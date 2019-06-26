@@ -38,4 +38,4 @@ struct phyPlane {
   void bind();
 };
 
-phyPlane createPhyPlane(float width, float height);
+phyPlane createPhyPlane(float xStart, float xEnd, float zStart, float zEnd);

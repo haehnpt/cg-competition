@@ -38,17 +38,17 @@ main(int, char* argv[]) {
     glDeleteShader(vertexShader);
     glUseProgram(shaderProgram);
 
-    // phySphere sphere1 = createPhySphere(-3.f, 5.f, -10.f,
-    //                                     0.f, 0.f, 0.f,
-    //                                     0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f));
-    // phySphere sphere2 = createPhySphere(0.f, 5.f, -10.f,
-    //                                     0.f, 0.f, 0.f,
-    //                                     0.4f, glm::vec4(1.f, 0.f, 0.f, 1.f));
-    // phySphere sphere3 = createPhySphere(3.f, 5.f, -10.f,
-    //                                     0.f, 0.f, 0.f,
-    //                                     0.8f, glm::vec4(0.f, 1.f, 0.f, 1.f));
+    phySphere sphere1 = createPhySphere(-3.f, 5.f, 0.f,
+                                        0.f, 0.f, 0.f,
+                                        0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f));
+    phySphere sphere2 = createPhySphere(0.f, 5.f, 0.f,
+                                        0.f, 0.f, 0.f,
+                                        0.4f, glm::vec4(1.f, 0.f, 0.f, 1.f));
+    phySphere sphere3 = createPhySphere(3.f, 5.f, 0.f,
+                                        0.f, 0.f, 0.f,
+                                        0.8f, glm::vec4(0.f, 1.f, 0.f, 1.f));
 
-    phyPlane plane = createPhyPlane(4.f, 4.f);
+    phyPlane plane = createPhyPlane(-5.f, 5.f, -5.f, 5.f);
     std::cout << "vdo_size: " << plane.mVertices << "\n";
 
     int model_mat_loc = glGetUniformLocation(shaderProgram, "model_mat");
@@ -80,22 +80,21 @@ main(int, char* argv[]) {
         glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &view_matrix[0][0]);
         glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
 
-        // render sphere
-        // sphere1.step(0.05);
-        // sphere2.step(0.05);
-        // sphere3.step(0.05);
+        sphere1.step(0.05);
+        sphere2.step(0.05);
+        sphere3.step(0.05);
 
-        // glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere1.geo.transform[0][0]);
-        // sphere1.geo.bind();
-        // glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere1.geo.transform[0][0]);
+        sphere1.geo.bind();
+        glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
 
-        // glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere2.geo.transform[0][0]);
-        // sphere2.geo.bind();
-        // glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere2.geo.transform[0][0]);
+        sphere2.geo.bind();
+        glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
 
-        // glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere3.geo.transform[0][0]);
-        // sphere3.geo.bind();
-        // glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere3.geo.transform[0][0]);
+        sphere3.geo.bind();
+        glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
 
         // reset the model matrix before rendering the plane
         glm::mat4 m = glm::mat4(1.f);
