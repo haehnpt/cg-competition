@@ -36,6 +36,8 @@ struct phyPlane {
   unsigned int mVertices;
 
   void bind();
+  void release();
+  void destroy();
 };
 
 phyPlane createPhyPlane(float xStart, float xEnd, float zStart, float zEnd);

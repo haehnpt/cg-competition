@@ -4,6 +4,27 @@
 #include <mesh.hpp>
 #include <glm/gtx/transform.hpp>
 
+// #include <buffer.hpp>
+
+void
+phyPlane::bind() {
+    glBindVertexArray(vao);
+}
+
+void
+phyPlane::release() {
+    glBindVertexArray(0);
+}
+
+void
+phyPlane::destroy() {
+    release();
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+}
+
+
+
 void testPhysicsLibraryLinking() {
     std::cout << "physics.cpp linked successfully!\n";
 }
@@ -139,7 +160,7 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     // (m-2)*(n-2)*6 + 2*(n-2)*3 + 2*(m-2)*3 + 1 + 1 + 2 + 2
     //  = 6*(n*m - n - m + 1)
     p.mVertices = 6 * (xNumPoints * zNumPoints - xNumPoints - zNumPoints + 1);
-    p.vbo_data = new float[p.mVertices];
+    p.vbo_data = new float[p.mVertices * 10];
     float deltaX = (xEnd - xStart) / (xNumPoints - 1);
     float deltaZ = (zEnd - zStart) / (zNumPoints - 1);
 
@@ -147,6 +168,7 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     std::cout << "heightMap dimension: " << zNumPoints << "x" << xNumPoints << "\n";
     std::cout << "deltaX = " << deltaX << ", deltaZ  = " << deltaZ << "\n";
     std::cout << "p.mVertices = " << p.mVertices << "\n";
+    std::cout << "sizeof(p.vbo_data) = " << sizeof(p.vbo_data) << "\n";
 
     // This for-loop loops over the squares between the data
     // points. (x,z) represents the upper-left vertex of the current
@@ -262,9 +284,4 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     // delete [p.vbo_data];
 
     return p;
-}
-
-void
-phyPlane::bind() {
-    glBindVertexArray(vao);
 }
