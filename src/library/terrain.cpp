@@ -1,10 +1,15 @@
 #include "terrain.hpp"
 
+/*
+Get heights using "Perlin Noise"
+- range : size of the terrain
+- rigidity : how "rough" shall the terrain look, e.g. very spiky = 2.0
+*/
 float * terrain::getHeights(float range, float rigidity)
 {
 	float * heights = new float[resolution * resolution];
-	perlin_noise noise = perlin_noise(100, 1.0, 0.3, 1.0);
-	perlin_noise noise2 = perlin_noise(300, 0.333333, 0.3, 1.0);
+	perlin_noise noise = perlin_noise(100, 1.0, 0.3, 1.3);
+	perlin_noise noise2 = perlin_noise(300, 0.333333, 0.3, 1.3);
 
 	for (int z = 0; z < resolution; z++)
 	{
@@ -23,6 +28,9 @@ float * terrain::getHeights(float range, float rigidity)
 	return heights;
 }
 
+/*
+Clamp the calculated heights to an specified range
+*/
 void terrain::clampHeights()
 {
 	for (int i = 0; i < resolution * resolution; i++)
@@ -31,9 +39,13 @@ void terrain::clampHeights()
 	}
 }
 
-// done TODO: Höhenberechnung in GPU
-// done TODO: Texturen
-// done TODO: Korrekte normalen auf GPU
+/*
+Build the terrain instance
+- calculate vertices
+- calculate normals
+- calculate texture coordinates
+- set VBO
+*/
 void terrain::build()
 {
 	geometry m;
@@ -49,13 +61,19 @@ void terrain::build()
 
 	float* vbo_data = new float[nVertices * 10];
 	unsigned int* ibo_data = new unsigned int[nFaces * 3];
+	int step = nVertices / 100;
 	for (uint32_t i = 0; i < nVertices; ++i) {
+		// Log to console
+		if ((i + 1) % step == 0)
+		{
+			std::cout << (i + 1) / step << "%" << std::endl;
+		}
 
 		glm::vec3 pos(-size/2 + (i % resolution) * deltaX, heights[i], -size/2 + (i / resolution) * deltaZ);
 		
 		// Calculate final normal after every vertex has reached its height
 		glm::vec3 nrm;
-		float hl = i-1 < 0 ? 0.0 : heights[i - 1];
+		float hl = i == 0 ? 0.0 : heights[i - 1];
 		float hr = ((i + 1) % resolution) == 0 ? 0.0 : heights[i + 1];
 		float hu = (i + resolution) / resolution < resolution ? heights[i + resolution] : 0.0;
 		float hd = i >= resolution ? heights[i - resolution] : 0.0;
@@ -63,25 +81,17 @@ void terrain::build()
 		
 		glm::vec4 col = m.colors[0];
 
-		/*
-		if (mesh->HasVertexColors(0)) {
-			col[0] = mesh->mColors[0][i].r;
-			col[1] = mesh->mColors[0][i].g;
-			col[2] = mesh->mColors[0][i].b;
-			col[3] = mesh->mColors[0][i].a;
-		}
-		*/
-
 		m.positions[i] = pos;
 		m.normals[i] = nrm;
 		m.colors[i] = col;
 
 		// Texture coordinates
 		float one = 1.0;
-		float scaling = resolution;
+		float scaling = resolution / 8.0;
 		col[0] = modf(i / scaling, &one);//1.0 / resolution * (i % resolution);
 		col[1] = modf(i / resolution / scaling, &one);//1.0 / resolution * (i / resolution);
 
+		// Fill VBO
 		vbo_data[10 * i + 0] = pos[0];
 		vbo_data[10 * i + 1] = pos[1];
 		vbo_data[10 * i + 2] = pos[2];
@@ -128,11 +138,16 @@ void terrain::build()
 
 	terra = m;
 
-	//delete[] heights;
 	delete[] vbo_data;
 	delete[] ibo_data;
 }
 
+/*
+Get an new terrain instance
+- size : size of the terrain
+- resolution : resolution of the underlying gradient grid
+- frames : number of frames in which the hills rise
+*/
 terrain::terrain(float size, int resolution, int frames)
 {
 	this->frames = frames;

@@ -8,14 +8,13 @@ uniform mat4 model_mat;
 uniform mat4 view_mat;
 uniform mat4 proj_mat;
 uniform vec3 light_dir;
+
 uniform float frame;
 uniform float max_frame;
-uniform int index;
 
-uniform vec4 hill_color;
-uniform vec4 mountain_color;
-uniform vec4 snow_color;
-uniform vec4 ground_color;
+uniform sampler2D stone_tex;
+uniform sampler2D grass_tex;
+uniform sampler2D snow_tex;
 
 vec4 actual_col;
 
@@ -25,37 +24,40 @@ out vec3 interp_light_dir;
 out vec2 uv;
 out vec2 tex_height;
 
-float rand(vec3 position){
+float texture_height_offset(vec3 position){
 	vec3 n = normalize(position);
-	return (n.x + n.y + n.z) / 1.0;
+	return 0.2 * (sin(n.x * n.y) + cos(n.y + n.x));
 }
 
 void main()
 {
-	// POSITION
-	float delta = min(1.0, frame / max_frame);
-    gl_Position = proj_mat * view_mat * model_mat * vec4(position.x, delta * position.y, position.z, 1.0);
+	// GET (U,V) TEXTURE COORDINATES
+	uv = vec2(color.x, color.y);
 
-	// COLOR
-	//float color_byte = (delta * position.y) / 2.0 + 0.5;
-    //interp_color = vec4(color_byte, 0.0, 0.0, 0.5);
+	// GET DELTA AND FRAME HEIGHT
+	float delta = min(1.0, frame / max_frame);
 	float actual_height = delta * position.y;
-	actual_col = snow_color;
-	if (actual_height < 0.9) actual_col = mountain_color;
-	if (actual_height < 0.5) actual_col = hill_color;
-	if (actual_height < 0.1) actual_col = ground_color;
-	interp_color = vec4(1.0,1.0,1.0,1.0);//actual_col;
+
+	// DECIDE TEXTURE ( & TEXTURE HEIGHT)
+	actual_height += texture_height_offset(position);
+	tex_height = vec2(actual_height,0.0);// > 0.3 ? vec2(1.0,0.0) : vec2(0.0,0.0);
 
 	// LIGHT DIRECTION
-    // compute directions towards light as well as surface normal in eye-space
 	vec3 temp_normal = normalize((1.0 - delta) * vec3(0.0,1.0,0.0) + delta * normal);
     interp_normal = normalize((transpose(inverse(view_mat * model_mat)) * vec4(temp_normal, 0.0)).xyz);
     interp_light_dir = normalize((view_mat * vec4(light_dir, 0.0)).xyz);
 
-	// get uv
-	uv = vec2(color.x, color.y);
+	// POSITION & DISPLACEMENT MAPPING
+	float displacement_amplitude = 0.005;
+	vec4 displacement;
+	if (tex_height.x > 0.8) displacement = texture2D(snow_tex, uv);
+	else if (tex_height.x > 0.4) displacement = texture2D(stone_tex, uv);
+	else displacement = texture2D(grass_tex, uv);
+	float displacement_scalar = ((displacement.r + displacement.g + displacement.b) / 3.0 / (0.5 / displacement_amplitude) - displacement_amplitude) * tex_height.x;
 
-	// decide texture
-	actual_height += rand(position) * 0.1;
-	tex_height = vec2(actual_height,0.0);// > 0.3 ? vec2(1.0,0.0) : vec2(0.0,0.0);
+	vec4 displaced_position = vec4(position.x, delta * position.y, position.z, 1.0) + displacement_scalar * vec4(interp_normal, 0.0);
+    gl_Position = proj_mat * view_mat * model_mat * displaced_position;
+
+	// COLOR
+	interp_color = vec4(1.0,1.0,1.0,1.0);
 }

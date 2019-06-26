@@ -1,4 +1,14 @@
 #pragma once
+
+/*
+*
+* This terrain class was inspired by
+* - https://www.redblobgames.com/maps/terrain-from-noise/
+* 
+* - author : Patrick Hähn
+*
+*/
+
 #include "mesh.hpp"
 #include "perlin_noise.hpp"
 #include <buffer.hpp>

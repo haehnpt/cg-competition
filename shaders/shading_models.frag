@@ -111,8 +111,16 @@ void main() {
 	if (tex_height.x > 0.8){
 		frag_color = texture2D(snow_tex, uv) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
 	}
+	else if (tex_height.x > 0.7){
+		float weight = (tex_height.x - 0.7) * 10.0;
+		frag_color =  ((weight * texture2D(snow_tex, uv)) + ((1.0 - weight) * texture2D(stone_tex, uv))) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
+	}
 	else if (tex_height.x > 0.4){
 		frag_color = texture2D(stone_tex, uv) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
+	}
+	else if (tex_height.x > 0.3){
+		float weight = (tex_height.x - 0.3) * 10.0;
+		frag_color =  ((weight * texture2D(stone_tex, uv)) + ((1.0 - weight) * texture2D(grass_tex, uv))) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
 	}
 	else{
 		frag_color = texture2D(grass_tex, uv) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
