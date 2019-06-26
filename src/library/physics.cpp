@@ -252,16 +252,16 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
 
 
     // DEBUG print
-    for (int i = 0; i < p.mVertices; i++) {
-        std::cout << "====== Vertix " << i << ":\n";
+    // for (int i = 0; i < p.mVertices; i++) {
+    //     std::cout << "====== Vertix " << i << ":\n";
 
-        for (int j = 0; j < 10; j++) {
-            std::cout << p.vbo_data[i * 10 + j] << " ";
-            std::cout << ((j == 2 || j == 5) ? "\n" : " ");
-        }
+    //     for (int j = 0; j < 10; j++) {
+    //         std::cout << p.vbo_data[i * 10 + j] << " ";
+    //         std::cout << ((j == 2 || j == 5) ? "\n" : " ");
+    //     }
 
-        std::cout << "\n\n";
-    }
+    //     std::cout << "\n\n";
+    // }
 
     glGenVertexArrays(1, &p.vao);
     glBindVertexArray(p.vao);
