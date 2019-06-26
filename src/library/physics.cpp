@@ -80,13 +80,14 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     //   {0.05f, 0.f, 0.05f, 0.05f, 0.05f}
     // };
 
+    // some friendly terrain for testing
     float heightMap[6][5] {
-        {0.1f, 2.0f, 0.0f, 0.0f, 0.1f},
-        {0.0f, 0.1f, 0.1f, 0.1f, 0.0f},
-        {0.3f, 0.1f, 0.5f, 0.3f, 0.2f},
-        {0.5f, 0.1f, 0.1f, 0.1f, 0.0f},
-        {0.4f, 0.2f, 0.2f, 0.4f, 0.2f},
-        {0.1f, 0.0f, 0.0f, 0.0f, 0.5f}
+        {-0.1f, -0.1f, -0.0f, -0.0f, -0.1f},
+        {-0.0f, -0.2f, -0.4f, -0.3f, -0.0f},
+        {-0.2f, -1.6f, -1.8f, -1.2f, -0.2f},
+        {-0.1f, -1.8f, -1.7f, -1.1f, -0.0f},
+        {-0.1f, -0.2f, -0.2f, -1.3f, -0.2f},
+        {-0.1f, -0.0f, -0.1f, -0.2f, -0.1f}
     };
 
     for (int i = 0; i < 6; i++) {

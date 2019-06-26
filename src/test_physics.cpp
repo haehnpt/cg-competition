@@ -48,7 +48,7 @@ main(int, char* argv[]) {
                                         0.f, 0.f, 0.f,
                                         0.8f, glm::vec4(0.f, 1.f, 0.f, 1.f));
 
-    phyPlane plane = createPhyPlane(-5.f, 5.f, -5.f, 5.f);
+    phyPlane plane = createPhyPlane(-10.f, 10.f, -10.f, 10.f);
     std::cout << "vdo_size: " << plane.mVertices << "\n";
 
     int model_mat_loc = glGetUniformLocation(shaderProgram, "model_mat");
