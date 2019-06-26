@@ -3,8 +3,11 @@
 #include "mesh.hpp"
 #include "camera.hpp"
 #include "terrain.hpp"
+#include <string>
 
 #define DEBUG
+
+#define DATA_PATH "C:\\users\\patrick\\desktop\\cg-competition\\data\\"
 
 const int WINDOW_WIDTH =  800;
 const int WINDOW_HEIGHT = 800;
@@ -95,19 +98,19 @@ main(int, char* argv[]) {
 	int image_width, image_height;
 
 	// Stone texture
-	float* image_tex_data = terrain::load_texture_data("C:\\users\\patrick\\desktop\\cg-competition\\data\\schotter.jpg", &image_width, &image_height);
+	float* image_tex_data = terrain::load_texture_data(std::string(DATA_PATH) + "schotter.jpg", &image_width, &image_height);
 	unsigned int image_tex1 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
 	glBindTextureUnit(0, image_tex1);
 	delete[] image_tex_data;
 
 	// Grass texture
-	image_tex_data = terrain::load_texture_data("C:\\users\\patrick\\desktop\\cg-competition\\data\\grass_large.jpg", &image_width, &image_height);
+	image_tex_data = terrain::load_texture_data(std::string(DATA_PATH) + "grass_large.jpg", &image_width, &image_height);
 	unsigned int image_tex2 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
 	glBindTextureUnit(1, image_tex2);
 	delete[] image_tex_data;
 
 	// Snow texture
-	image_tex_data = terrain::load_texture_data("C:\\users\\patrick\\desktop\\cg-competition\\data\\snow_large.jpg", &image_width, &image_height);
+	image_tex_data = terrain::load_texture_data(std::string(DATA_PATH) + "snow_large.jpg", &image_width, &image_height);
 	unsigned int image_tex3 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
 	glBindTextureUnit(2, image_tex3);
 	delete[] image_tex_data;
