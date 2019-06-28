@@ -6,7 +6,7 @@
  * - https://en.wikipedia.org/wiki/Perlin_noise
  * - https://www.redblobgames.com/maps/terrain-from-noise/
  * 
- * @author Patrick Hähn
+ * - author : Patrick Hähn
  * 
  */
 
