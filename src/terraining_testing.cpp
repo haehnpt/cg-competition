@@ -14,8 +14,6 @@
 #define DEBUG false
 #define x64 true
 
-#define DATA_PATH "C:\\users\\patrick\\desktop\\cg-competition\\data\\"
-
 const int WINDOW_WIDTH =  800;
 const int WINDOW_HEIGHT = 800;
 const float FOV = 45.f;
@@ -101,19 +99,19 @@ main(int, char* argv[]) {
 	int image_width, image_height;
 
 	// Stone texture
-	float* image_tex_data = terrain::load_texture_data(std::string(DATA_PATH) + STONE, &image_width, &image_height);
+	float* image_tex_data = terrain::load_texture_data(std::string(DATA_ROOT) + STONE, &image_width, &image_height);
 	unsigned int image_tex1 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
 	glBindTextureUnit(0, image_tex1);
 	delete[] image_tex_data;
 
 	// Grass texture
-	image_tex_data = terrain::load_texture_data(std::string(DATA_PATH) + GRASS, &image_width, &image_height);
+	image_tex_data = terrain::load_texture_data(std::string(DATA_ROOT) + GRASS, &image_width, &image_height);
 	unsigned int image_tex2 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
 	glBindTextureUnit(1, image_tex2);
 	delete[] image_tex_data;
 
 	// Snow texture
-	image_tex_data = terrain::load_texture_data(std::string(DATA_PATH) + SNOW, &image_width, &image_height);
+	image_tex_data = terrain::load_texture_data(std::string(DATA_ROOT) + SNOW, &image_width, &image_height);
 	unsigned int image_tex3 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
 	glBindTextureUnit(2, image_tex3);
 	delete[] image_tex_data;
