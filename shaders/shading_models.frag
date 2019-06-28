@@ -108,6 +108,7 @@ void main() {
     float specularTerm = cooktorranceTerm(interp_normal, interp_light_dir);
     // combine both terms (diffuse+specular) using our material properties (colors)
 
+	
 	if (tex_height.x > 0.8){
 		frag_color = texture2D(snow_tex, uv) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
 	}

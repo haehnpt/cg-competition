@@ -87,7 +87,7 @@ void terrain::build()
 
 		// Texture coordinates
 		float one = 1.0;
-		float scaling = resolution / 8.0;
+		float scaling = resolution; // / 8.0
 		col[0] = modf(i / scaling, &one);//1.0 / resolution * (i % resolution);
 		col[1] = modf(i / resolution / scaling, &one);//1.0 / resolution * (i / resolution);
 
@@ -143,22 +143,88 @@ void terrain::build()
 }
 
 /*
+void terrain::get_texture_locations(int shader_program)
+{
+	stone_loc = glGetUniformLocation(shader_program, "stone_tex");
+	grass_loc = glGetUniformLocation(shader_program, "grass_tex");
+	snow_loc = glGetUniformLocation(shader_program, "snow_tex");
+}
+*/
+
+void terrain::get_frame_locations(int shader_program)
+{
+	this->frame_loc = glGetUniformLocation(shader_program, "frame");
+	this->max_frame_loc = glGetUniformLocation(shader_program, "max_frame");
+}
+
+void terrain::set_frames(int start, int max)
+{
+	this->start_frame = start;
+	this->frames = max;
+}
+
+void terrain::reset_current_frame()
+{
+	this->current_frame = this->start_frame;
+}
+
+void terrain::increase_current_frame(int increase)
+{
+	this->current_frame += (this->current_frame < this->frames ? increase : 0);
+}
+
+void terrain::render(int model_loc)
+{
+	glUniform1f(this->frame_loc, this->current_frame);
+	glUniform1f(this->max_frame_loc, this->frames);
+
+	glUniform1i(stone_loc, 0);
+	glUniform1i(grass_loc, 1);
+	glUniform1i(snow_loc, 2);
+
+	glUniformMatrix4fv(model_loc, 1, GL_FALSE, &this->terra.transform[0][0]);
+	this->terra.bind();
+	glDrawElements(GL_TRIANGLES, this->terra.vertex_count, GL_UNSIGNED_INT, (void*)0);
+
+	increase_current_frame();
+}
+
+/*
 Get an new terrain instance
 - size : size of the terrain
 - resolution : resolution of the underlying gradient grid
-- frames : number of frames in which the hills rise
+- start_frame : starting frame
+- max_frame : maximum frame
+- shader_program :
+- stone : stone texture file name
+- grass : grass - - -
+- snow : snow - - -
 */
-terrain::terrain(float size, int resolution, int frames)
+terrain::terrain(float size, int resolution, int start_frame, int max_frame, int shader_program, std::string stone, std::string grass, std::string snow)
 {
-	this->frames = frames;
 	this->size = size;
 	this->resolution = resolution;
 	heights = getHeights(size, 1.0);
 	clampHeights();
 	build();
+	get_texture_locations(shader_program);
+	load_textures(stone, grass, snow);
+	get_frame_locations(shader_program);
+	set_frames(start_frame, max_frame);
 }
 
 
 terrain::~terrain()
 {
+}
+
+int terrain::stone_loc;
+int terrain::grass_loc;
+int terrain::snow_loc;
+
+void terrain::get_texture_locations(int shader_program)
+{
+	stone_loc = glGetUniformLocation(shader_program, "stone_tex");
+	grass_loc = glGetUniformLocation(shader_program, "grass_tex");
+	snow_loc = glGetUniformLocation(shader_program, "snow_tex");
 }
