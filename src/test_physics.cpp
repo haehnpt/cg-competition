@@ -42,7 +42,7 @@ main(int, char* argv[]) {
 
     phySphere sphere1 = createPhySphere(-10.f, 0.f, -10.f,
                                         1.8f, 0.f, 0.2f,
-                                        0.3f, glm::vec4(0.8f, 0.8f, 0.8f, 1.f), &plane);
+                                        0.3f, glm::vec4(1.0f, 0.2f, 0.2f, 1.f), &plane);
     // phySphere sphere2 = createPhySphere(0.f, 5.f, 0.f,
     //                                     0.f, 0.f, 0.f,
     //                                     0.4f, glm::vec4(1.f, 0.f, 0.f, 1.f), &plane);
@@ -54,8 +54,11 @@ main(int, char* argv[]) {
     int view_mat_loc = glGetUniformLocation(shaderProgram, "view_mat");
     int proj_mat_loc = glGetUniformLocation(shaderProgram, "proj_mat");
 
+    int use_special_color_loc = glGetUniformLocation(shaderProgram, "use_special_color");
+    glUniform1i(use_special_color_loc, true);
+
     int special_color_loc = glGetUniformLocation(shaderProgram, "special_color");
-    glm::vec4 special_color = glm::vec4(1.f, 1.f, 0.f, 1.f);
+    glm::vec4 special_color = glm::vec4(0.f, 1.f, 1.0f, 1.f);
     glUniform4fv(special_color_loc, 1, &special_color[0]);
 
     // these hold the vertices of the triangle over which the sphere is
@@ -131,6 +134,7 @@ main(int, char* argv[]) {
         glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &m[0][0]);
 
         plane.bind();
+        // glUniform1i(use_special_color_loc, true);
         glDrawArrays(GL_TRIANGLES, 0, plane.mVertices);
 
         // swap buffers == show rendered content

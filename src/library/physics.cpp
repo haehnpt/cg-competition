@@ -272,9 +272,9 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
                     p.vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
                 }
                 // default color
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.5f; // r
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.5f; // g
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 1.0f; // b
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.8f; // r
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.8f; // g
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.8f; // b
                 p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.0f; // a
             }
 
@@ -306,9 +306,9 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
                     p.vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
                 }
                 // default color
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.5f; // r
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.5f; // g
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 1.0f; // b
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.8f; // r
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.8f; // g
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.8f; // b
                 p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.0f; // a
             }
 
