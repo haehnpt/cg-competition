@@ -28,7 +28,7 @@ class terrain
 	static int grass_loc;
 	static int snow_loc;
 public:
-	terrain::terrain(float size, int resolution, int start_frame, int max_frame, int shader_program, std::string stone, std::string grass, std::string snow);
+	terrain(float size, int resolution, int start_frame, int max_frame, int shader_program, std::string stone, std::string grass, std::string snow);
 	~terrain();
 	geometry terra;
 	float * heights;
@@ -54,27 +54,27 @@ public:
 		int image_width, image_height;
 
 		// Stone texture
-		float* image_tex_data = terrain::load_texture_data(std::string(DATA_ROOT) + stone, &image_width, &image_height);
-		unsigned int image_tex1 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
+		float* image_tex_data = load_texture_data(std::string(DATA_ROOT) + stone, &image_width, &image_height);
+		unsigned int image_tex1 = create_texture_rgba32f(image_width, image_height, image_tex_data);
 		glBindTextureUnit(0, image_tex1);
 		delete[] image_tex_data;
 
 		// Grass texture
-		image_tex_data = terrain::load_texture_data(std::string(DATA_ROOT) + grass, &image_width, &image_height);
-		unsigned int image_tex2 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
+		image_tex_data = load_texture_data(std::string(DATA_ROOT) + grass, &image_width, &image_height);
+		unsigned int image_tex2 = create_texture_rgba32f(image_width, image_height, image_tex_data);
 		glBindTextureUnit(1, image_tex2);
 		delete[] image_tex_data;
 
 		// Snow texture
-		image_tex_data = terrain::load_texture_data(std::string(DATA_ROOT) + snow, &image_width, &image_height);
-		unsigned int image_tex3 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
+		image_tex_data = load_texture_data(std::string(DATA_ROOT) + snow, &image_width, &image_height);
+		unsigned int image_tex3 = create_texture_rgba32f(image_width, image_height, image_tex_data);
 		glBindTextureUnit(2, image_tex3);
 		delete[] image_tex_data;
 
 		// Set properties
-		terrain::set_texture_filter_mode(image_tex1, GL_LINEAR_MIPMAP_LINEAR);
-		terrain::set_texture_filter_mode(image_tex2, GL_LINEAR_MIPMAP_LINEAR);
-		terrain::set_texture_filter_mode(image_tex3, GL_LINEAR_MIPMAP_LINEAR);
+		set_texture_filter_mode(image_tex1, GL_LINEAR_MIPMAP_LINEAR);
+		set_texture_filter_mode(image_tex2, GL_LINEAR_MIPMAP_LINEAR);
+		set_texture_filter_mode(image_tex3, GL_LINEAR_MIPMAP_LINEAR);
 	}
 
 	static unsigned create_texture_rgba32f(int width, int height, float* data) {
