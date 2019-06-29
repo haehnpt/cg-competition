@@ -30,7 +30,7 @@ main(int, char* argv[]) {
     camera cam(window);
 
     // load and compile shaders and link program
-    unsigned int vertexShader = compileShader("mesh_render.vert", GL_VERTEX_SHADER);
+    unsigned int vertexShader = compileShader("test_physics_mesh_render.vert", GL_VERTEX_SHADER);
     unsigned int fragmentShader = compileShader("mesh_render.frag", GL_FRAGMENT_SHADER);
     unsigned int shaderProgram = linkProgram(vertexShader, fragmentShader);
     // after linking the program the shader objects are no longer needed
@@ -40,23 +40,37 @@ main(int, char* argv[]) {
 
     phyPlane plane = createPhyPlane(-10.f, 10.f, -10.f, 10.f);
 
-    phySphere sphere1 = createPhySphere(-3.f, 5.f, 0.f,
-                                        0.f, 0.f, 0.f,
-                                        0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), &plane);
-    phySphere sphere2 = createPhySphere(0.f, 5.f, 0.f,
-                                        0.f, 0.f, 0.f,
-                                        0.4f, glm::vec4(1.f, 0.f, 0.f, 1.f), &plane);
-    phySphere sphere3 = createPhySphere(3.f, 5.f, 0.f,
-                                        0.f, 0.f, 0.f,
-                                        0.8f, glm::vec4(0.f, 1.f, 0.f, 1.f), &plane);
+    phySphere sphere1 = createPhySphere(-10.f, 0.f, -10.f,
+                                        1.8f, 0.f, 0.2f,
+                                        0.3f, glm::vec4(0.8f, 0.8f, 0.8f, 1.f), &plane);
+    // phySphere sphere2 = createPhySphere(0.f, 5.f, 0.f,
+    //                                     0.f, 0.f, 0.f,
+    //                                     0.4f, glm::vec4(1.f, 0.f, 0.f, 1.f), &plane);
+    // phySphere sphere3 = createPhySphere(3.f, 5.f, 0.f,
+    //                                     0.f, 0.f, 0.f,
+    //                                     0.8f, glm::vec4(0.f, 1.f, 0.f, 1.f), &plane);
 
     int model_mat_loc = glGetUniformLocation(shaderProgram, "model_mat");
     int view_mat_loc = glGetUniformLocation(shaderProgram, "view_mat");
     int proj_mat_loc = glGetUniformLocation(shaderProgram, "proj_mat");
+
+    int special_color_loc = glGetUniformLocation(shaderProgram, "special_color");
+    glm::vec4 special_color = glm::vec4(1.f, 1.f, 0.f, 1.f);
+    glUniform4fv(special_color_loc, 1, &special_color[0]);
+
+    // these hold the vertices of the triangle over which the sphere is
+    int active_vert_1_loc = glGetUniformLocation(shaderProgram, "active_vert_1");
+    int active_vert_2_loc = glGetUniformLocation(shaderProgram, "active_vert_2");
+    int active_vert_3_loc = glGetUniformLocation(shaderProgram, "active_vert_3");
+
     proj_matrix = glm::perspective(FOV, 1.f, NEAR, FAR);
     int light_dir_loc = glGetUniformLocation(shaderProgram, "light_dir");
     glm::vec3 light_dir = glm::normalize(glm::vec3(1.0, 1.0, 1.0));
     glUniform3fv(light_dir_loc, 1, &light_dir[0]);
+
+    glm::vec3 active_vert_1;
+    glm::vec3 active_vert_2;
+    glm::vec3 active_vert_3;
 
     glEnable(GL_DEPTH_TEST);
 
@@ -80,20 +94,37 @@ main(int, char* argv[]) {
         glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
 
         sphere1.step(0.05);
-        sphere2.step(0.05);
-        sphere3.step(0.05);
+
+        // This is for testing, will be moved inside the sphere code later
+        int i = plane.getTriangleIndex(&sphere1);
+        active_vert_1 = glm::vec3(plane.vbo_data[i * 30 + 0],
+                                  plane.vbo_data[i * 30 + 1],
+                                  plane.vbo_data[i * 30 + 2]);
+        active_vert_2 = glm::vec3(plane.vbo_data[i * 30 + 10],
+                                  plane.vbo_data[i * 30 + 11],
+                                  plane.vbo_data[i * 30 + 12]);
+        active_vert_3 = glm::vec3(plane.vbo_data[i * 30 + 20],
+                                  plane.vbo_data[i * 30 + 21],
+                                  plane.vbo_data[i * 30 + 22]);
+
+        glUniform3fv(active_vert_1_loc, 1, &active_vert_1[0]);
+        glUniform3fv(active_vert_2_loc, 1, &active_vert_2[0]);
+        glUniform3fv(active_vert_3_loc, 1, &active_vert_3[0]);
+
+        // sphere2.step(0.005);
+        // sphere3.step(0.005);
 
         glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere1.geo.transform[0][0]);
         sphere1.geo.bind();
         glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
 
-        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere2.geo.transform[0][0]);
-        sphere2.geo.bind();
-        glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+        // glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere2.geo.transform[0][0]);
+        // sphere2.geo.bind();
+        // glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
 
-        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere3.geo.transform[0][0]);
-        sphere3.geo.bind();
-        glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+        // glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere3.geo.transform[0][0]);
+        // sphere3.geo.bind();
+        // glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
 
         // reset the model matrix before rendering the plane
         glm::mat4 m = glm::mat4(1.f);

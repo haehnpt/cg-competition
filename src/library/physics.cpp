@@ -23,16 +23,43 @@ phyPlane::destroy() {
     glDeleteBuffers(1, &vbo);
 }
 
-bool
-phyPlane::isCutting(phySphere *s) {
-    std::cout << "isCutting(" << s << ")" << s->x[0] << s->x[1] << s->x[2] << "\n";
+// For the start we assume the sphere has a radius of zero!
+int
+phyPlane::getTriangleIndex(phySphere *s) {
+    // printf("isCutting with s coordinates: %02.2f %02.2f %02.2f\n",
+    //        s->x[0], s->x[1], s->x[2]);
 
-    // get triangle below s
+    // position of the sphere's center relative to the plane
+    float xInPlane = s->x[0] - xStart;
+    float zInPlane = s->x[2] - zStart;
 
+    // indices of the rectangle containing the sphere's center
+    int xIndexRect = floor(xInPlane / xTileWidth);
+    int zIndexRect = floor(zInPlane / zTileWidth);
 
-    return true;
+    // x and z positions relative to the top (z-axis pointing
+    // downwards!) left corner of the rectangle
+    float xInRect = fmod(xInPlane, xTileWidth);
+    float zInRect = fmod(zInPlane, zTileWidth);
+
+    // top-right (-1) or bottom left (-0) triangle?
+    int oldTriangleIndex = triangleIndex;
+
+    // two triangles per rectangle
+    triangleIndex = 2 * (zIndexRect * (xNumPoints - 1) + xIndexRect);
+    // if the sphere is in the 'upper'-left triangle it's one less
+    if (zInRect > zTileWidth - xInRect * zTileWidth / xTileWidth) {
+        triangleIndex++;
+    }
+
+    if (triangleIndex != oldTriangleIndex) {
+        std::cout << "zIndexRect: " << zIndexRect
+                  << ", xIndexRect: " << xIndexRect
+                  << ", triangleIndex: " << triangleIndex << "\n";
+    }
+
+    return triangleIndex;
 }
-
 
 void testPhysicsLibraryLinking() {
     std::cout << "physics.cpp linked successfully!\n";
@@ -61,8 +88,9 @@ phySphere::step(float deltaT) {
     // } else {
         // sphere over the same triangle as last step
         // check if the center is below the surface
-        plane->isCutting(this);
+        // plane->getTriangleIndex(this);
     // };
+
 
     for (int i = 0; i < 3; i++) {
         // update position
@@ -73,12 +101,14 @@ phySphere::step(float deltaT) {
 
 
         // for TESTING: a hard-coded bounding box
-        if (x[i] - radius < -6 && v[i] < 0) {
-            v[i] = -0.90 * v[i];
-        } else if (x[i] + radius > 6 && v[i] > 0) {
-            v[i] = -0.90 * v[i];
+        if (x[i] - radius < -10 && v[i] < 0) {
+            v[i] = -1.0 * v[i];
+        } else if (x[i] + radius > 10 && v[i] > 0) {
+            v[i] = -1.0 * v[i];
         }
     }
+
+    // plane->getTriangleIndex(this);
 
     geo.transform = glm::translate(glm::vec3(x[0], x[1], x[2]))
         * glm::scale(glm::vec3(radius));
@@ -106,7 +136,7 @@ createPhySphere(float x1, float x2, float x3,
 
     // acceleration (hard-coded for now!)
     s.a[0] = 0;                   // x
-    s.a[1] = -10;                 // y
+    s.a[1] = 0;                 // y
     s.a[2] = 0;                   // z
 
     s.geo = loadMesh("sphere.obj", false, color);
@@ -123,8 +153,8 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     phyPlane p{};
 
     p.xStart = xStart;
-    p.zEnd = zEnd;
-    p.xStart = xStart;
+    p.xEnd = xEnd;
+    p.zStart = zStart;
     p.zEnd = zEnd;
 
     // This will later come from Patrick's generted data
@@ -146,11 +176,11 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
         {-0.1f, -0.0f, -0.1f, -0.2f, -0.1f}
     };
 
-    for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < 5; j++) {
-            heightMap[i][j] -= 4.f;
-        }
-    }
+    // for (int i = 0; i < 6; i++) {
+    //     for (int j = 0; j < 5; j++) {
+    //         heightMap[i][j] -= 4.f;
+    //     }
+    // }
 
     // float heightMap[4][3] {
     //     {0.f, 0.f, 0.f},
@@ -159,10 +189,12 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     //     {0.f, 0.f, 0.f}
     // };
 
-    // If you can't be bothered to learn C++ ... ;)
-    int zNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
-    int xNumPoints = sizeof(heightMap[0]) / sizeof(heightMap[0][0]);
+    p.zNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
+    p.xNumPoints = sizeof(heightMap[0]) / sizeof(heightMap[0][0]);
+    p.zTileWidth = (p.zEnd - p.zStart) / (p.zNumPoints - 1);
+    p.xTileWidth = (p.xEnd - p.xStart) / (p.xNumPoints - 1);
 
+    std::cout << "p.xTileWidth: " << p.xTileWidth << ", p.zTileWidth: " << p.zTileWidth << "\n";
     // Set vertex coordinates using the heightMap for the y-value.
     //
     // Each square of the (m-1)*(n-1) squares is separated into two
@@ -194,13 +226,13 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     // Thus the total number of vertices needed is:
     // (m-2)*(n-2)*6 + 2*(n-2)*3 + 2*(m-2)*3 + 1 + 1 + 2 + 2
     //  = 6*(n*m - n - m + 1)
-    p.mVertices = 6 * (xNumPoints * zNumPoints - xNumPoints - zNumPoints + 1);
+    p.mVertices = 6 * (p.xNumPoints * p.zNumPoints - p.xNumPoints - p.zNumPoints + 1);
     p.vbo_data = new float[p.mVertices * 10];
-    float deltaX = (xEnd - xStart) / (xNumPoints - 1);
-    float deltaZ = (zEnd - zStart) / (zNumPoints - 1);
+    float deltaX = (xEnd - xStart) / (p.xNumPoints - 1);
+    float deltaZ = (zEnd - zStart) / (p.zNumPoints - 1);
 
     // DEBUG:
-    std::cout << "heightMap dimension: " << zNumPoints << "x" << xNumPoints << "\n";
+    std::cout << "heightMap dimension: " << p.zNumPoints << "x" << p.xNumPoints << "\n";
     std::cout << "deltaX = " << deltaX << ", deltaZ  = " << deltaZ << "\n";
     std::cout << "p.mVertices = " << p.mVertices << "\n";
     std::cout << "sizeof(p.vbo_data) = " << sizeof(p.vbo_data) << "\n";
@@ -210,8 +242,8 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     // square. For each square the two contained triangles (called
     // top-left and bottom-right triangle) are added to the VBO data.
     int indexRectTopLeft = 0;
-    for (int z = 0; z < zNumPoints - 1; z++) {
-        for (int x = 0; x < xNumPoints - 1; x++) {
+    for (int z = 0; z < p.zNumPoints - 1; z++) {
+        for (int x = 0; x < p.xNumPoints - 1; x++) {
             glm::vec3 a, b, nrm;
             //// TOP-LEFT TRIANGLE ////
             // top-left vertex of the square
@@ -242,8 +274,8 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
                 // default color
                 p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.5f; // r
                 p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.5f; // g
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 1.f; // b
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.f; // a
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 1.0f; // b
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.0f; // a
             }
 
             //// BOTTOM-RIGHT TRIANGLE ////
@@ -274,10 +306,10 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
                     p.vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
                 }
                 // default color
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 1.f; // r
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.5f; // r
                 p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.5f; // g
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.5f; // b
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.f; // a
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 1.0f; // b
+                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.0f; // a
             }
 
             // Per square (= 2 triangles) 6 vertices are added, update index

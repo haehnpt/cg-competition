@@ -39,12 +39,20 @@ struct phyPlane {
     float *vbo_data;
     unsigned int mVertices;
 
+    int zNumPoints;
+    int xNumPoints;
+
     float xStart;
     float xEnd;
     float zStart;
     float zEnd;
 
-    bool isCutting(phySphere *sphere);
+    float xTileWidth;
+    float zTileWidth;
+
+    int triangleIndex;
+
+    int getTriangleIndex(phySphere *sphere);
 
 
     void bind();
