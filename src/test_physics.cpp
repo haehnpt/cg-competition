@@ -38,18 +38,17 @@ main(int, char* argv[]) {
     glDeleteShader(vertexShader);
     glUseProgram(shaderProgram);
 
+    phyPlane plane = createPhyPlane(-10.f, 10.f, -10.f, 10.f);
+
     phySphere sphere1 = createPhySphere(-3.f, 5.f, 0.f,
                                         0.f, 0.f, 0.f,
-                                        0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f));
+                                        0.2f, glm::vec4(0.f, 0.f, 1.f, 1.f), &plane);
     phySphere sphere2 = createPhySphere(0.f, 5.f, 0.f,
                                         0.f, 0.f, 0.f,
-                                        0.4f, glm::vec4(1.f, 0.f, 0.f, 1.f));
+                                        0.4f, glm::vec4(1.f, 0.f, 0.f, 1.f), &plane);
     phySphere sphere3 = createPhySphere(3.f, 5.f, 0.f,
                                         0.f, 0.f, 0.f,
-                                        0.8f, glm::vec4(0.f, 1.f, 0.f, 1.f));
-
-    phyPlane plane = createPhyPlane(-10.f, 10.f, -10.f, 10.f);
-    std::cout << "vdo_size: " << plane.mVertices << "\n";
+                                        0.8f, glm::vec4(0.f, 1.f, 0.f, 1.f), &plane);
 
     int model_mat_loc = glGetUniformLocation(shaderProgram, "model_mat");
     int view_mat_loc = glGetUniformLocation(shaderProgram, "view_mat");

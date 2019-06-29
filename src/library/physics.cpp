@@ -23,6 +23,15 @@ phyPlane::destroy() {
     glDeleteBuffers(1, &vbo);
 }
 
+bool
+phyPlane::isCutting(phySphere *s) {
+    std::cout << "isCutting(" << s << ")" << s->x[0] << s->x[1] << s->x[2] << "\n";
+
+    // get triangle below s
+
+
+    return true;
+}
 
 
 void testPhysicsLibraryLinking() {
@@ -37,11 +46,30 @@ phySphere::step(float deltaT) {
     // matrices). Also, using a single big matrix involves many
     // superfluous multiplications with zeros.
 
+    // next position in the plane if there were no obstacles
+    float xNext[3];
+    xNext[0] = x[0] + v[0] * deltaT; // + a[0] * 0.5 * deltaT * deltaT;
+    xNext[1] = x[1] + v[1] * deltaT; // + a[1] * 0.5 * deltaT * deltaT;
+    xNext[2] = x[2] + v[2] * deltaT + a[2] * 0.5 * deltaT * deltaT;
+
+    // Fox each triangle along the way to xNext check if the sphere
+    // (center) hits it.
+
+    // if (lastTriangleIndex != plane.getTriangleAt(xNext)) {
+    //     // sphere is over a new triangle now
+
+    // } else {
+        // sphere over the same triangle as last step
+        // check if the center is below the surface
+        plane->isCutting(this);
+    // };
+
     for (int i = 0; i < 3; i++) {
         // update position
         x[i] = x[i] + v[i] * deltaT + a[i] * 0.5 * deltaT * deltaT;
         // update velocity
         v[i] = v[i] + a[i] * deltaT;
+
 
 
         // for TESTING: a hard-coded bounding box
@@ -60,9 +88,11 @@ phySphere
 createPhySphere(float x1, float x2, float x3,
                 float v1, float v2, float v3,
                 float radius,
-                glm::vec4 color) {
+                glm::vec4 color, phyPlane *plane) {
 
     phySphere s{};
+
+    s.plane = plane;
 
     // position
     s.x[0] = x1;                  // x
@@ -91,6 +121,11 @@ phyPlane
 createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     // TODO: heightMap as parameter
     phyPlane p{};
+
+    p.xStart = xStart;
+    p.zEnd = zEnd;
+    p.xStart = xStart;
+    p.zEnd = zEnd;
 
     // This will later come from Patrick's generted data
     // float heightMap[5][5] {
