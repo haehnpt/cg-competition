@@ -349,14 +349,14 @@ phyPlane::isAbove(glm::vec3 x) {
     int index = getTriangleAt(x);
 
     // first vertex of the triangle
-    glm::vec3 v1(vbo_data[index * 10 + 0],
-                 vbo_data[index * 10 + 1],
-                 vbo_data[index * 10 + 2]);
+    glm::vec3 v1(vbo_data[index * 3 * 10 + 0],
+                 vbo_data[index * 3 * 10 + 1],
+                 vbo_data[index * 3 * 10 + 2]);
 
     // normal of the triangle's plane
-    glm::vec3 norm(vbo_data[index * 10 + 3 + 0],
-                   vbo_data[index * 10 + 3 + 1],
-                   vbo_data[index * 10 + 3 + 2]);
+    glm::vec3 norm(vbo_data[index * 3 * 10 + 3 + 0],
+                   vbo_data[index * 3 * 10 + 3 + 1],
+                   vbo_data[index * 3 * 10 + 3 + 2]);
 
     // distance between plane and origin
     // float d = -glm::dot(v1, norm);
