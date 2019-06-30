@@ -114,37 +114,30 @@ phySphere::step(float deltaT) {
         * glm::scale(glm::vec3(radius));
 }
 
-phySphere
-createPhySphere(float x1, float x2, float x3,
-                float v1, float v2, float v3,
-                float radius,
-                glm::vec4 color, phyPlane *plane) {
-
-    phySphere s{};
-
-    s.plane = plane;
-
+phySphere::phySphere(float x1, float x2, float x3,
+                     float v1, float v2, float v3,
+                     float radius,
+                     glm::vec4 color, phyPlane *plane) : radius(radius) {
     // position
-    s.x[0] = x1;                  // x
-    s.x[1] = x2;                  // y
-    s.x[2] = x3;                  // z
+    x[0] = x1;                  // x
+    x[1] = x2;                  // y
+    x[2] = x3;                  // z
 
     // velocity
-    s.v[0] = v1;                  // x
-    s.v[1] = v2;                  // y
-    s.v[2] = v3;                  // z
+    v[0] = v1;                  // x
+    v[1] = v2;                  // y
+    v[2] = v3;                  // z
 
     // acceleration (hard-coded for now!)
-    s.a[0] = 0;                   // x
-    s.a[1] = 0;                 // y
-    s.a[2] = 0;                   // z
+    a[0] = 0;                   // x
+    a[1] = 0;                   // y
+    a[2] = 0;                   // z
 
-    s.geo = loadMesh("sphere.obj", false, color);
-    s.radius = radius;
+    plane = plane;
 
-    s.geo.transform = glm::translate(glm::vec3(s.x[0], s.x[1], s.x[2]))
-        * glm::scale(glm::vec3(s.radius));
-    return s;
+    geo = loadMesh("sphere.obj", false, color);
+    geo.transform = glm::translate(glm::vec3(x[0], x[1], x[2]))
+        * glm::scale(glm::vec3(radius));
 }
 
 phyPlane

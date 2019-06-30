@@ -23,15 +23,14 @@ struct phySphere {
 
     struct phyPlane *plane;
 
+    phySphere(float x1, float x2, float x3,
+              float v1, float v2, float v3,
+              float radius, glm::vec4 color,
+              struct phyPlane *plane);
     // calculates the new position, velocity, acceleration
     void step(float deltaT);
 };
 
-// x1..x3: Position, v1..v3: velocity
-phySphere createPhySphere(float x1, float x2, float x3,
-                          float v1, float v2, float v3,
-                          float radius, glm::vec4 color,
-                          struct phyPlane *plane);
 
 struct phyPlane {
     unsigned int vao;
@@ -53,7 +52,6 @@ struct phyPlane {
     int triangleIndex;
 
     int getTriangleIndex(phySphere *sphere);
-
 
     void bind();
     void release();

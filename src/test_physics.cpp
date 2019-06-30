@@ -40,15 +40,11 @@ main(int, char* argv[]) {
 
     phyPlane plane = createPhyPlane(-10.f, 10.f, -10.f, 10.f);
 
-    phySphere sphere1 = createPhySphere(-10.f, 0.f, -10.f,
-                                        1.8f, 0.f, 0.2f,
-                                        0.3f, glm::vec4(1.0f, 0.2f, 0.2f, 1.f), &plane);
-    // phySphere sphere2 = createPhySphere(0.f, 5.f, 0.f,
-    //                                     0.f, 0.f, 0.f,
-    //                                     0.4f, glm::vec4(1.f, 0.f, 0.f, 1.f), &plane);
-    // phySphere sphere3 = createPhySphere(3.f, 5.f, 0.f,
-    //                                     0.f, 0.f, 0.f,
-    //                                     0.8f, glm::vec4(0.f, 1.f, 0.f, 1.f), &plane);
+    phySphere sphere1(-10.f, 0.f, -10.f,
+                      1.8f, 0.f, 0.2f,
+                      0.3f, glm::vec4(1.0f, 0.2f, 0.2f, 1.f), &plane);
+    std::cout << "-------->" << "radius: " << sphere1.radius << "\n";
+
 
     int model_mat_loc = glGetUniformLocation(shaderProgram, "model_mat");
     int view_mat_loc = glGetUniformLocation(shaderProgram, "view_mat");
@@ -114,20 +110,9 @@ main(int, char* argv[]) {
         glUniform3fv(active_vert_2_loc, 1, &active_vert_2[0]);
         glUniform3fv(active_vert_3_loc, 1, &active_vert_3[0]);
 
-        // sphere2.step(0.005);
-        // sphere3.step(0.005);
-
         glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere1.geo.transform[0][0]);
         sphere1.geo.bind();
         glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
-
-        // glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere2.geo.transform[0][0]);
-        // sphere2.geo.bind();
-        // glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
-
-        // glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere3.geo.transform[0][0]);
-        // sphere3.geo.bind();
-        // glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
 
         // reset the model matrix before rendering the plane
         glm::mat4 m = glm::mat4(1.f);
