@@ -2,9 +2,6 @@
 
 #include <mesh.hpp>
 
-void testPhysicsLibraryLinking();
-
-
 struct phySphere {
     // holds the mesh, etc.
     geometry geo;

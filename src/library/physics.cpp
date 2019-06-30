@@ -61,10 +61,6 @@ phyPlane::getTriangleAt(glm::vec3 pos) {
     return triangleIndex;
 }
 
-void testPhysicsLibraryLinking() {
-    std::cout << "physics.cpp linked successfully!\n";
-}
-
 void
 phySphere::step(float deltaT) {
     // All these calculations could be done with one big matrix and one
