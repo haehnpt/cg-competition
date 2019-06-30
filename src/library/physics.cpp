@@ -25,13 +25,13 @@ phyPlane::destroy() {
 
 // For the start we assume the sphere has a radius of zero!
 int
-phyPlane::getTriangleIndex(phySphere *s) {
+phyPlane::getTriangleAt(glm::vec3 pos) {
     // printf("isCutting with s coordinates: %02.2f %02.2f %02.2f\n",
     //        s->x[0], s->x[1], s->x[2]);
 
     // position of the sphere's center relative to the plane
-    float xInPlane = s->x[0] - xStart;
-    float zInPlane = s->x[2] - zStart;
+    float xInPlane = pos.x - xStart;
+    float zInPlane = pos.z - zStart;
 
     // indices of the rectangle containing the sphere's center
     int xIndexRect = floor(xInPlane / xTileWidth);
@@ -74,10 +74,7 @@ phySphere::step(float deltaT) {
     // superfluous multiplications with zeros.
 
     // next position in the plane if there were no obstacles
-    float xNext[3];
-    xNext[0] = x[0] + v[0] * deltaT; // + a[0] * 0.5 * deltaT * deltaT;
-    xNext[1] = x[1] + v[1] * deltaT; // + a[1] * 0.5 * deltaT * deltaT;
-    xNext[2] = x[2] + v[2] * deltaT + a[2] * 0.5 * deltaT * deltaT;
+    // glm::vec3 newPos = x + v * deltaT + 0.5 * a * deltaT * deltaT;
 
     // Fox each triangle along the way to xNext check if the sphere
     // (center) hits it.
@@ -92,14 +89,11 @@ phySphere::step(float deltaT) {
     // };
 
 
+    x = x + v * deltaT + a * (0.5f * deltaT * deltaT);
+    // update velocity
+    v = v + a * deltaT;
+
     for (int i = 0; i < 3; i++) {
-        // update position
-        x[i] = x[i] + v[i] * deltaT + a[i] * 0.5 * deltaT * deltaT;
-        // update velocity
-        v[i] = v[i] + a[i] * deltaT;
-
-
-
         // for TESTING: a hard-coded bounding box
         if (x[i] - radius < -10 && v[i] < 0) {
             v[i] = -1.0 * v[i];
@@ -110,32 +104,25 @@ phySphere::step(float deltaT) {
 
     // plane->getTriangleIndex(this);
 
-    geo.transform = glm::translate(glm::vec3(x[0], x[1], x[2]))
+    geo.transform = glm::translate(x)
         * glm::scale(glm::vec3(radius));
 }
 
-phySphere::phySphere(float x1, float x2, float x3,
-                     float v1, float v2, float v3,
+phySphere::phySphere(glm::vec3 x,
+                     glm::vec3 v,
                      float radius,
-                     glm::vec4 color, phyPlane *plane) : radius{radius}, plane{plane}
+                     glm::vec4 color, phyPlane *plane) :
+    x{x},
+    v{v},
+    radius{radius},
+    plane{plane}
 {
-    // position
-    x[0] = x1;                  // x
-    x[1] = x2;                  // y
-    x[2] = x3;                  // z
-
-    // velocity
-    v[0] = v1;                  // x
-    v[1] = v2;                  // y
-    v[2] = v3;                  // z
-
-    // acceleration (hard-coded for now!)
-    a[0] = 0;                   // x
-    a[1] = 0;                   // y
-    a[2] = 0;                   // z
+    a.x = 0;
+    a.y = 0;
+    a.z = 0;
 
     geo = loadMesh("sphere.obj", false, color);
-    geo.transform = glm::translate(glm::vec3(x[0], x[1], x[2]))
+    geo.transform = glm::translate(x)
         * glm::scale(glm::vec3(radius));
 }
 
@@ -347,4 +334,10 @@ phyPlane::phyPlane(float xStart,
 
 phyPlane::~phyPlane() {
     delete[] vbo_data;
+}
+
+std::vector<int>
+phyPlane::getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd) {
+  // TODO
+  return std::vector<int>{(int)(xStart + zStart + xEnd + zEnd)};
 }

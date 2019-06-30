@@ -8,23 +8,24 @@ void testPhysicsLibraryLinking();
 struct phySphere {
     // holds the mesh, etc.
     geometry geo;
-    float radius;
 
     // physics simulation
-    float x[3]; // position
-    float v[3]; // velocity
-    float a[3]; // acceleration
+    glm::vec3 x; // position
+    glm::vec3 v; // velocity
+    glm::vec3 a; // acceleration
+
+    float radius;
 
     // index of the triangle over which the sphere was at the last
     // tick
     int lastTriangleIndex;
-    float xMax[3];
+    // float xMax[3];
     // float aNext[3];
 
     struct phyPlane *plane;
 
-    phySphere(float x1, float x2, float x3,
-              float v1, float v2, float v3,
+    phySphere(glm::vec3 x,
+              glm::vec3 v,
               float radius, glm::vec4 color,
               struct phyPlane *plane);
 
@@ -55,7 +56,8 @@ struct phyPlane {
     phyPlane(float xStart, float xEnd, float zStart, float zEnd);
     ~phyPlane();
 
-    int getTriangleIndex(phySphere *sphere);
+    int getTriangleAt(glm::vec3 x);
+    std::vector<int> getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd);
 
     void bind();
     void release();

@@ -40,11 +40,9 @@ main(int, char* argv[]) {
 
     phyPlane plane(-10.f, 10.f, -10.f, 10.f);
 
-    phySphere sphere1(-10.f, 0.f, -10.f,
-                      1.8f, 0.f, 0.2f,
+    phySphere sphere1(glm::vec3(-10.f, 0.f, -10.f),
+                      glm::vec3(1.8f, 0.f, 0.2f),
                       0.3f, glm::vec4(1.0f, 0.2f, 0.2f, 1.f), &plane);
-    std::cout << "-------->" << "radius: " << sphere1.radius << "\n";
-
 
     int model_mat_loc = glGetUniformLocation(shaderProgram, "model_mat");
     int view_mat_loc = glGetUniformLocation(shaderProgram, "view_mat");
@@ -95,7 +93,7 @@ main(int, char* argv[]) {
         sphere1.step(0.05);
 
         // This is for testing, will be moved inside the sphere code later
-        int i = plane.getTriangleIndex(&sphere1);
+        int i = plane.getTriangleAt(sphere1.x);
         active_vert_1 = glm::vec3(plane.vbo_data[i * 30 + 0],
                                   plane.vbo_data[i * 30 + 1],
                                   plane.vbo_data[i * 30 + 2]);
