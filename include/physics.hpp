@@ -27,6 +27,7 @@ struct phySphere {
               float v1, float v2, float v3,
               float radius, glm::vec4 color,
               struct phyPlane *plane);
+
     // calculates the new position, velocity, acceleration
     void step(float deltaT);
 };
@@ -51,11 +52,12 @@ struct phyPlane {
 
     int triangleIndex;
 
+    phyPlane(float xStart, float xEnd, float zStart, float zEnd);
+    ~phyPlane();
+
     int getTriangleIndex(phySphere *sphere);
 
     void bind();
     void release();
     void destroy();
 };
-
-phyPlane createPhyPlane(float xStart, float xEnd, float zStart, float zEnd);

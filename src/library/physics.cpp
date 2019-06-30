@@ -86,9 +86,9 @@ phySphere::step(float deltaT) {
     //     // sphere is over a new triangle now
 
     // } else {
-        // sphere over the same triangle as last step
-        // check if the center is below the surface
-        // plane->getTriangleIndex(this);
+    // sphere over the same triangle as last step
+    // check if the center is below the surface
+    // plane->getTriangleIndex(this);
     // };
 
 
@@ -117,7 +117,8 @@ phySphere::step(float deltaT) {
 phySphere::phySphere(float x1, float x2, float x3,
                      float v1, float v2, float v3,
                      float radius,
-                     glm::vec4 color, phyPlane *plane) : radius(radius) {
+                     glm::vec4 color, phyPlane *plane) : radius{radius}, plane{plane}
+{
     // position
     x[0] = x1;                  // x
     x[1] = x2;                  // y
@@ -133,23 +134,21 @@ phySphere::phySphere(float x1, float x2, float x3,
     a[1] = 0;                   // y
     a[2] = 0;                   // z
 
-    plane = plane;
-
     geo = loadMesh("sphere.obj", false, color);
     geo.transform = glm::translate(glm::vec3(x[0], x[1], x[2]))
         * glm::scale(glm::vec3(radius));
 }
 
-phyPlane
-createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
-    // TODO: heightMap as parameter
-    phyPlane p{};
-
-    p.xStart = xStart;
-    p.xEnd = xEnd;
-    p.zStart = zStart;
-    p.zEnd = zEnd;
-
+// TODO: heightMap as parameter
+phyPlane::phyPlane(float xStart,
+                   float xEnd,
+                   float zStart,
+                   float zEnd) :
+    xStart{xStart},
+    xEnd{xEnd},
+    zStart{zStart},
+    zEnd{zEnd}
+{
     // This will later come from Patrick's generted data
     // float heightMap[5][5] {
     //   {0.05f, 0.f, 0.f, 0.05f, 0.f},
@@ -160,7 +159,8 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     // };
 
     // some friendly terrain for testing
-    float heightMap[6][5] {
+    float heightMap[6][5]
+    {
         {-0.1f, -0.1f, -0.0f, -0.0f, -0.1f},
         {-0.0f, -0.2f, -0.4f, -0.3f, -0.0f},
         {-0.2f, -1.6f, -1.8f, -1.2f, -0.2f},
@@ -182,12 +182,12 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     //     {0.f, 0.f, 0.f}
     // };
 
-    p.zNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
-    p.xNumPoints = sizeof(heightMap[0]) / sizeof(heightMap[0][0]);
-    p.zTileWidth = (p.zEnd - p.zStart) / (p.zNumPoints - 1);
-    p.xTileWidth = (p.xEnd - p.xStart) / (p.xNumPoints - 1);
+    zNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
+    xNumPoints = sizeof(heightMap[0]) / sizeof(heightMap[0][0]);
+    zTileWidth = (zEnd - zStart) / (zNumPoints - 1);
+    xTileWidth = (xEnd - xStart) / (xNumPoints - 1);
 
-    std::cout << "p.xTileWidth: " << p.xTileWidth << ", p.zTileWidth: " << p.zTileWidth << "\n";
+    std::cout << "xTileWidth: " << xTileWidth << ", zTileWidth: " << zTileWidth << "\n";
     // Set vertex coordinates using the heightMap for the y-value.
     //
     // Each square of the (m-1)*(n-1) squares is separated into two
@@ -219,90 +219,90 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     // Thus the total number of vertices needed is:
     // (m-2)*(n-2)*6 + 2*(n-2)*3 + 2*(m-2)*3 + 1 + 1 + 2 + 2
     //  = 6*(n*m - n - m + 1)
-    p.mVertices = 6 * (p.xNumPoints * p.zNumPoints - p.xNumPoints - p.zNumPoints + 1);
-    p.vbo_data = new float[p.mVertices * 10];
-    float deltaX = (xEnd - xStart) / (p.xNumPoints - 1);
-    float deltaZ = (zEnd - zStart) / (p.zNumPoints - 1);
+    mVertices = 6 * (xNumPoints * zNumPoints - xNumPoints - zNumPoints + 1);
+    vbo_data = new float[mVertices * 10];
+    float deltaX = (xEnd - xStart) / (xNumPoints - 1);
+    float deltaZ = (zEnd - zStart) / (zNumPoints - 1);
 
     // DEBUG:
-    std::cout << "heightMap dimension: " << p.zNumPoints << "x" << p.xNumPoints << "\n";
+    std::cout << "heightMap dimension: " << zNumPoints << "x" << xNumPoints << "\n";
     std::cout << "deltaX = " << deltaX << ", deltaZ  = " << deltaZ << "\n";
-    std::cout << "p.mVertices = " << p.mVertices << "\n";
-    std::cout << "sizeof(p.vbo_data) = " << sizeof(p.vbo_data) << "\n";
+    std::cout << "mVertices = " << mVertices << "\n";
+    std::cout << "sizeof(vbo_data) = " << sizeof(vbo_data) << "\n";
 
     // This for-loop loops over the squares between the data
     // points. (x,z) represents the upper-left vertex of the current
     // square. For each square the two contained triangles (called
     // top-left and bottom-right triangle) are added to the VBO data.
     int indexRectTopLeft = 0;
-    for (int z = 0; z < p.zNumPoints - 1; z++) {
-        for (int x = 0; x < p.xNumPoints - 1; x++) {
+    for (int z = 0; z < zNumPoints - 1; z++) {
+        for (int x = 0; x < xNumPoints - 1; x++) {
             glm::vec3 a, b, nrm;
             //// TOP-LEFT TRIANGLE ////
             // top-left vertex of the square
-            p.vbo_data[indexRectTopLeft + 0] = xStart + x * deltaX;
-            p.vbo_data[indexRectTopLeft + 1] = heightMap[x][z];
-            p.vbo_data[indexRectTopLeft + 2] = zStart + z * deltaZ;
+            vbo_data[indexRectTopLeft + 0] = xStart + x * deltaX;
+            vbo_data[indexRectTopLeft + 1] = heightMap[x][z];
+            vbo_data[indexRectTopLeft + 2] = zStart + z * deltaZ;
             // bottom-left vertex of the square
-            p.vbo_data[indexRectTopLeft + 10 + 0] = xStart + x * deltaX;
-            p.vbo_data[indexRectTopLeft + 10 + 1] = heightMap[x][z + 1];
-            p.vbo_data[indexRectTopLeft + 10 + 2] = zStart + (z + 1) * deltaZ;
+            vbo_data[indexRectTopLeft + 10 + 0] = xStart + x * deltaX;
+            vbo_data[indexRectTopLeft + 10 + 1] = heightMap[x][z + 1];
+            vbo_data[indexRectTopLeft + 10 + 2] = zStart + (z + 1) * deltaZ;
             // top-right vertex of the square
-            p.vbo_data[indexRectTopLeft + 20 + 0] = xStart + (x + 1) * deltaX;
-            p.vbo_data[indexRectTopLeft + 20 + 1] = heightMap[x + 1][z];
-            p.vbo_data[indexRectTopLeft + 20 + 2] = zStart + z * deltaZ;
+            vbo_data[indexRectTopLeft + 20 + 0] = xStart + (x + 1) * deltaX;
+            vbo_data[indexRectTopLeft + 20 + 1] = heightMap[x + 1][z];
+            vbo_data[indexRectTopLeft + 20 + 2] = zStart + z * deltaZ;
             // add the same normal to all three vertices:
-            a = glm::vec3(p.vbo_data[indexRectTopLeft + 10 + 0] - p.vbo_data[indexRectTopLeft + 0],
-                          p.vbo_data[indexRectTopLeft + 10 + 1] - p.vbo_data[indexRectTopLeft + 1],
-                          p.vbo_data[indexRectTopLeft + 10 + 2] - p.vbo_data[indexRectTopLeft + 2]);
-            b = glm::vec3(p.vbo_data[indexRectTopLeft + 20 + 0] - p.vbo_data[indexRectTopLeft + 0],
-                          p.vbo_data[indexRectTopLeft + 20 + 1] - p.vbo_data[indexRectTopLeft + 1],
-                          p.vbo_data[indexRectTopLeft + 20 + 2] - p.vbo_data[indexRectTopLeft + 2]);
+            a = glm::vec3(vbo_data[indexRectTopLeft + 10 + 0] - vbo_data[indexRectTopLeft + 0],
+                          vbo_data[indexRectTopLeft + 10 + 1] - vbo_data[indexRectTopLeft + 1],
+                          vbo_data[indexRectTopLeft + 10 + 2] - vbo_data[indexRectTopLeft + 2]);
+            b = glm::vec3(vbo_data[indexRectTopLeft + 20 + 0] - vbo_data[indexRectTopLeft + 0],
+                          vbo_data[indexRectTopLeft + 20 + 1] - vbo_data[indexRectTopLeft + 1],
+                          vbo_data[indexRectTopLeft + 20 + 2] - vbo_data[indexRectTopLeft + 2]);
             nrm = glm::normalize(glm::cross(a, b));
             for (int vert = 0; vert < 3; vert++) {
                 for (int coord = 0; coord < 3; coord++) {
                     // normal's x,y,z values start at index 3
-                    p.vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
+                    vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
                 }
                 // default color
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.8f; // r
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.8f; // g
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.8f; // b
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.0f; // a
+                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.8f; // r
+                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.8f; // g
+                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.8f; // b
+                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.0f; // a
             }
 
             //// BOTTOM-RIGHT TRIANGLE ////
             // bottom-left vertex of the square
-            p.vbo_data[indexRectTopLeft + 30 + 0] = xStart + x * deltaX;
-            p.vbo_data[indexRectTopLeft + 30 + 1] = heightMap[x][z + 1];
-            p.vbo_data[indexRectTopLeft + 30 + 2] = zStart + (z + 1) * deltaZ;
+            vbo_data[indexRectTopLeft + 30 + 0] = xStart + x * deltaX;
+            vbo_data[indexRectTopLeft + 30 + 1] = heightMap[x][z + 1];
+            vbo_data[indexRectTopLeft + 30 + 2] = zStart + (z + 1) * deltaZ;
             // top-right vertex of the square
-            p.vbo_data[indexRectTopLeft + 40 + 0] = xStart + (x + 1) * deltaX;
-            p.vbo_data[indexRectTopLeft + 40 + 1] = heightMap[x + 1][z];
-            p.vbo_data[indexRectTopLeft + 40 + 2] = zStart + z * deltaZ;
+            vbo_data[indexRectTopLeft + 40 + 0] = xStart + (x + 1) * deltaX;
+            vbo_data[indexRectTopLeft + 40 + 1] = heightMap[x + 1][z];
+            vbo_data[indexRectTopLeft + 40 + 2] = zStart + z * deltaZ;
             // bottom-right vertex of the square
-            p.vbo_data[indexRectTopLeft + 50 + 0] = xStart + (x + 1) * deltaX;
-            p.vbo_data[indexRectTopLeft + 50 + 1] = heightMap[x + 1][z + 1];
-            p.vbo_data[indexRectTopLeft + 50 + 2] = zStart + (z + 1) * deltaZ;
+            vbo_data[indexRectTopLeft + 50 + 0] = xStart + (x + 1) * deltaX;
+            vbo_data[indexRectTopLeft + 50 + 1] = heightMap[x + 1][z + 1];
+            vbo_data[indexRectTopLeft + 50 + 2] = zStart + (z + 1) * deltaZ;
             // add the same normal to all three vertices:
-            a = glm::vec3(p.vbo_data[indexRectTopLeft + 40 + 0] - p.vbo_data[indexRectTopLeft + 50 + 0],
-                          p.vbo_data[indexRectTopLeft + 40 + 1] - p.vbo_data[indexRectTopLeft + 50 + 1],
-                          p.vbo_data[indexRectTopLeft + 40 + 2] - p.vbo_data[indexRectTopLeft + 50 + 2]);
-            b = glm::vec3(p.vbo_data[indexRectTopLeft + 30 + 0] - p.vbo_data[indexRectTopLeft + 50 + 0],
-                          p.vbo_data[indexRectTopLeft + 30 + 1] - p.vbo_data[indexRectTopLeft + 50 + 1],
-                          p.vbo_data[indexRectTopLeft + 30 + 2] - p.vbo_data[indexRectTopLeft + 50 + 2]);
+            a = glm::vec3(vbo_data[indexRectTopLeft + 40 + 0] - vbo_data[indexRectTopLeft + 50 + 0],
+                          vbo_data[indexRectTopLeft + 40 + 1] - vbo_data[indexRectTopLeft + 50 + 1],
+                          vbo_data[indexRectTopLeft + 40 + 2] - vbo_data[indexRectTopLeft + 50 + 2]);
+            b = glm::vec3(vbo_data[indexRectTopLeft + 30 + 0] - vbo_data[indexRectTopLeft + 50 + 0],
+                          vbo_data[indexRectTopLeft + 30 + 1] - vbo_data[indexRectTopLeft + 50 + 1],
+                          vbo_data[indexRectTopLeft + 30 + 2] - vbo_data[indexRectTopLeft + 50 + 2]);
             nrm = glm::normalize(glm::cross(a, b));
 
             for (int vert = 3; vert < 6; vert++) {
                 for (int coord = 0; coord < 3; coord++) {
                     // normal's x,y,z values start at index 3
-                    p.vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
+                    vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
                 }
                 // default color
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.8f; // r
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.8f; // g
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.8f; // b
-                p.vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.0f; // a
+                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.8f; // r
+                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.8f; // g
+                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.8f; // b
+                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.0f; // a
             }
 
             // Per square (= 2 triangles) 6 vertices are added, update index
@@ -312,23 +312,23 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
 
 
     // DEBUG print
-    // for (int i = 0; i < p.mVertices; i++) {
+    // for (int i = 0; i < mVertices; i++) {
     //     std::cout << "====== Vertix " << i << ":\n";
 
     //     for (int j = 0; j < 10; j++) {
-    //         std::cout << p.vbo_data[i * 10 + j] << " ";
+    //         std::cout << vbo_data[i * 10 + j] << " ";
     //         std::cout << ((j == 2 || j == 5) ? "\n" : " ");
     //     }
 
     //     std::cout << "\n\n";
     // }
 
-    glGenVertexArrays(1, &p.vao);
-    glBindVertexArray(p.vao);
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
-    glGenBuffers(1, &p.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, p.vbo);
-    glBufferData(GL_ARRAY_BUFFER, p.mVertices * 10 * sizeof(float), p.vbo_data, GL_STATIC_DRAW);
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, mVertices * 10 * sizeof(float), vbo_data, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)(3*sizeof(float)));
@@ -338,10 +338,13 @@ createPhyPlane(float xStart, float xEnd, float zStart, float zEnd) {
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
 
-    // We don't delete p.vbo_data, as we will use it for collision
+    // We don't delete vbo_data, as we will use it for collision
     // detection!
     //
-    // delete [p.vbo_data];
+    // delete [vbo_data];
+}
 
-    return p;
+
+phyPlane::~phyPlane() {
+    delete[] vbo_data;
 }

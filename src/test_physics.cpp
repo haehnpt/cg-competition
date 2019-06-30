@@ -38,7 +38,7 @@ main(int, char* argv[]) {
     glDeleteShader(vertexShader);
     glUseProgram(shaderProgram);
 
-    phyPlane plane = createPhyPlane(-10.f, 10.f, -10.f, 10.f);
+    phyPlane plane(-10.f, 10.f, -10.f, 10.f);
 
     phySphere sphere1(-10.f, 0.f, -10.f,
                       1.8f, 0.f, 0.2f,
