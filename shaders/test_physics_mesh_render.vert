@@ -2,6 +2,8 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec4 color;
+// So far unused in the shader
+layout (location = 3) in float d;
 
 uniform mat4 model_mat;
 uniform mat4 view_mat;

@@ -55,22 +55,26 @@ phyPlane::getTriangleAt(glm::vec3 pos) {
     if (triangleIndex != oldTriangleIndex) {
         std::cout << "zIndexRect: " << zIndexRect
                   << ", xIndexRect: " << xIndexRect
-                  << ", triangleIndex: " << triangleIndex << "\n";
+                  << ", triangleIndex: " << triangleIndex << "\n" << std::flush;
+
     }
 
     return triangleIndex;
 }
 
-void
+bool
 phySphere::step(float deltaT) {
-    // All these calculations could be done with one big matrix and one
-    // vector, but I don't know yet how to best do that (are there any
-    // matrix/vector libraries already? glm only goes up to 4x4
-    // matrices). Also, using a single big matrix involves many
-    // superfluous multiplications with zeros.
-
     // next position in the plane if there were no obstacles
-    // glm::vec3 newPos = x + v * deltaT + 0.5 * a * deltaT * deltaT;
+    // glm::vec3 newPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
+    // glm::vec3 deltaPos = newPos - x;
+
+    // if (lastTriangleIndex != plane->getTriangleAt(newPos)) {
+
+    // } else {
+    //     // if plane->isAbove(newPos) {
+
+    //     //     }
+    // };
 
     // Fox each triangle along the way to xNext check if the sphere
     // (center) hits it.
@@ -85,7 +89,7 @@ phySphere::step(float deltaT) {
     // };
 
 
-    x = x + v * deltaT + a * (0.5f * deltaT * deltaT);
+    x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
     // update velocity
     v = v + a * deltaT;
 
@@ -102,6 +106,8 @@ phySphere::step(float deltaT) {
 
     geo.transform = glm::translate(x)
         * glm::scale(glm::vec3(radius));
+
+    return plane->isAbove(x);
 }
 
 phySphere::phySphere(glm::vec3 x,
@@ -114,7 +120,7 @@ phySphere::phySphere(glm::vec3 x,
     plane{plane}
 {
     a.x = 0;
-    a.y = 0;
+    a.y = -2;
     a.z = 0;
 
     geo = loadMesh("sphere.obj", false, color);
@@ -152,11 +158,11 @@ phyPlane::phyPlane(float xStart,
         {-0.1f, -0.0f, -0.1f, -0.2f, -0.1f}
     };
 
-    // for (int i = 0; i < 6; i++) {
-    //     for (int j = 0; j < 5; j++) {
-    //         heightMap[i][j] -= 4.f;
-    //     }
-    // }
+    for (int i = 0; i < 6; i++) {
+        for (int j = 0; j < 5; j++) {
+            heightMap[i][j] -= 4.f;
+        }
+    }
 
     // float heightMap[4][3] {
     //     {0.f, 0.f, 0.f},
@@ -336,4 +342,24 @@ std::vector<int>
 phyPlane::getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd) {
   // TODO
   return std::vector<int>{(int)(xStart + zStart + xEnd + zEnd)};
+}
+
+bool
+phyPlane::isAbove(glm::vec3 x) {
+    int index = getTriangleAt(x);
+
+    // first vertex of the triangle
+    glm::vec3 v1(vbo_data[index * 10 + 0],
+                 vbo_data[index * 10 + 1],
+                 vbo_data[index * 10 + 2]);
+
+    // normal of the triangle's plane
+    glm::vec3 norm(vbo_data[index * 10 + 3 + 0],
+                   vbo_data[index * 10 + 3 + 1],
+                   vbo_data[index * 10 + 3 + 2]);
+
+    // distance between plane and origin
+    // float d = -glm::dot(v1, norm);
+
+    return glm::dot(x, norm) > glm::dot(v1, norm);
 }

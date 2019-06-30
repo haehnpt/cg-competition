@@ -27,7 +27,7 @@ struct phySphere {
               struct phyPlane *plane);
 
     // calculates the new position, velocity, acceleration
-    void step(float deltaT);
+    bool step(float deltaT);
 };
 
 
@@ -55,6 +55,7 @@ struct phyPlane {
 
     int getTriangleAt(glm::vec3 x);
     std::vector<int> getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd);
+    bool isAbove(glm::vec3 x);
 
     void bind();
     void release();
