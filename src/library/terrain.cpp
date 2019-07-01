@@ -5,7 +5,7 @@ Get heights using "Perlin Noise"
 - range : size of the terrain
 - rigidity : how "rough" shall the terrain look, e.g. very spiky = 2.0
 */
-float * terrain::getHeights(float range, float rigidity)
+float * terrain::get_heights(float range, float rigidity)
 {
 	float * heights = new float[resolution * resolution];
 	perlin_noise noise = perlin_noise(100, 1.0, 0.3, 1.3);
@@ -32,7 +32,7 @@ float * terrain::getHeights(float range, float rigidity)
 /*
 Clamp the calculated heights to an specified range
 */
-void terrain::clampHeights()
+void terrain::clamp_heights()
 {
 	for (int i = 0; i < resolution * resolution; i++)
 	{
@@ -205,8 +205,8 @@ terrain::terrain(float size, int resolution, int start_frame, int max_frame, int
 {
 	this->size = size;
 	this->resolution = resolution;
-	heights = getHeights(size, 1.0);
-	clampHeights();
+	heights = get_heights(size, 1.0);
+	clamp_heights();
 	build();
 	get_texture_locations(shader_program);
 	load_textures(stone, grass, snow);

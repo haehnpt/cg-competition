@@ -17,9 +17,9 @@
 
 class terrain
 {
-	float * getHeights(float range, float rigidity);
+	float * get_heights(float range, float rigidity);
 	void build();
-	void clampHeights();
+	void clamp_heights();
 	int start_frame = 0;
 	int current_frame = 0;
 	int frame_loc;

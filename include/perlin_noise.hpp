@@ -24,7 +24,7 @@ class perlin_noise
         float scaling;
         float gradient_grid_distance;
         void create_gradients();
-        float dotGridGradient(int index_x, int index_y, float x, float y);
+        float dot_grid_gradient(int index_x, int index_y, float x, float y);
         float lerp(float high, float low, float weight);
 		float fade(float x);
     public:

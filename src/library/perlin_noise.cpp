@@ -58,7 +58,7 @@ void perlin_noise::create_gradients()
 /*
 Dot product of gradient and position
 */
-float perlin_noise::dotGridGradient(int index_x, int index_y, float x, float y)
+float perlin_noise::dot_grid_gradient(int index_x, int index_y, float x, float y)
 {
     float dx = x - (-max_distance + index_x * gradient_grid_distance);
     float dy = y - (-max_distance + index_y * gradient_grid_distance);
@@ -95,12 +95,12 @@ float perlin_noise::get_noise(float x, float y)
 	float sx = fade((x - (-max_distance + x_index * gradient_grid_distance)) / gradient_grid_distance); 
 	float sy = fade((y - (-max_distance + y_index * gradient_grid_distance)) / gradient_grid_distance);
 
-    float n1 = dotGridGradient(x_index, y_index, x, y);
-    float n2 = dotGridGradient(x_index_1, y_index, x, y);
+    float n1 = dot_grid_gradient(x_index, y_index, x, y);
+    float n2 = dot_grid_gradient(x_index_1, y_index, x, y);
     float i1 = lerp(n1,n2,sx);
 
-    n1 = dotGridGradient(x_index, y_index_1, x, y);
-    n2 = dotGridGradient(x_index_1, y_index_1, x, y);
+    n1 = dot_grid_gradient(x_index, y_index_1, x, y);
+    n2 = dot_grid_gradient(x_index_1, y_index_1, x, y);
     float i2 = lerp(n1,n2,sx);
 
     return offset + scaling * lerp(i1,i2,sy);
