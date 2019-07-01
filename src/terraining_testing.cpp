@@ -11,7 +11,7 @@
 *
 */
 
-#define DEBUG true
+#define DEBUG false
 #define x64 true
 
 const int WINDOW_WIDTH =  800;
@@ -22,7 +22,7 @@ const float FAR_VALUE = 100.f;
 
 const float TERRAIN_SIZE = 8.0;
 const int FRAMES = 180;
-const int RESOLUTION = (DEBUG) ? 1000 : (x64 ? 4000 : 2000);
+const int RESOLUTION = (DEBUG) ? 1000 : (x64 ? 2000 : 2000);
 
 const std::string GRASS = (DEBUG) ? "grass.jpg" : "grass_large.jpg";
 const std::string STONE = (DEBUG) ? "mountain.jpg" : "mountain_large.jpg";
