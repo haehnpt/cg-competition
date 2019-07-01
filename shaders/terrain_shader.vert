@@ -51,7 +51,7 @@ void main()
 	float displacement_amplitude = 0.005;
 	vec4 displacement;
 	if (tex_height.x > 0.8) displacement = texture2D(snow_tex, uv);
-	else if (tex_height.x > 0.4) displacement = texture2D(stone_tex, uv);
+	else if (tex_height.x > 0.5) displacement = texture2D(stone_tex, uv);
 	else displacement = texture2D(grass_tex, uv);
 	float displacement_scalar = ((displacement.r + displacement.g + displacement.b) / 3.0 / (0.5 / displacement_amplitude) - displacement_amplitude) * tex_height.x;
 

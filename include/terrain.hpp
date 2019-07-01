@@ -76,9 +76,9 @@ public:
 		terrain::set_texture_filter_mode(image_tex2, GL_LINEAR_MIPMAP_LINEAR);
 		terrain::set_texture_filter_mode(image_tex3, GL_LINEAR_MIPMAP_LINEAR);
 
-		terrain::set_texture_wrap_mode(image_tex1, GL_REPEAT);
-		terrain::set_texture_wrap_mode(image_tex2, GL_REPEAT);
-		terrain::set_texture_wrap_mode(image_tex3, GL_REPEAT);
+		terrain::set_texture_wrap_mode(image_tex1, GL_MIRRORED_REPEAT);
+		terrain::set_texture_wrap_mode(image_tex2, GL_MIRRORED_REPEAT);
+		terrain::set_texture_wrap_mode(image_tex3, GL_MIRRORED_REPEAT);
 	}
 
 	static unsigned create_texture_rgba32f(int width, int height, float* data) {
