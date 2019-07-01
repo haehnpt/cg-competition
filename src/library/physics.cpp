@@ -109,8 +109,9 @@ phySphere::step(float deltaT) {
             std::cout << "Next exit: LEFT\n";
         }
     } else {
-        // i % 2 == 1
-        // x is in a bottom-right triangle, the order of the vertices in
+        // x is in a bottom-right triangle, the order of the vertices
+        // in the vbo is:
+        //
         //       1
         //       +
         //      /|
@@ -118,6 +119,7 @@ phySphere::step(float deltaT) {
         //    / x|
         //   +---+
         //   0    2
+
         if (glm::cross(v0, delta).y > 0
             && glm::cross(delta, v2).y > 0) {
             // Next exit: between bottom-left and bottom-right edge
