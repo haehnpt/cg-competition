@@ -89,7 +89,7 @@ float orennayarTerm(float lambert, vec3 n, vec3 l) {
 	float cos_azimuth = cdot(ortho_L, ortho_V);
 
 	// rho * cos(theta_L)
-	float LV = albedo * (A + (B * max(0, cos_azimuth) * sin(alpha) * tan(beta)));
+	float LV = cos(theta_L) * albedo * (A + (B * max(0, cos_azimuth) * sin(alpha) * tan(beta)));
 
     return lambert * LV;
 }
@@ -108,22 +108,29 @@ void main() {
     float specularTerm = cooktorranceTerm(interp_normal, interp_light_dir);
     // combine both terms (diffuse+specular) using our material properties (colors)
 
-	
+	vec4 diff;
+	vec4 spec;
+
 	if (tex_height.x > 0.8){
-		frag_color = texture2D(snow_tex, uv) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
+		diff = texture2D(snow_tex, uv);
 	}
 	else if (tex_height.x > 0.7){
 		float weight = (tex_height.x - 0.7) * 10.0;
-		frag_color =  ((weight * texture2D(snow_tex, uv)) + ((1.0 - weight) * texture2D(stone_tex, uv))) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
+		diff =  weight * texture2D(snow_tex, uv) + (1.0 - weight) * texture2D(stone_tex, uv);
+	}
+	else if (tex_height.x > 0.5){
+		diff = texture2D(stone_tex, uv);
 	}
 	else if (tex_height.x > 0.4){
-		frag_color = texture2D(stone_tex, uv) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
-	}
-	else if (tex_height.x > 0.3){
-		float weight = (tex_height.x - 0.3) * 10.0;
-		frag_color =  ((weight * texture2D(stone_tex, uv)) + ((1.0 - weight) * texture2D(grass_tex, uv))) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
+		float weight = (tex_height.x - 0.4) * 10.0;
+		diff =  weight * texture2D(stone_tex, uv) + (1.0 - weight) * texture2D(grass_tex, uv);
 	}
 	else{
-		frag_color = texture2D(grass_tex, uv) * vec4(vec3(clamp(diffuse * diffuseTerm + specular * specularTerm, 0.0, 1.0)), 1);
+		diff = texture2D(grass_tex, uv);
 	}
+
+	//diff = vec4(0.0,0.0,0.0,1.0);
+	float intensity = 100.0;
+	spec = intensity * (diff + vec4(0.2,0.2,0.2,0.0));
+	frag_color = vec4(vec3(clamp(diff * diffuseTerm + spec * specularTerm, 0.0, 1.0)), 1);
 }

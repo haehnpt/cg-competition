@@ -20,6 +20,7 @@ struct geometry {
     std::vector<glm::vec3> normals;
     std::vector<glm::vec4> colors;
     std::vector<glm::uvec3> faces;
+	std::vector<glm::vec3> faces_normals;
 };
 
 std::vector<geometry>
