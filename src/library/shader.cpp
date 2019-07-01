@@ -57,3 +57,15 @@ linkProgram(unsigned int vertexShader, unsigned int fragmentShader) {
 
     return shaderProgram;
 }
+
+unsigned int
+getShader(const char* vertex_shader_filename, const char* fragment_shader_filename) {
+  unsigned int vertexShader = compileShader(vertex_shader_filename, GL_VERTEX_SHADER);
+  unsigned int fragmentShader = compileShader(fragment_shader_filename, GL_FRAGMENT_SHADER);
+  unsigned int shaderProgram = linkProgram(vertexShader, fragmentShader);
+  // after linking the program the shader objects are no longer needed
+  glDeleteShader(fragmentShader);
+  glDeleteShader(vertexShader);
+
+  return shaderProgram;
+}
