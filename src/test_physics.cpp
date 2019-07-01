@@ -25,120 +25,14 @@ float getTimeDelta();
 void
 resizeCallback(GLFWwindow* window, int width, int height);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-unsigned int *genTextures(int width, int height, int size) {
-  unsigned int *textures = (unsigned int *)malloc(sizeof(unsigned int) * size);
-
-  for (int i = 0; i < size; i++) {
-    glGenTextures(1, textures + i);
-
-    glBindTexture(GL_TEXTURE_2D, textures[i]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-    // Set the texture quality
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-  }
-
-  return textures;
-}
-
-unsigned int makeTextureVAO() {
-  float vertices[] = {
-      -1.0f, -1.0f, 0.f,
-       1.0f, -1.0f, 0.f,
-       1.0f,  1.0f, 0.f,
-      -1.0f,  1.0f, 0.f
-  };
-
-  unsigned int indices[] = {
-      0, 1, 2, 2, 3, 0
-  };
-
-  unsigned int VAO;
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
-
-  unsigned int VBO = makeBuffer(GL_ARRAY_BUFFER, GL_STATIC_DRAW, sizeof(vertices), vertices);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
-
-  unsigned int IBO = makeBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, sizeof(indices), indices);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-
-  return VAO;
-}
-
-void motion_blur(unsigned int shader, unsigned int *textures, int size, unsigned int tex_loc, unsigned int texture_vao) {
-  glDeleteTextures(1, textures + size - 1);
-
-  for (int i = size - 1; i > 0; i--) {
-    textures[i] = textures[i - 1];
-  }
-
-  unsigned int *new_tex = genTextures(WINDOW_WIDTH, WINDOW_HEIGHT, 1);
-  textures[0] = new_tex[0];
-  free(new_tex);
-
-  glReadBuffer(GL_BACK);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, textures[0]);
-  glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  glDisable(GL_DEPTH_TEST);
-
-  glUseProgram(shader);
-
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_ONE, GL_ONE);
-
-  for (int i = 0; i < size; i++) {
-    glBindTexture(GL_TEXTURE_2D, textures[i]);
-    glUniform1i(tex_loc, 0);
-    glBindVertexArray(texture_vao);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0);
-  }
-
-  glDisable(GL_BLEND);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int
 main(int, char* argv[]) {
     GLFWwindow* window = initOpenGL(WINDOW_WIDTH, WINDOW_HEIGHT, argv[0]);
     glfwSetFramebufferSizeCallback(window, resizeCallback);
 
     camera cam(window);
+
+    MotionBlur motion_blur = MotionBlur(5, WINDOW_WIDTH, WINDOW_HEIGHT);
 
     // load and compile shaders and link program
     unsigned int vertexShader = compileShader("test_physics_mesh_render.vert", GL_VERTEX_SHADER);
@@ -188,31 +82,6 @@ main(int, char* argv[]) {
     glm::vec3 active_vert_1;
     glm::vec3 active_vert_2;
     glm::vec3 active_vert_3;
-
-
-
-
-
-
-    // int size = 5;
-    //
-    // unsigned int motionShader = getShader("motion_blur.vert", "motion_blur.frag");
-    // glUseProgram(motionShader);
-    // int tex_loc = glGetUniformLocation(motionShader, "tex");
-    // int alpha_loc = glGetUniformLocation(motionShader, "alpha");
-    // glUniform1f(alpha_loc, 1.f / size);
-    //
-    // unsigned int *textures = genTextures(WINDOW_WIDTH, WINDOW_HEIGHT, size);
-    // unsigned int texture_vao = makeTextureVAO();
-
-
-
-    MotionBlur motion_blur_effect = MotionBlur(5, WINDOW_WIDTH, WINDOW_HEIGHT);
-
-
-
-
-
 
     glEnable(GL_DEPTH_TEST);
 
@@ -287,17 +156,7 @@ main(int, char* argv[]) {
         glDrawArrays(GL_TRIANGLES, 0, plane.mVertices);
         // if (!above) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-
-
-
-
-        // motion_blur(motionShader, textures, size, tex_loc, texture_vao);
-        // glEnable(GL_DEPTH_TEST);
-        // glUseProgram(shaderProgram);
-        motion_blur_effect.render();
-
-
-
+        motion_blur.render();
 
         // swap buffers == show rendered content
         glfwSwapBuffers(window);

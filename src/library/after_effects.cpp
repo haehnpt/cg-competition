@@ -6,6 +6,9 @@ MotionBlur::MotionBlur(unsigned int blur_size, int width, int height)
 
   this->shader = getShader("motion_blur.vert", "motion_blur.frag");
 
+  this->width = width;
+  this->height = height;
+
   int current_shader;
   glGetIntegerv(GL_CURRENT_PROGRAM, &current_shader);
   {
@@ -38,28 +41,28 @@ void MotionBlur::render()
 
   this->textures[0] = genTexture(this->width, this->height);
 
-  // int current_texture;
-  // float current_clear_color[4];
+  int current_texture;
+  float current_clear_color[4];
   int current_shader;
-  // glGetIntegerv(GL_ACTIVE_TEXTURE, &current_texture);
-  // glGetFloatv(GL_COLOR_CLEAR_VALUE, &(current_clear_color[0]));
+  glGetIntegerv(GL_ACTIVE_TEXTURE, &current_texture);
+  glGetFloatv(GL_COLOR_CLEAR_VALUE, &(current_clear_color[0]));
   glGetIntegerv(GL_CURRENT_PROGRAM, &current_shader);
   {
 
-    glReadBuffer(GL_BACK);
-    glActiveTexture(GL_TEXTURE0);
+    glReadBuffer(GL_BACK);//needs reset
+    glActiveTexture(GL_TEXTURE0);//needs reset
     glBindTexture(GL_TEXTURE_2D, this->textures[0]);
     glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, this->width, this->height);
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);//needs reset
 
     glUseProgram(this->shader);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
+    glEnable(GL_BLEND);//needs reset
+    glBlendFunc(GL_ONE, GL_ONE);//needs reset
 
     for (int i = 0; i < this->blur_size; i++) {
       glBindTexture(GL_TEXTURE_2D, this->textures[i]);
@@ -68,21 +71,21 @@ void MotionBlur::render()
       glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0);
     }
 
-    glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);//todo reset
+    glEnable(GL_DEPTH_TEST);//todo reset
   }
   glUseProgram(current_shader);
-
-  // glBindTexture(GL_TEXTURE_2D, current_texture);
+  glClearColor(current_clear_color[0], current_clear_color[1], current_clear_color[2], current_clear_color[3]);
+  glBindTexture(GL_TEXTURE_2D, current_texture);
 }
 
 unsigned int genTexture(int width, int height)
 {
   unsigned int texture;
 
-  // int current_texture;
-  // glGetIntegerv(GL_ACTIVE_TEXTURE, &current_texture);
-  // {
+  int current_texture;
+  glGetIntegerv(GL_ACTIVE_TEXTURE, &current_texture);
+  {
     glGenTextures(1, &texture);
 
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -91,8 +94,8 @@ unsigned int genTexture(int width, int height)
     // Set the texture quality
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-  // }
-  // glBindTexture(GL_TEXTURE_2D, current_texture);
+  }
+  glBindTexture(GL_TEXTURE_2D, current_texture);
 
   return texture;
 }
@@ -110,12 +113,12 @@ unsigned int genTextureVAO()
       0, 1, 2, 2, 3, 0
   };
 
-  // int current_vao;
-  // int current_vbo;
-  // int current_ibo;
-  // glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
-  // glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &current_vbo);
-  // glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &current_ibo);
+  int current_vao;
+  int current_vbo;
+  int current_ibo;
+  glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &current_vao);
+  glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &current_vbo);
+  glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &current_ibo);
 
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
@@ -129,9 +132,9 @@ unsigned int genTextureVAO()
   unsigned int IBO = makeBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, sizeof(indices), indices);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
-  // glBindVertexArray(current_vao);
-  // glBindBuffer(GL_ARRAY_BUFFER, current_vbo);
-  // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, current_ibo);
+  glBindVertexArray(current_vao);
+  glBindBuffer(GL_ARRAY_BUFFER, current_vbo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, current_ibo);
 
   return VAO;
 }
