@@ -60,6 +60,8 @@ Dot product of gradient and position
 */
 float perlin_noise::dot_grid_gradient(int index_x, int index_y, float x, float y)
 {
+	if (index_x >= gradients_count || index_y >= gradients_count)
+		return 0.0;
     float dx = x - (-max_distance + index_x * gradient_grid_distance);
     float dy = y - (-max_distance + index_y * gradient_grid_distance);
     return (dx * gradients[index_x][index_y][0] + dy * gradients[index_x][index_y][1]);

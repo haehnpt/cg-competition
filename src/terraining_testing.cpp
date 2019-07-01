@@ -11,7 +11,7 @@
 *
 */
 
-#define DEBUG false
+#define DEBUG true
 #define x64 true
 
 const int WINDOW_WIDTH =  800;
@@ -20,7 +20,7 @@ const float FOV = 45.f;
 const float NEAR_VALUE = 0.1f;
 const float FAR_VALUE = 100.f;
 
-const float TERRAIN_SIZE = 10.0;
+const float TERRAIN_SIZE = 8.0;
 const int FRAMES = 180;
 const int RESOLUTION = (DEBUG) ? 1000 : (x64 ? 4000 : 2000);
 
@@ -46,8 +46,8 @@ main(int, char* argv[]) {
     camera cam(window);
 
     // load and compile shaders and link program
-    unsigned int vertexShader = compileShader("shading_models.vert", GL_VERTEX_SHADER);
-    unsigned int fragmentShader = compileShader("shading_models.frag", GL_FRAGMENT_SHADER);
+    unsigned int vertexShader = compileShader("terrain_shader.vert", GL_VERTEX_SHADER);
+    unsigned int fragmentShader = compileShader("terrain_shader.frag", GL_FRAGMENT_SHADER);
     unsigned int shaderProgram = linkProgram(vertexShader, fragmentShader);
     // after linking the program the shader objects are no longer needed
     glDeleteShader(fragmentShader);
@@ -93,7 +93,7 @@ main(int, char* argv[]) {
     // rendering loop
     while (glfwWindowShouldClose(window) == false) {
         glfwPollEvents();
-        glClearColor(0.25f, 0.25f, 0.6f, 1.0f);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 view_matrix = cam.view_matrix();
