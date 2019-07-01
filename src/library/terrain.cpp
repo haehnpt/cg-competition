@@ -18,7 +18,8 @@ float * terrain::getHeights(float range, float rigidity)
 			float x1 = x * range / resolution;
 			float x2 = z * range / resolution;
 			float v = 0.6 * noise.get_noise(x1, x2) + noise2.get_noise(x1, x2) * 0.4;
-			v = glm::max<float>(min_height, (v < 0.0 ? -1.0 : 1.0) * pow(abs(v), rigidity));
+			v = pow(fabs(v), rigidity);
+			if (v < min_height) v = min_height;
 			heights[(z * resolution) + x] = v;
 			if (v < lowest_height) lowest_height = v;
 			if (v > highest_height) highest_height = v;
