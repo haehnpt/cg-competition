@@ -32,7 +32,8 @@ main(int, char* argv[]) {
 
     camera cam(window);
 
-    MotionBlur motion_blur = MotionBlur(5, WINDOW_WIDTH, WINDOW_HEIGHT);
+    DepthBlur depth_blur = DepthBlur(WINDOW_WIDTH, WINDOW_HEIGHT, NEAR, FAR);
+    MotionBlur motion_blur = MotionBlur(WINDOW_WIDTH, WINDOW_HEIGHT, 5);
 
     // load and compile shaders and link program
     unsigned int vertexShader = compileShader("test_physics_mesh_render.vert", GL_VERTEX_SHADER);
@@ -156,6 +157,7 @@ main(int, char* argv[]) {
         glDrawArrays(GL_TRIANGLES, 0, plane.mVertices);
         // if (!above) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+        depth_blur.render();
         motion_blur.render();
 
         // swap buffers == show rendered content
