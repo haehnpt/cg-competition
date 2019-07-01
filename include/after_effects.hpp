@@ -19,7 +19,24 @@ private:
   int width;
   int height;
 public:
-  MotionBlur(unsigned int blur_size, int width, int height);
+  MotionBlur(int width, int height, unsigned int blur_size);
   ~MotionBlur();
+  void render();
+};
+
+class DepthBlur
+{
+private:
+  unsigned int shader;
+  unsigned int texture_loc;
+  unsigned int texture_vao;
+  unsigned int texture;
+  unsigned int depth_loc;
+  unsigned int depth;
+  int width;
+  int height;
+public:
+  DepthBlur(int width, int height, float near, float far);
+  ~DepthBlur();
   void render();
 };

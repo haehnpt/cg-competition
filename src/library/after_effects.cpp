@@ -1,13 +1,12 @@
 #include "after_effects.hpp"
 
-MotionBlur::MotionBlur(unsigned int blur_size, int width, int height)
+MotionBlur::MotionBlur(int width, int height, unsigned int blur_size)
 {
+  this->width  = width;
+  this->height = height;
   this->blur_size = blur_size;
 
-  this->shader = getShader("motion_blur.vert", "motion_blur.frag");
-
-  this->width = width;
-  this->height = height;
+  this->shader = getShader("after_effects/tex2d.vert", "after_effects/motion_blur.frag");
 
   int current_shader;
   glGetIntegerv(GL_CURRENT_PROGRAM, &current_shader);
@@ -78,6 +77,78 @@ void MotionBlur::render()
   glClearColor(current_clear_color[0], current_clear_color[1], current_clear_color[2], current_clear_color[3]);
   glBindTexture(GL_TEXTURE_2D, current_texture);
 }
+
+
+DepthBlur::DepthBlur(int width, int height, float near, float far)
+{
+  this->width  = width;
+  this->height = height;
+
+  this->shader = getShader("after_effects/tex2d.vert", "after_effects/depth_blur.frag");
+
+  int current_shader;
+  glGetIntegerv(GL_CURRENT_PROGRAM, &current_shader);
+  {
+    glUseProgram(this->shader);
+    this->texture_loc = glGetUniformLocation(this->shader, "tex");
+    this->depth_loc   = glGetUniformLocation(this->shader, "depth");
+    glUniform1f(glGetUniformLocation(this->shader, "near"), near);
+    glUniform1f(glGetUniformLocation(this->shader, "far"), far);
+
+    this->texture = genTexture(width, height);
+    this->depth   = genTexture(width, height);
+    this->texture_vao = genTextureVAO();
+  }
+  glUseProgram(current_shader);
+}
+
+DepthBlur::~DepthBlur()
+{
+}
+
+void DepthBlur::render()
+{
+  int current_texture;
+  int current_active_texture;
+  float current_clear_color[4];
+  int current_shader;
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, &current_texture);
+  glGetIntegerv(GL_ACTIVE_TEXTURE, &current_active_texture);
+  glGetFloatv(GL_COLOR_CLEAR_VALUE, &(current_clear_color[0]));
+  glGetIntegerv(GL_CURRENT_PROGRAM, &current_shader);
+  {
+    glBindTexture(GL_TEXTURE_2D, this->depth);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, 0, 0, this->width, this->height, 0);
+
+    glBindTexture(GL_TEXTURE_2D, this->texture);
+    glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, this->width, this->height);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glDisable(GL_DEPTH_TEST);
+
+    glUseProgram(this->shader);
+    glUniform1i(this->depth_loc, 0);
+    glUniform1i(this->texture_loc, 1);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, this->depth);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, this->texture);
+
+    glBindVertexArray(this->texture_vao);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*) 0);
+
+    glEnable(GL_DEPTH_TEST);
+  }
+  glUseProgram(current_shader);
+  glClearColor(current_clear_color[0], current_clear_color[1], current_clear_color[2], current_clear_color[3]);
+  glActiveTexture(current_active_texture);
+  glBindTexture(GL_TEXTURE_2D, current_texture);
+}
+
 
 unsigned int genTexture(int width, int height)
 {
