@@ -95,9 +95,9 @@ phySphere::step(float deltaT) {
 
     for (int i = 0; i < 3; i++) {
         // for TESTING: a hard-coded bounding box
-        if (x[i] - radius < -10 && v[i] < 0) {
+        if (x[i] < -10 && v[i] < 0) {
             v[i] = -1.0 * v[i];
-        } else if (x[i] + radius > 10 && v[i] > 0) {
+        } else if (x[i] > 10 && v[i] > 0) {
             v[i] = -1.0 * v[i];
         }
     }
@@ -124,6 +124,37 @@ phySphere::phySphere(glm::vec3 x,
     a.z = 0;
 
     geo = loadMesh("sphere.obj", false, color);
+    geo.transform = glm::translate(x)
+        * glm::scale(glm::vec3(radius));
+}
+
+void
+phySphere::setPosition(glm::vec3 pos) {
+    x = pos;
+
+    geo.transform = glm::translate(x)
+        * glm::scale(glm::vec3(radius));
+}
+
+void
+phySphere::moveToPlaneHeight() {
+    int index = plane->getTriangleAt(x);
+
+    // first vertex of the triangle
+    glm::vec3 v1(plane->vbo_data[index * 3 * 10 + 0],
+                 plane->vbo_data[index * 3 * 10 + 1],
+                 plane->vbo_data[index * 3 * 10 + 2]);
+
+    // normal of the triangle's plane
+    glm::vec3 norm(plane->vbo_data[index * 3 * 10 + 3 + 0],
+                   plane->vbo_data[index * 3 * 10 + 3 + 1],
+                   plane->vbo_data[index * 3 * 10 + 3 + 2]);
+
+    float d = glm::dot(v1, norm);
+
+    // x.y = 1.f;
+    x.y = (d - x.x * norm.x - x.z * norm.z) / norm.y;
+
     geo.transform = glm::translate(x)
         * glm::scale(glm::vec3(radius));
 }

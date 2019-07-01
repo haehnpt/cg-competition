@@ -7,6 +7,8 @@
 #include "mesh.hpp"
 #include "physics.hpp"
 
+#define TRACKER
+
 const int WINDOW_WIDTH =  800;
 const int WINDOW_HEIGHT = 800;
 const float FOV = 45.f;
@@ -43,6 +45,11 @@ main(int, char* argv[]) {
     phySphere sphere1(glm::vec3(-10.f, 0.f, -10.f),
                       glm::vec3(1.8f, 1.f, 0.2f),
                       0.3f, glm::vec4(1.0f, 0.2f, 0.2f, 1.f), &plane);
+#ifdef TRACKER
+    phySphere sphereTracker(glm::vec3(0.f, 0.f, 0.f),
+                            glm::vec3(0.f, 0.f, 0.f),
+                            0.3f, glm::vec4(0.2f, 0.2f, 0.8f, 1.f), &plane);
+#endif
 
     int model_mat_loc = glGetUniformLocation(shaderProgram, "model_mat");
     int view_mat_loc = glGetUniformLocation(shaderProgram, "view_mat");
@@ -54,6 +61,10 @@ main(int, char* argv[]) {
     int special_color_loc = glGetUniformLocation(shaderProgram, "special_color");
     glm::vec4 color_above = glm::vec4(1.f, 1.f, 0.0f, 1.f);
     glm::vec4 color_below = glm::vec4(0.f, 1.f, 1.0f, 1.f);
+
+    // to indicate the position of the sphere on the plane
+    int sphere_pos_loc = glGetUniformLocation(shaderProgram, "sphere_pos");
+
 
     // these hold the vertices of the triangle over which the sphere is
     int active_vert_1_loc = glGetUniformLocation(shaderProgram, "active_vert_1");
@@ -90,13 +101,21 @@ main(int, char* argv[]) {
         glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &view_matrix[0][0]);
         glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
 
-        bool above = sphere1.step(0.02);
+        bool above = sphere1.step(0.05);
         if (above) {
           glUniform4fv(special_color_loc, 1, &color_above[0]);
         } else {
           glUniform4fv(special_color_loc, 1, &color_below[0]);
         }
+        glUniform3fv(sphere_pos_loc, 1, &sphere1.x[0]);
 
+        // if (!above) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+#ifdef TRACKER
+        // set the tracker to the same position
+        sphereTracker.setPosition(sphere1.x);
+        sphereTracker.moveToPlaneHeight();
+#endif
 
         // This is for testing, will be moved inside the sphere code later
         int i = plane.getTriangleAt(sphere1.x);
@@ -118,6 +137,13 @@ main(int, char* argv[]) {
         sphere1.geo.bind();
         glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
 
+#ifdef TRACKER
+        // tracker on the plane
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphereTracker.geo.transform[0][0]);
+        sphereTracker.geo.bind();
+        glDrawElements(GL_TRIANGLES, sphereTracker.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+#endif
+
         // reset the model matrix before rendering the plane
         glm::mat4 m = glm::mat4(1.f);
         glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &m[0][0]);
@@ -125,6 +151,7 @@ main(int, char* argv[]) {
         plane.bind();
         // glUniform1i(use_special_color_loc, true);
         glDrawArrays(GL_TRIANGLES, 0, plane.mVertices);
+        // if (!above) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         // swap buffers == show rendered content
         glfwSwapBuffers(window);

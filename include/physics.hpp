@@ -28,6 +28,8 @@ struct phySphere {
 
     // calculates the new position, velocity, acceleration
     bool step(float deltaT);
+    void setPosition(glm::vec3 pos);
+    void moveToPlaneHeight();
 };
 
 
