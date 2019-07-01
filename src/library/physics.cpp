@@ -65,32 +65,97 @@ phyPlane::getTriangleAt(glm::vec3 pos) {
 bool
 phySphere::step(float deltaT) {
     // next position in the plane if there were no obstacles
-    // glm::vec3 newPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
-    // glm::vec3 deltaPos = newPos - x;
+    glm::vec3 newPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
+    glm::vec3 delta = newPos - x;
 
-    // if (lastTriangleIndex != plane->getTriangleAt(newPos)) {
+    // where does g(t) = x + delta * t leave the current triangle?
 
-    // } else {
-    //     // if plane->isAbove(newPos) {
+    int i = plane->getTriangleAt(x);
+    // vectors from x to each vertices
+    glm::vec3 v0(plane->vbo_data[i * 30 + 0] - x.x,
+                 plane->vbo_data[i * 30 + 1] - x.y,
+                 plane->vbo_data[i * 30 + 2] - x.z);
+    glm::vec3 v1(plane->vbo_data[i * 30 + 10 + 0] - x.x,
+                 plane->vbo_data[i * 30 + 10 + 1] - x.y,
+                 plane->vbo_data[i * 30 + 10 + 2] - x.z);
+    glm::vec3 v2(plane->vbo_data[i * 30 + 20 + 0] - x.x,
+                 plane->vbo_data[i * 30 + 20 + 1] - x.y,
+                 plane->vbo_data[i * 30 + 20 + 2] - x.z);
 
-    //     //     }
-    // };
+    if (i % 2 == 0) {
+        // x is in a top-left triangle, the order of the vertices in
+        // the vbo is:
+        //
+        //   0    2
+        //   +---+
+        //   |x /
+        //   | /
+        //   |/
+        //   +
+        //   1
 
-    // Fox each triangle along the way to xNext check if the sphere
-    // (center) hits it.
+        // TODO: Exit through a corner
+        if (glm::cross(v0, delta).y < 0
+            && glm::cross(delta, v2).y < 0) {
+            // Next exit: between top-left and top-right edge
+            std::cout << "Next exit: TOP\n";
+        } else if (glm::cross(v2, delta).y < 0
+                   && glm::cross(delta, v1).y < 0) {
+            // Next exit: between top-right and bottom-left edge
+            std::cout << "Next exit: RIGHT DIAGONAL\n";
+        } else if (glm::cross(v1, delta).y < 0
+                   && glm::cross(delta, v0).y < 0) {
+            // Next exit: between bottom-left and top-left edge
+            std::cout << "Next exit: LEFT\n";
+        }
+    } else {
+        // i % 2 == 1
+        // x is in a bottom-right triangle, the order of the vertices in
+        //       1
+        //       +
+        //      /|
+        //     / |
+        //    / x|
+        //   +---+
+        //   0    2
+        if (glm::cross(v0, delta).y > 0
+            && glm::cross(delta, v2).y > 0) {
+            // Next exit: between bottom-left and bottom-right edge
+            std::cout << "Next exit: BOTTOM\n";
+        } else if (glm::cross(v2, delta).y > 0
+                   && glm::cross(delta, v1).y > 0) {
+            // Next exit: between top right and bottom left edge
+            std::cout << "Next exit: RIGHT\n";
+        } else if (glm::cross(v1, delta).y > 0
+                   && glm::cross(delta, v0).y > 0) {
+            // Next exit: between bottom left and top left edge
+            std::cout << "Next exit: LEFT DIAGONAL\n";
+        }
+    }
 
-    // if (lastTriangleIndex != plane.getTriangleAt(xNext)) {
-    //     // sphere is over a new triangle now
+// if (lastTriangleIndex != plane->getTriangleAt(newPos)) {
 
-    // } else {
-    // sphere over the same triangle as last step
-    // check if the center is below the surface
-    // plane->getTriangleIndex(this);
-    // };
+// } else {
+//     // if plane->isAbove(newPos) {
+
+//     //     }
+// };
+
+// Fox each triangle along the way to xNext check if the sphere
+// (center) hits it.
+
+// if (lastTriangleIndex != plane.getTriangleAt(xNext)) {
+//     // sphere is over a new triangle now
+
+// } else {
+// sphere over the same triangle as last step
+// check if the center is below the surface
+// plane->getTriangleIndex(this);
+// };
 
 
     x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-    // update velocity
+// update velocity
     v = v + a * deltaT;
 
     for (int i = 0; i < 3; i++) {
@@ -102,7 +167,7 @@ phySphere::step(float deltaT) {
         }
     }
 
-    // plane->getTriangleIndex(this);
+// plane->getTriangleIndex(this);
 
     geo.transform = glm::translate(x)
         * glm::scale(glm::vec3(radius));
@@ -371,8 +436,8 @@ phyPlane::~phyPlane() {
 
 std::vector<int>
 phyPlane::getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd) {
-  // TODO
-  return std::vector<int>{(int)(xStart + zStart + xEnd + zEnd)};
+    // TODO
+    return std::vector<int>{(int)(xStart + zStart + xEnd + zEnd)};
 }
 
 bool
