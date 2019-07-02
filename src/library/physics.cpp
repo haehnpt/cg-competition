@@ -65,117 +65,37 @@ phyPlane::getTriangleAt(glm::vec3 pos) {
 bool
 phySphere::step(float deltaT) {
     // next position in the plane if there were no obstacles
-    glm::vec3 newPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
-    glm::vec3 delta = newPos - x;
+    glm::vec3 targetPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
+
+    int i = plane->getNextTriangle(x, targetPos - x);
+
+    if (i != lastTriangleIndex) {
+        std::cout << "next triangle: " << i << "\n";
+        lastTriangleIndex = i;
+    }
+    // int currentIndex = plane->getTriangleAt(x);
+    // int targetIndex = plane->getTriangleAt(targetPos);
+
+    // while (currentIndex != targetIndex) {
+    //     // the position where the sphere enters/leaves the next
+    //     // triangle
+    //     glm::vec3 enterPos;
+    //     glm::vec3 exitPos;
+
+    //     if (!isAbove(enterNextPos) && !isAbove(exitPos)) {
+    //         // passing over this triangle
+    //         currentIndex = getNextTriangle(currentIndex, phyDirection d);
+    //     } else {
+    //         // TODO: calculate intersection position and time of
+    //         // trajectory with the triangle. Based on this, calculate
+    //         // the new position.
+    //     }
+    // }
 
     // where does g(t) = x + delta * t leave the current triangle?
 
-    int i = plane->getTriangleAt(x);
-
-    phyDirection dir;
-
-    if (lastTriangleIndex != i) {
-        // when etering a new triangle, calculate and print the next
-        // index.
-
-        // vectors from x to each vertices
-        glm::vec3 v0(plane->vbo_data[i * 30 + 0] - x.x,
-                     plane->vbo_data[i * 30 + 1] - x.y,
-                     plane->vbo_data[i * 30 + 2] - x.z);
-        glm::vec3 v1(plane->vbo_data[i * 30 + 10 + 0] - x.x,
-                     plane->vbo_data[i * 30 + 10 + 1] - x.y,
-                     plane->vbo_data[i * 30 + 10 + 2] - x.z);
-        glm::vec3 v2(plane->vbo_data[i * 30 + 20 + 0] - x.x,
-                     plane->vbo_data[i * 30 + 20 + 1] - x.y,
-                     plane->vbo_data[i * 30 + 20 + 2] - x.z);
-
-        int nextIndex;
-
-        if (i % 2 == 0) {
-            // x is in a top-left triangle, the order of the vertices in
-            // the vbo is:
-            //
-            //   0    2
-            //   +---+
-            //   |x /
-            //   | /
-            //   |/
-            //   +
-            //   1
-
-            // TODO: Exit through a corner
-            if (glm::cross(v0, delta).y < 0
-                && glm::cross(delta, v2).y < 0) {
-                // Next exit: between top-left and top-right edge
-                std::cout << "Next exit: TOP";
-                dir = up;
-            } else if (glm::cross(v2, delta).y < 0
-                       && glm::cross(delta, v1).y < 0) {
-                // Next exit: between top-right and bottom-left edge
-                std::cout << "Next exit: RIGHT DIAGONAL";
-                dir = right;
-            } else if (glm::cross(v1, delta).y < 0
-                       && glm::cross(delta, v0).y < 0) {
-                // Next exit: between bottom-left and top-left edge
-                std::cout << "Next exit: LEFT";
-                dir = left;
-            }
-        } else {
-            // x is in a bottom-right triangle, the order of the vertices
-            // in the vbo is:
-            //
-            //       1
-            //       +
-            //      /|
-            //     / |
-            //    / x|
-            //   +---+
-            //   0    2
-
-            if (glm::cross(v0, delta).y > 0
-                && glm::cross(delta, v2).y > 0) {
-                // Next exit: between bottom-left and bottom-right edge
-                std::cout << "Next exit: BOTTOM";
-            } else if (glm::cross(v2, delta).y > 0
-                       && glm::cross(delta, v1).y > 0) {
-                // Next exit: between top right and bottom left edge
-                std::cout << "Next exit: RIGHT";
-                dir = right;
-            } else if (glm::cross(v1, delta).y > 0
-                       && glm::cross(delta, v0).y > 0) {
-                // Next exit: between bottom left and top left edge
-                std::cout << "Next exit: LEFT DIAGONAL";
-                dir = left;
-            }
-        }
-
-        std::cout << " to triangle " << plane->getNextTriangle(i, dir) << "\n";
-        lastTriangleIndex = i;
-    }
-
-// if (lastTriangleIndex != plane->getTriangleAt(newPos)) {
-
-// } else {
-//     // if plane->isAbove(newPos) {
-
-//     //     }
-// };
-
-// Fox each triangle along the way to xNext check if the sphere
-// (center) hits it.
-
-// if (lastTriangleIndex != plane.getTriangleAt(xNext)) {
-//     // sphere is over a new triangle now
-
-// } else {
-// sphere over the same triangle as last step
-// check if the center is below the surface
-// plane->getTriangleIndex(this);
-// };
-
-
     x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-// update velocity
+    // update velocity
     v = v + a * deltaT;
 
     for (int i = 0; i < 3; i++) {
@@ -465,6 +385,77 @@ phyPlane::getNextTriangle(int index, phyDirection d) {
     case up: return index - 2 * (xNumPoints - 1); break;
     default: return -1;
     }
+}
+
+int
+phyPlane::getNextTriangle(glm::vec3 x, glm::vec3 direction) {
+    int i = getTriangleAt(x);
+    // vectors from x to each vertices
+    glm::vec3 v0(vbo_data[i * 30 + 0] - x.x,
+                 vbo_data[i * 30 + 1] - x.y,
+                 vbo_data[i * 30 + 2] - x.z);
+    glm::vec3 v1(vbo_data[i * 30 + 10 + 0] - x.x,
+                 vbo_data[i * 30 + 10 + 1] - x.y,
+                 vbo_data[i * 30 + 10 + 2] - x.z);
+    glm::vec3 v2(vbo_data[i * 30 + 20 + 0] - x.x,
+                 vbo_data[i * 30 + 20 + 1] - x.y,
+                 vbo_data[i * 30 + 20 + 2] - x.z);
+
+    int nextIndex;
+    phyDirection dir;
+    if (i % 2 == 0) {
+        // x is in a top-left triangle, the order of the vertices in
+        // the vbo is:
+        //
+        //   0    2
+        //   +---+
+        //   |x /
+        //   | /
+        //   |/
+        //   +
+        //   1
+
+        // TODO: Exit through a corner
+        if (glm::cross(v0, direction).y < 0
+            && glm::cross(direction, v2).y < 0) {
+            // Next exit: between top-left and top-right edge
+            dir = up;
+        } else if (glm::cross(v2, direction).y < 0
+                   && glm::cross(direction, v1).y < 0) {
+            // Next exit: between top-right and bottom-left edge
+            dir = right;
+        } else if (glm::cross(v1, direction).y < 0
+                   && glm::cross(direction, v0).y < 0) {
+            // Next exit: between bottom-left and top-left edge
+            dir = left;
+        }
+    } else {
+        // x is in a bottom-right triangle, the order of the vertices
+        // in the vbo is:
+        //
+        //       1
+        //       +
+        //      /|
+        //     / |
+        //    / x|
+        //   +---+
+        //   0    2
+
+        if (glm::cross(v0, direction).y > 0
+            && glm::cross(direction, v2).y > 0) {
+            // Next exit: between bottom-left and bottom-right edge
+        } else if (glm::cross(v2, direction).y > 0
+                   && glm::cross(direction, v1).y > 0) {
+            // Next exit: between top right and bottom left edge
+            dir = right;
+        } else if (glm::cross(v1, direction).y > 0
+                   && glm::cross(direction, v0).y > 0) {
+            // Next exit: between bottom left and top left edge
+            dir = left;
+        }
+    }
+
+    return getNextTriangle(i, dir);
 }
 
 std::vector<int>

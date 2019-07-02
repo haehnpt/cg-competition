@@ -68,7 +68,8 @@ struct phyPlane {
     std::vector<int> getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd);
     bool isAbove(glm::vec3 x);
 
-    int getNextTriangle(int index, phyDirection d);
+    int getNextTriangle(int index, phyDirection direction);
+    int getNextTriangle(glm::vec3 position, glm::vec3 direction);
 
     void bind();
     void release();
