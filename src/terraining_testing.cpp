@@ -11,7 +11,7 @@
 *
 */
 
-#define DEBUG false
+#define DEBUG true
 #define x64 true
 
 const int WINDOW_WIDTH =  800;
@@ -21,7 +21,7 @@ const float NEAR_VALUE = 0.1f;
 const float FAR_VALUE = 100.f;
 
 const float TERRAIN_SIZE = 8.0;
-const int FRAMES = 180;
+const int FRAMES = 360;
 const int RESOLUTION = (DEBUG) ? 1000 : (x64 ? 2000 : 2000);
 
 const std::string GRASS = (DEBUG) ? "grass.jpg" : "grass_large.jpg";
@@ -44,6 +44,9 @@ main(int, char* argv[]) {
     glfwSetFramebufferSizeCallback(window, resizeCallback);
 
     camera cam(window);
+	cam.set_phi(0.25);
+	cam.set_theta(-0.15);
+	cam.set_distance(10.0);
 
     // load and compile shaders and link program
     unsigned int vertexShader = compileShader("terrain_shader.vert", GL_VERTEX_SHADER);
@@ -116,8 +119,11 @@ main(int, char* argv[]) {
 		// Render terrain
 		terr.render(model_mat_loc);
 
-		// Light motion
-		light_phi = (light_phi += 0.01) > 2 * M_PI ? 0.0 : light_phi;
+		// Light motion (DO NOT)
+		//light_phi = (light_phi += 0.01) > 2 * M_PI ? 0.0 : light_phi;
+
+		// Rotate camera
+		cam.rotate();
 
         // render UI
         glfwSwapBuffers(window);
