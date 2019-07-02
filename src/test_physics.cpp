@@ -42,13 +42,13 @@ main(int, char* argv[]) {
 
     phyPlane plane(-10.f, 10.f, -10.f, 10.f);
 
-    phySphere sphere1(glm::vec3(-10.f, 0.f, -10.f),
+    phySphere sphere1(glm::vec3(-10.f, 4.f, -10.f),
                       glm::vec3(1.8f, 1.f, 0.2f),
                       0.3f, glm::vec4(1.0f, 0.2f, 0.2f, 1.f), &plane);
-    phySphere sphere2(glm::vec3(-5.f, 0.f, -8.f),
-                      glm::vec3(1.2f, 0.5f, 0.2f),
+    phySphere sphere2(glm::vec3(-5.f, 2.f, -8.f),
+                      glm::vec3(4.f, -8.f, -4.f),
                       0.3f, glm::vec4(0.2f, 1.0f, 0.2f, 1.f), &plane);
-    phySphere sphere3(glm::vec3(5.f, -2.f, 3.f),
+    phySphere sphere3(glm::vec3(5.f, 6.f, 3.f),
                       glm::vec3(0.3f, 0.5f, 0.2f),
                       0.3f, glm::vec4(0.2f, 0.2f, 1.0f, 1.f), &plane);
 
@@ -108,9 +108,9 @@ main(int, char* argv[]) {
         glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &view_matrix[0][0]);
         glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
 
-        sphere2.step(0.05);
-        sphere3.step(0.05);
-        bool above = sphere1.step(0.05);
+        sphere2.step(0.03);
+        sphere3.step(0.03);
+        bool above = sphere1.step(0.03);
         if (above) {
           glUniform4fv(special_color_loc, 1, &color_above[0]);
         } else {

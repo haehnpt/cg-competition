@@ -17,7 +17,7 @@ phySphere::phySphere(glm::vec3 x,
     plane{plane}
 {
     a.x = 0;
-    a.y = -1;
+    a.y = -10;
     a.z = 0;
 
     geo = loadMesh("sphere.obj", false, color);
@@ -78,6 +78,8 @@ phySphere::step(float deltaT) {
         x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
         // update velocity
         v = v + a * deltaT;
+        // lost energy when bouncing
+        v *= 0.98;
     }
 
     // hard-coded bounding box
@@ -90,6 +92,9 @@ phySphere::step(float deltaT) {
         }
     }
 
+    // drag
+    // a = glm::vec3(0, -10.f, 0.f);
+    // a = a - 0.01f * (float)pow(glm::length(v), 2.f) * glm::normalize(v);
 
 
 // plane->getTriangleIndex(this);
