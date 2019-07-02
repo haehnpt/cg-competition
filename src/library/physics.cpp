@@ -201,7 +201,6 @@ phySphere::phySphere(glm::vec3 x,
     geo = loadMesh("sphere.obj", false, color);
     geo.transform = glm::translate(x)
         * glm::scale(glm::vec3(radius));
-    lastTriangleIndex = plane->getTriangleAt(x);
 }
 
 void

@@ -15,7 +15,7 @@ struct phySphere {
 
     // index of the triangle over which the sphere was at the last
     // tick
-    int lastTriangleIndex;
+    int lastTriangleIndex = -1;
     // float xMax[3];
     // float aNext[3];
 
