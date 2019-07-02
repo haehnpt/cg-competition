@@ -17,7 +17,7 @@ phySphere::phySphere(glm::vec3 x,
     plane{plane}
 {
     a.x = 0;
-    a.y = -2;
+    a.y = -1;
     a.z = 0;
 
     geo = loadMesh("sphere.obj", false, color);
@@ -29,7 +29,7 @@ phySphere::~phySphere() {}
 
 bool
 phySphere::step(float deltaT) {
-    // next position in the plane if there were no obstacles
+    // next position if there were no obstacles
     glm::vec3 targetPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
 
     int i = plane->getNextTriangle(x, targetPos - x);
@@ -38,9 +38,12 @@ phySphere::step(float deltaT) {
         std::cout << "next triangle: " << i << "\n";
         lastTriangleIndex = i;
     }
-    // int currentIndex = plane->getTriangleAt(x);
-    // int targetIndex = plane->getTriangleAt(targetPos);
 
+    int currentIndex = plane->getTriangleAt(x);
+    int targetIndex = plane->getTriangleAt(targetPos);
+
+    // TODO: iterate over all triangles on the way to targetPos:
+    //
     // while (currentIndex != targetIndex) {
     //     // the position where the sphere enters/leaves the next
     //     // triangle
@@ -57,12 +60,21 @@ phySphere::step(float deltaT) {
     //     }
     // }
 
-    // where does g(t) = x + delta * t leave the current triangle?
+    // For now we simply assume currentIndex == targetIndex. This
+    // holds most of the time unless the sphere enters another
+    // triangle AND dives below the plane in one step.
+    if (plane->isAbove(targetPos)) {
+        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+        // update velocity
+        v = v + a * deltaT;
+    } else {
+        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+        v.y = -v.y;
+        // update velocity
+        v = v + a * deltaT;
+    }
 
-    x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-    // update velocity
-    v = v + a * deltaT;
-
+    // hard-coded bounding box
     for (int i = 0; i < 3; i++) {
         // for TESTING: a hard-coded bounding box
         if (x[i] < -10 && v[i] < 0) {
@@ -71,6 +83,8 @@ phySphere::step(float deltaT) {
             v[i] = -1.0 * v[i];
         }
     }
+
+
 
 // plane->getTriangleIndex(this);
 

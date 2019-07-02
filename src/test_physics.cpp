@@ -7,7 +7,7 @@
 #include "mesh.hpp"
 #include "physics.hpp"
 
-#define TRACKER
+// #define TRACKER
 
 const int WINDOW_WIDTH =  800;
 const int WINDOW_HEIGHT = 800;
@@ -101,7 +101,7 @@ main(int, char* argv[]) {
         glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &view_matrix[0][0]);
         glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
 
-        bool above = sphere1.step(0.01);
+        bool above = sphere1.step(0.05);
         if (above) {
           glUniform4fv(special_color_loc, 1, &color_above[0]);
         } else {
