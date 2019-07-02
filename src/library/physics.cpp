@@ -6,61 +6,26 @@
 
 // #include <buffer.hpp>
 
-void
-phyPlane::bind() {
-    glBindVertexArray(vao);
+
+phySphere::phySphere(glm::vec3 x,
+                     glm::vec3 v,
+                     float radius,
+                     glm::vec4 color, phyPlane *plane) :
+    x{x},
+    v{v},
+    radius{radius},
+    plane{plane}
+{
+    a.x = 0;
+    a.y = -2;
+    a.z = 0;
+
+    geo = loadMesh("sphere.obj", false, color);
+    geo.transform = glm::translate(x)
+        * glm::scale(glm::vec3(radius));
 }
 
-void
-phyPlane::release() {
-    glBindVertexArray(0);
-}
-
-void
-phyPlane::destroy() {
-    release();
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &vbo);
-}
-
-// For the start we assume the sphere has a radius of zero!
-int
-phyPlane::getTriangleAt(glm::vec3 pos) {
-    // printf("isCutting with s coordinates: %02.2f %02.2f %02.2f\n",
-    //        s->x[0], s->x[1], s->x[2]);
-
-    // position of the sphere's center relative to the plane
-    float xInPlane = pos.x - xStart;
-    float zInPlane = pos.z - zStart;
-
-    // indices of the rectangle containing the sphere's center
-    int xIndexRect = floor(xInPlane / xTileWidth);
-    int zIndexRect = floor(zInPlane / zTileWidth);
-
-    // x and z positions relative to the top (z-axis pointing
-    // downwards!) left corner of the rectangle
-    float xInRect = fmod(xInPlane, xTileWidth);
-    float zInRect = fmod(zInPlane, zTileWidth);
-
-    // top-right (-1) or bottom left (-0) triangle?
-    int oldTriangleIndex = triangleIndex;
-
-    // two triangles per rectangle
-    triangleIndex = 2 * (zIndexRect * (xNumPoints - 1) + xIndexRect);
-    // if the sphere is in the 'upper'-left triangle it's one less
-    if (zInRect > zTileWidth - xInRect * zTileWidth / xTileWidth) {
-        triangleIndex++;
-    }
-
-    if (triangleIndex != oldTriangleIndex) {
-        std::cout << "zIndexRect: " << zIndexRect
-                  << ", xIndexRect: " << xIndexRect
-                  << ", triangleIndex: " << triangleIndex << "\n" << std::flush;
-
-    }
-
-    return triangleIndex;
-}
+phySphere::~phySphere() {}
 
 bool
 phySphere::step(float deltaT) {
@@ -113,24 +78,6 @@ phySphere::step(float deltaT) {
         * glm::scale(glm::vec3(radius));
 
     return plane->isAbove(x);
-}
-
-phySphere::phySphere(glm::vec3 x,
-                     glm::vec3 v,
-                     float radius,
-                     glm::vec4 color, phyPlane *plane) :
-    x{x},
-    v{v},
-    radius{radius},
-    plane{plane}
-{
-    a.x = 0;
-    a.y = -2;
-    a.z = 0;
-
-    geo = loadMesh("sphere.obj", false, color);
-    geo.transform = glm::translate(x)
-        * glm::scale(glm::vec3(radius));
 }
 
 void
@@ -374,6 +321,61 @@ phyPlane::~phyPlane() {
     delete[] vbo_data;
 }
 
+void
+phyPlane::bind() {
+    glBindVertexArray(vao);
+}
+
+void
+phyPlane::release() {
+    glBindVertexArray(0);
+}
+
+void
+phyPlane::destroy() {
+    release();
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
+}
+
+// For the start we assume the sphere has a radius of zero!
+int
+phyPlane::getTriangleAt(glm::vec3 pos) {
+    // printf("isCutting with s coordinates: %02.2f %02.2f %02.2f\n",
+    //        s->x[0], s->x[1], s->x[2]);
+
+    // position of the sphere's center relative to the plane
+    float xInPlane = pos.x - xStart;
+    float zInPlane = pos.z - zStart;
+
+    // indices of the rectangle containing the sphere's center
+    int xIndexRect = floor(xInPlane / xTileWidth);
+    int zIndexRect = floor(zInPlane / zTileWidth);
+
+    // x and z positions relative to the top (z-axis pointing
+    // downwards!) left corner of the rectangle
+    float xInRect = fmod(xInPlane, xTileWidth);
+    float zInRect = fmod(zInPlane, zTileWidth);
+
+    // top-right (-1) or bottom left (-0) triangle?
+    int oldTriangleIndex = triangleIndex;
+
+    // two triangles per rectangle
+    triangleIndex = 2 * (zIndexRect * (xNumPoints - 1) + xIndexRect);
+    // if the sphere is in the 'upper'-left triangle it's one less
+    if (zInRect > zTileWidth - xInRect * zTileWidth / xTileWidth) {
+        triangleIndex++;
+    }
+
+    if (triangleIndex != oldTriangleIndex) {
+        std::cout << "zIndexRect: " << zIndexRect
+                  << ", xIndexRect: " << xIndexRect
+                  << ", triangleIndex: " << triangleIndex << "\n" << std::flush;
+
+    }
+
+    return triangleIndex;
+}
 
 // Return (the index of) the next triangle in the phyDirection d
 int

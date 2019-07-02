@@ -34,6 +34,7 @@ struct phySphere {
               glm::vec3 v,
               float radius, glm::vec4 color,
               struct phyPlane *plane);
+    ~phySphere();
 
     // calculates the new position, velocity, acceleration
     bool step(float deltaT);
