@@ -9,13 +9,16 @@
 
 // WARNING ABOUT NON-DETERMINISM
 //
-// Notice that floating point operations in the same program can yield
-// different results each time the program runs. This gets obvious
-// when running the test_physics program, where the simulation can
-// take different paths depending slight differences in the floating
+// Notice that a floating point operation in a program can yield
+// different results each time the program runs. This may become
+// obvious when running the test_physics program, where the simulation
+// can take different paths due to different results of the floating
 // point operations which accumulate over time. As a result, when
 // running two instances of the same program side by side, they start
-// out identical can can differ more and more over time.
+// out identical might differ more and more over time. This is *not*
+// caused by using operations involving the system time to measure the
+// passed time; the test_physics program simply advances the time
+// value used for calculations by a fixed value each frame.
 //
 // See https://isocpp.org/wiki/faq/newbie#floating-point-arith2 for
 // more information.
