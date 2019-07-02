@@ -72,6 +72,8 @@ struct phyPlane {
     int getNextTriangle(int index, phyDirection direction);
     int getNextTriangle(glm::vec3 position, glm::vec3 direction);
 
+    glm::vec3 reflectAt(glm::vec3 pos, glm::vec3 v);
+
     void bind();
     void release();
     void destroy();

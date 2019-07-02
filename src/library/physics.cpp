@@ -5,7 +5,7 @@
 #include <glm/gtx/transform.hpp>
 
 // #include <buffer.hpp>
-
+// #define PHYSICS_DEBUG
 
 phySphere::phySphere(glm::vec3 x,
                      glm::vec3 v,
@@ -35,7 +35,9 @@ phySphere::step(float deltaT) {
     int i = plane->getNextTriangle(x, targetPos - x);
 
     if (i != lastTriangleIndex) {
+#ifdef PHYSICS_DEBUG
         std::cout << "next triangle: " << i << "\n";
+#endif
         lastTriangleIndex = i;
     }
 
@@ -70,7 +72,9 @@ phySphere::step(float deltaT) {
     } else {
         // TODO: Calculate new position and direction based on the
         // normal of the triangle.
-        v.y = -v.y;
+        // Super hacky ducktape stuff follows...
+        // TODO: x is not the position of the first contact!
+        v = plane->reflectAt(x, v);
         x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
         // update velocity
         v = v + a * deltaT;
@@ -383,12 +387,14 @@ phyPlane::getTriangleAt(glm::vec3 pos) {
         triangleIndex++;
     }
 
+#ifdef PHYSICS_DEBUG
     if (triangleIndex != oldTriangleIndex) {
         std::cout << "zIndexRect: " << zIndexRect
                   << ", xIndexRect: " << xIndexRect
                   << ", triangleIndex: " << triangleIndex << "\n" << std::flush;
 
     }
+#endif // PHYSICS_DEBUG
 
     return triangleIndex;
 }
@@ -500,4 +506,17 @@ phyPlane::isAbove(glm::vec3 x) {
     // float d = -glm::dot(v1, norm);
 
     return glm::dot(x, norm) > glm::dot(v1, norm);
+}
+
+// reflect the vector @v at the normal of the triangle at position
+// @pos
+glm::vec3
+phyPlane::reflectAt(glm::vec3 pos, glm::vec3 v) {
+    int index = getTriangleAt(pos);
+
+    // normal of the triangle's plane
+    glm::vec3 norm(vbo_data[index * 3 * 10 + 3 + 0],
+                   vbo_data[index * 3 * 10 + 3 + 1],
+                   vbo_data[index * 3 * 10 + 3 + 2]);
+    return v - 2*glm::dot(norm, v) * norm;
 }

@@ -45,6 +45,13 @@ main(int, char* argv[]) {
     phySphere sphere1(glm::vec3(-10.f, 0.f, -10.f),
                       glm::vec3(1.8f, 1.f, 0.2f),
                       0.3f, glm::vec4(1.0f, 0.2f, 0.2f, 1.f), &plane);
+    phySphere sphere2(glm::vec3(-5.f, 0.f, -8.f),
+                      glm::vec3(1.2f, 0.5f, 0.2f),
+                      0.3f, glm::vec4(0.2f, 1.0f, 0.2f, 1.f), &plane);
+    phySphere sphere3(glm::vec3(5.f, -2.f, 3.f),
+                      glm::vec3(0.3f, 0.5f, 0.2f),
+                      0.3f, glm::vec4(0.2f, 0.2f, 1.0f, 1.f), &plane);
+
 #ifdef TRACKER
     phySphere sphereTracker(glm::vec3(0.f, 0.f, 0.f),
                             glm::vec3(0.f, 0.f, 0.f),
@@ -101,6 +108,8 @@ main(int, char* argv[]) {
         glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &view_matrix[0][0]);
         glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
 
+        sphere2.step(0.05);
+        sphere3.step(0.05);
         bool above = sphere1.step(0.05);
         if (above) {
           glUniform4fv(special_color_loc, 1, &color_above[0]);
@@ -135,6 +144,14 @@ main(int, char* argv[]) {
 
         glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere1.geo.transform[0][0]);
         sphere1.geo.bind();
+        glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere2.geo.transform[0][0]);
+        sphere2.geo.bind();
+        glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere3.geo.transform[0][0]);
+        sphere3.geo.bind();
         glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
 
 #ifdef TRACKER
