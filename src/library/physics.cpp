@@ -72,6 +72,8 @@ phySphere::step(float deltaT) {
 
     int i = plane->getTriangleAt(x);
 
+    phyDirection dir;
+
     if (lastTriangleIndex != i) {
         // when etering a new triangle, calculate and print the next
         // index.
@@ -86,6 +88,8 @@ phySphere::step(float deltaT) {
         glm::vec3 v2(plane->vbo_data[i * 30 + 20 + 0] - x.x,
                      plane->vbo_data[i * 30 + 20 + 1] - x.y,
                      plane->vbo_data[i * 30 + 20 + 2] - x.z);
+
+        int nextIndex;
 
         if (i % 2 == 0) {
             // x is in a top-left triangle, the order of the vertices in
@@ -103,15 +107,18 @@ phySphere::step(float deltaT) {
             if (glm::cross(v0, delta).y < 0
                 && glm::cross(delta, v2).y < 0) {
                 // Next exit: between top-left and top-right edge
-                std::cout << "Next exit: TOP\n";
+                std::cout << "Next exit: TOP";
+                dir = up;
             } else if (glm::cross(v2, delta).y < 0
                        && glm::cross(delta, v1).y < 0) {
                 // Next exit: between top-right and bottom-left edge
-                std::cout << "Next exit: RIGHT DIAGONAL\n";
+                std::cout << "Next exit: RIGHT DIAGONAL";
+                dir = right;
             } else if (glm::cross(v1, delta).y < 0
                        && glm::cross(delta, v0).y < 0) {
                 // Next exit: between bottom-left and top-left edge
-                std::cout << "Next exit: LEFT\n";
+                std::cout << "Next exit: LEFT";
+                dir = left;
             }
         } else {
             // x is in a bottom-right triangle, the order of the vertices
@@ -128,18 +135,21 @@ phySphere::step(float deltaT) {
             if (glm::cross(v0, delta).y > 0
                 && glm::cross(delta, v2).y > 0) {
                 // Next exit: between bottom-left and bottom-right edge
-                std::cout << "Next exit: BOTTOM\n";
+                std::cout << "Next exit: BOTTOM";
             } else if (glm::cross(v2, delta).y > 0
                        && glm::cross(delta, v1).y > 0) {
                 // Next exit: between top right and bottom left edge
-                std::cout << "Next exit: RIGHT\n";
+                std::cout << "Next exit: RIGHT";
+                dir = right;
             } else if (glm::cross(v1, delta).y > 0
                        && glm::cross(delta, v0).y > 0) {
                 // Next exit: between bottom left and top left edge
-                std::cout << "Next exit: LEFT DIAGONAL\n";
+                std::cout << "Next exit: LEFT DIAGONAL";
+                dir = left;
             }
         }
 
+        std::cout << " to triangle " << plane->getNextTriangle(i, dir) << "\n";
         lastTriangleIndex = i;
     }
 
@@ -442,6 +452,19 @@ phyPlane::phyPlane(float xStart,
 
 phyPlane::~phyPlane() {
     delete[] vbo_data;
+}
+
+
+// Return (the index of) the next triangle in the phyDirection d
+int
+phyPlane::getNextTriangle(int index, phyDirection d) {
+    switch(d) {
+    case right: return index + 1; break;
+    case left: return index - 1; break;
+    case down: return index + 2 * (xNumPoints - 1); break;
+    case up: return index - 2 * (xNumPoints - 1); break;
+    default: return -1;
+    }
 }
 
 std::vector<int>

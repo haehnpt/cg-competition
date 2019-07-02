@@ -2,6 +2,15 @@
 
 #include <mesh.hpp>
 
+// 'direction' in the plane
+enum phyDirection
+  {
+   right,
+   up,
+   left,
+   down,
+  };
+
 struct phySphere {
     // holds the mesh, etc.
     geometry geo;
@@ -58,6 +67,8 @@ struct phyPlane {
     int getTriangleAt(glm::vec3 x);
     std::vector<int> getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd);
     bool isAbove(glm::vec3 x);
+
+    int getNextTriangle(int index, phyDirection d);
 
     void bind();
     void release();
