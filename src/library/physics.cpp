@@ -211,7 +211,7 @@ phyPlane::phyPlane(float xStart,
     std::cout << "heightMap dimension: " << zNumPoints << "x" << xNumPoints << "\n";
     std::cout << "deltaX = " << deltaX << ", deltaZ  = " << deltaZ << "\n";
     std::cout << "mVertices = " << mVertices << "\n";
-    std::cout << "sizeof(vbo_data) = " << sizeof(vbo_data) << "\n";
+    std::cout << "vbo_data size: " << mVertices * 10 * sizeof(float) / 1000.f << "K\n";
 
     // This for-loop loops over the squares between the data
     // points. (x,z) represents the upper-left vertex of the current
