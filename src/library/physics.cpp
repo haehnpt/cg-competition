@@ -141,15 +141,6 @@ phyPlane::phyPlane(float xStart,
     zStart{zStart},
     zEnd{zEnd}
 {
-    // This will later come from Patrick's generted data
-    // float heightMap[5][5] {
-    //   {0.05f, 0.f, 0.f, 0.05f, 0.f},
-    //   {0.f, 0.f, 0.f, 0.05f, 0.f},
-    //   {0.05f, 0.f, 0.f, 0.05f, 0.05f},
-    //   {0.05f, 0.f, 0.f, 0.f, 0.f},
-    //   {0.05f, 0.f, 0.05f, 0.05f, 0.05f}
-    // };
-
     // some friendly terrain for testing
     float heightMap[6][5]
     {
@@ -161,18 +152,13 @@ phyPlane::phyPlane(float xStart,
         {-0.1f, -0.0f, -0.1f, -0.2f, -0.1f}
     };
 
-    for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < 5; j++) {
+    // move the map down for the camera (not using transformations to
+    // keep real vertex posistions for collision detection)
+    for (int i = 0; i < sizeof(heightMap) / sizeof(heightMap[0]); i++) {
+      for (int j = 0; j < sizeof(heightMap[0]) / sizeof(heightMap[0][0]); j++) {
             heightMap[i][j] -= 4.f;
         }
     }
-
-    // float heightMap[4][3] {
-    //     {0.f, 0.f, 0.f},
-    //     {0.f, 0.f, 0.f},
-    //     {0.f, 0.f, 0.f},
-    //     {0.f, 0.f, 0.f}
-    // };
 
     zNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
     xNumPoints = sizeof(heightMap[0]) / sizeof(heightMap[0][0]);
