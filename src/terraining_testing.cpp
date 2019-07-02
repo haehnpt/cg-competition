@@ -14,6 +14,7 @@
 
 #define DEBUG true
 #define x64 true
+//#define RENDER_VIDEO
 
 const int WINDOW_WIDTH =  1920;
 const int WINDOW_HEIGHT = 1080;
@@ -95,7 +96,9 @@ main(int, char* argv[]) {
 		SNOW);
 
 	// "ffmpeg" command and preparation
+	#ifdef RENDER_VIDEO
 	ffmpeg_wrapper fw(WINDOW_WIDTH, WINDOW_HEIGHT, FRAMES * 3);
+	#endif
 
     // rendering loop
 	while (glfwWindowShouldClose(window) == false)
@@ -128,16 +131,20 @@ main(int, char* argv[]) {
 		cam.rotate();
 
 		// Before swapping, read the pixels and feed them to "ffmpeg"
+		#ifdef RENDER_VIDEO
 		fw.save_frame();
+		#endif
 
         // render UI
         glfwSwapBuffers(window);
 
 		// Check for stop
+		#ifdef RENDER_VIDEO
 		if (fw.is_finished())
 		{
 			break;
 		}
+		#endif
     }
 
     glfwTerminate();
