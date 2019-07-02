@@ -3,6 +3,7 @@
 #include "mesh.hpp"
 #include "camera.hpp"
 #include "terrain.hpp"
+#include "ffmpeg_wrapper.hpp"
 #include <string>
 
 /*
@@ -14,8 +15,8 @@
 #define DEBUG true
 #define x64 true
 
-const int WINDOW_WIDTH =  800;
-const int WINDOW_HEIGHT = 800;
+const int WINDOW_WIDTH =  1920;
+const int WINDOW_HEIGHT = 1080;
 const float FOV = 45.f;
 const float NEAR_VALUE = 0.1f;
 const float FAR_VALUE = 100.f;
@@ -93,28 +94,42 @@ main(int, char* argv[]) {
 		GRASS,
 		SNOW);
 
+	// "ffmpeg" command and preparation
+	ffmpeg_wrapper fw(WINDOW_WIDTH, WINDOW_HEIGHT, FRAMES * 3);
+	/*
+	int width = WINDOW_WIDTH;// -100;
+	int height = WINDOW_HEIGHT;// -100;
+	std::string cmd = std::string("\"") + FFMPEG_ROOT + std::string("\\ffmpeg.exe\" -r 60 -f rawvideo -pix_fmt rgba -s " + std::to_string(width) + "x" + std::to_string(height) + " -i - "
+		"-threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip ") + FFMPEG_ROOT + std::string("\\Terrain_Rising.mp4");// +std::string("\"") + FFMPEG_ROOT + std::string("\\Animation_PH_SK_VS.mp4\"");
+	FILE
+	* ffmpeg = _popen(cmd.c_str(), "wb");
+	*/
+
     // rendering loop
-    while (glfwWindowShouldClose(window) == false) {
-        glfwPollEvents();
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	int frames = 1200;
+	int frame = 0;
+	while (glfwWindowShouldClose(window) == false)
+	{
+		glfwPollEvents();
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 view_matrix = cam.view_matrix();
-        glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &view_matrix[0][0]);
-        glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
+		glm::mat4 view_matrix = cam.view_matrix();
+		glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &view_matrix[0][0]);
+		glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
 
-        glm::vec3 light_dir(std::cos(light_phi) * std::sin(light_theta),
-                            std::cos(light_theta),
-                            std::sin(light_phi) * std::sin(light_theta));
-        glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
+		glm::vec3 light_dir(std::cos(light_phi) * std::sin(light_theta),
+			std::cos(light_theta),
+			std::sin(light_phi) * std::sin(light_theta));
+		glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
 
-        glUniform1i(use_oren_nayar_loc, use_oren_nayar);
-        glUniform1f(roughness_loc, roughness);
+		glUniform1i(use_oren_nayar_loc, use_oren_nayar);
+		glUniform1f(roughness_loc, roughness);
 		// Uniform albedo
 		glUniform1f(albedo_loc, albedo);
-        glUniform1f(ref_index_loc, refraction_index);
-        glUniform4f(diffuse_loc, diffuse_color.x, diffuse_color.y, diffuse_color.z, diffuse_color.w);
-        glUniform4f(specular_loc, specular_color.x, specular_color.y, specular_color.z, specular_color.w);
+		glUniform1f(ref_index_loc, refraction_index);
+		glUniform4f(diffuse_loc, diffuse_color.x, diffuse_color.y, diffuse_color.z, diffuse_color.w);
+		glUniform4f(specular_loc, specular_color.x, specular_color.y, specular_color.z, specular_color.w);
 
 		// Render terrain
 		terr.render(model_mat_loc);
@@ -125,8 +140,24 @@ main(int, char* argv[]) {
 		// Rotate camera
 		cam.rotate();
 
+		// Before swapping, read the pixels and feed them to "ffmpeg"
+		fw.save_frame();
+		/*
+		int * buffer = new int[width * height];
+		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+		fwrite(buffer, sizeof(int)*width*height, 1, ffmpeg);
+		delete[] buffer;
+		frame++;
+		*/
+
         // render UI
         glfwSwapBuffers(window);
+
+		// Check for stop
+		if (fw.is_finished())
+		{
+			break;
+		}
     }
 
     glfwTerminate();
