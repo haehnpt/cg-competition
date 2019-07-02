@@ -7,6 +7,19 @@
 // #include <buffer.hpp>
 // #define PHYSICS_DEBUG
 
+// WARNING ABOUT NON-DETERMINISM
+//
+// Notice that floating point operations in the same program can yield
+// different results each time the program runs. This gets obvious
+// when running the test_physics program, where the simulation can
+// take different paths depending slight differences in the floating
+// point operations which accumulate over time. As a result, when
+// running two instances of the same program side by side, they start
+// out identical can can differ more and more over time.
+//
+// See https://isocpp.org/wiki/faq/newbie#floating-point-arith2 for
+// more information.
+
 phySphere::phySphere(glm::vec3 x,
                      glm::vec3 v,
                      float radius,
