@@ -41,9 +41,11 @@ void MotionBlur::render()
   this->textures[0] = genTexture(this->width, this->height);
 
   int current_texture;
+  int current_active_texture;
   float current_clear_color[4];
   int current_shader;
-  glGetIntegerv(GL_ACTIVE_TEXTURE, &current_texture);
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, &current_texture);
+  glGetIntegerv(GL_ACTIVE_TEXTURE, &current_active_texture);
   glGetFloatv(GL_COLOR_CLEAR_VALUE, &(current_clear_color[0]));
   glGetIntegerv(GL_CURRENT_PROGRAM, &current_shader);
   {
@@ -75,6 +77,7 @@ void MotionBlur::render()
   }
   glUseProgram(current_shader);
   glClearColor(current_clear_color[0], current_clear_color[1], current_clear_color[2], current_clear_color[3]);
+  glActiveTexture(current_active_texture);
   glBindTexture(GL_TEXTURE_2D, current_texture);
 }
 

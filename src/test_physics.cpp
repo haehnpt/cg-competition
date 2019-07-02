@@ -157,7 +157,7 @@ main(int, char* argv[]) {
         glDrawArrays(GL_TRIANGLES, 0, plane.mVertices);
         // if (!above) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        depth_blur.render();
+        depth_blur.render();//should be applied before motion blur
         motion_blur.render();
 
         // swap buffers == show rendered content
