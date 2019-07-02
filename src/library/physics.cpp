@@ -68,8 +68,10 @@ phySphere::step(float deltaT) {
         // update velocity
         v = v + a * deltaT;
     } else {
-        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+        // TODO: Calculate new position and direction based on the
+        // normal of the triangle.
         v.y = -v.y;
+        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
         // update velocity
         v = v + a * deltaT;
     }
