@@ -28,7 +28,7 @@ class terrain
 	static int grass_loc;
 	static int snow_loc;
 public:
-	terrain::terrain(float size, int resolution, int start_frame, int max_frame, int shader_program, std::string stone, std::string grass, std::string snow);
+	terrain(float size, int resolution, int start_frame, int max_frame, int shader_program, std::string stone, std::string grass, std::string snow);
 	~terrain();
 	geometry terra;
 	float * heights;
