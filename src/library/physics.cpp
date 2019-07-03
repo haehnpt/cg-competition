@@ -163,7 +163,7 @@ phyPlane::phyPlane(float xStart,
     zEnd{zEnd}
 {
     // some friendly terrain for testing
-    float heightMap[6][5]
+    float heightMap[6][5] // [x][y]
     {
         {-0.1f, -0.1f, -0.0f, -0.0f, -0.1f},
         {-0.0f, -0.2f, -0.4f, -0.3f, -0.0f},
@@ -176,15 +176,15 @@ phyPlane::phyPlane(float xStart,
     // move the map down for the camera (not using transformations to
     // keep real vertex posistions for collision detection)
     for (int i = 0; i < sizeof(heightMap) / sizeof(heightMap[0]); i++) {
-      for (int j = 0; j < sizeof(heightMap[0]) / sizeof(heightMap[0][0]); j++) {
+        for (int j = 0; j < sizeof(heightMap[0]) / sizeof(heightMap[0][0]); j++) {
             heightMap[i][j] -= 4.f;
         }
     }
 
-    zNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
-    xNumPoints = sizeof(heightMap[0]) / sizeof(heightMap[0][0]);
-    zTileWidth = (zEnd - zStart) / (zNumPoints - 1);
+    xNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
+    zNumPoints = sizeof(heightMap[0]) / sizeof(heightMap[0][0]);
     xTileWidth = (xEnd - xStart) / (xNumPoints - 1);
+    zTileWidth = (zEnd - zStart) / (zNumPoints - 1);
 
     std::cout << "xTileWidth: " << xTileWidth << ", zTileWidth: " << zTileWidth << "\n";
     // Set vertex coordinates using the heightMap for the y-value.
@@ -234,9 +234,16 @@ phyPlane::phyPlane(float xStart,
     // square. For each square the two contained triangles (called
     // top-left and bottom-right triangle) are added to the VBO data.
     int indexRectTopLeft = 0;
-    for (int z = 0; z < zNumPoints - 1; z++) {
-        for (int x = 0; x < xNumPoints - 1; x++) {
+    for (int x = 0; x < xNumPoints - 1; x++) {
+        for (int z = 0; z < zNumPoints - 1; z++) {
             glm::vec3 a, b, nrm;
+            // coordinates in the plane:
+            //  +----→ x
+            //  |
+            //  |
+            //  ↓
+            //  z
+
             //// TOP-LEFT TRIANGLE ////
             // top-left vertex of the square
             vbo_data[indexRectTopLeft + 0] = xStart + x * deltaX;
@@ -251,13 +258,15 @@ phyPlane::phyPlane(float xStart,
             vbo_data[indexRectTopLeft + 20 + 1] = heightMap[x + 1][z];
             vbo_data[indexRectTopLeft + 20 + 2] = zStart + z * deltaZ;
             // add the same normal to all three vertices:
+            // top-left --> bottom-left
             a = glm::vec3(vbo_data[indexRectTopLeft + 10 + 0] - vbo_data[indexRectTopLeft + 0],
                           vbo_data[indexRectTopLeft + 10 + 1] - vbo_data[indexRectTopLeft + 1],
                           vbo_data[indexRectTopLeft + 10 + 2] - vbo_data[indexRectTopLeft + 2]);
+            // top-left --> top-right
             b = glm::vec3(vbo_data[indexRectTopLeft + 20 + 0] - vbo_data[indexRectTopLeft + 0],
                           vbo_data[indexRectTopLeft + 20 + 1] - vbo_data[indexRectTopLeft + 1],
                           vbo_data[indexRectTopLeft + 20 + 2] - vbo_data[indexRectTopLeft + 2]);
-            nrm = glm::normalize(glm::cross(a, b));
+            nrm = glm::normalize(glm::cross(b, a));
             for (int vert = 0; vert < 3; vert++) {
                 for (int coord = 0; coord < 3; coord++) {
                     // normal's x,y,z values start at index 3
@@ -284,9 +293,11 @@ phyPlane::phyPlane(float xStart,
             vbo_data[indexRectTopLeft + 50 + 1] = heightMap[x + 1][z + 1];
             vbo_data[indexRectTopLeft + 50 + 2] = zStart + (z + 1) * deltaZ;
             // add the same normal to all three vertices:
+            // bottom-right --> top-right
             a = glm::vec3(vbo_data[indexRectTopLeft + 40 + 0] - vbo_data[indexRectTopLeft + 50 + 0],
                           vbo_data[indexRectTopLeft + 40 + 1] - vbo_data[indexRectTopLeft + 50 + 1],
                           vbo_data[indexRectTopLeft + 40 + 2] - vbo_data[indexRectTopLeft + 50 + 2]);
+            // bottom-right --> bottom-left
             b = glm::vec3(vbo_data[indexRectTopLeft + 30 + 0] - vbo_data[indexRectTopLeft + 50 + 0],
                           vbo_data[indexRectTopLeft + 30 + 1] - vbo_data[indexRectTopLeft + 50 + 1],
                           vbo_data[indexRectTopLeft + 30 + 2] - vbo_data[indexRectTopLeft + 50 + 2]);
