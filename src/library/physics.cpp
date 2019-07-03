@@ -399,7 +399,7 @@ phyPlane::getTriangleAt(glm::vec3 pos) {
     int oldTriangleIndex = triangleIndex;
 
     // two triangles per rectangle
-    triangleIndex = 2 * (zIndexRect * (xNumPoints - 1) + xIndexRect);
+    triangleIndex = 2 * (xIndexRect * (zNumPoints - 1) + zIndexRect);
     // if the sphere is in the 'upper'-left triangle it's one less
     if (zInRect > zTileWidth - xInRect * zTileWidth / xTileWidth) {
         triangleIndex++;
