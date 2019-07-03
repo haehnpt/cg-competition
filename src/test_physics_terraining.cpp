@@ -99,9 +99,10 @@ main(int, char* argv[]) {
                       RESOLUTION,
                       RESOLUTION);
 
-    phySphere sphere1(glm::vec3(0.f, 10.f, 0.f),
-                      glm::vec3(1.8f, 1.f, 0.2f),
-                      0.1f, glm::vec4(1.0f, 1.0f, 0.0f, 1.f), &phyplane);
+    phySphere sphere1(glm::vec3(0.f, 2.f, 0.f),
+                      glm::vec3(0.f, 2.f, 0.f),
+                      0.08f, glm::vec4(1.0f, 1.0f, 0.0f, 1.f), &phyplane);
+    // customized acceleration for the first tests
     sphere1.a.x = 0;
     sphere1.a.y = -2;
     sphere1.a.z = 0;
