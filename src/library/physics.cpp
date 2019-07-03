@@ -266,7 +266,7 @@ phyPlane::phyPlane(float xStart,
             b = glm::vec3(vbo_data[indexRectTopLeft + 20 + 0] - vbo_data[indexRectTopLeft + 0],
                           vbo_data[indexRectTopLeft + 20 + 1] - vbo_data[indexRectTopLeft + 1],
                           vbo_data[indexRectTopLeft + 20 + 2] - vbo_data[indexRectTopLeft + 2]);
-            nrm = glm::normalize(glm::cross(b, a));
+            nrm = glm::normalize(glm::cross(a, b));
             for (int vert = 0; vert < 3; vert++) {
                 for (int coord = 0; coord < 3; coord++) {
                     // normal's x,y,z values start at index 3
