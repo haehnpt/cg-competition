@@ -4,12 +4,12 @@
 
 // 'direction' in the plane
 enum phyDirection
-  {
-   right,
-   up,
-   left,
-   down,
-  };
+{
+    right,
+    up,
+    left,
+    down,
+};
 
 struct phySphere {
     // holds the mesh, etc.
@@ -62,11 +62,13 @@ struct phyPlane {
 
     int triangleIndex;
 
-    phyPlane(float xStart, float xEnd, float zStart, float zEnd);
+    phyPlane(float xStart, float xEnd, float zStart, float zEnd,
+             float *heightMap, int xNumPoints, int zNumPoints);
     ~phyPlane();
 
     int getTriangleAt(glm::vec3 x);
     std::vector<int> getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd);
+
     bool isAbove(glm::vec3 x);
 
     int getNextTriangle(int index, phyDirection direction);

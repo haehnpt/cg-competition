@@ -156,33 +156,17 @@ phySphere::moveToPlaneHeight() {
 phyPlane::phyPlane(float xStart,
                    float xEnd,
                    float zStart,
-                   float zEnd) :
+                   float zEnd,
+                   float *heightMap,
+                   int xNumPoints,
+                   int zNumPoints) :
     xStart{xStart},
     xEnd{xEnd},
     zStart{zStart},
-    zEnd{zEnd}
+    zEnd{zEnd},
+    xNumPoints{xNumPoints},
+    zNumPoints{zNumPoints}
 {
-    // some friendly terrain for testing
-    float heightMap[6][5] // [x][y]
-    {
-        {-0.1f, -0.1f, -0.0f, -0.0f, -0.1f},
-        {-0.0f, -0.2f, -0.4f, -0.3f, -0.0f},
-        {-0.2f, -1.6f, -1.8f, -1.2f, -0.2f},
-        {-0.1f, -1.8f, -1.7f, -1.1f, -0.0f},
-        {-0.1f, -0.2f, -0.2f, -1.3f, -0.2f},
-        {-0.1f, -0.0f, -0.1f, -0.2f, -0.1f}
-    };
-
-    // move the map down for the camera (not using transformations to
-    // keep real vertex posistions for collision detection)
-    for (int i = 0; i < sizeof(heightMap) / sizeof(heightMap[0]); i++) {
-        for (int j = 0; j < sizeof(heightMap[0]) / sizeof(heightMap[0][0]); j++) {
-            heightMap[i][j] -= 4.f;
-        }
-    }
-
-    xNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
-    zNumPoints = sizeof(heightMap[0]) / sizeof(heightMap[0][0]);
     xTileWidth = (xEnd - xStart) / (xNumPoints - 1);
     zTileWidth = (zEnd - zStart) / (zNumPoints - 1);
 
@@ -247,15 +231,15 @@ phyPlane::phyPlane(float xStart,
             //// TOP-LEFT TRIANGLE ////
             // top-left vertex of the square
             vbo_data[indexRectTopLeft + 0] = xStart + x * deltaX;
-            vbo_data[indexRectTopLeft + 1] = heightMap[x][z];
+            vbo_data[indexRectTopLeft + 1] = heightMap[x * (zNumPoints - 1) + z];
             vbo_data[indexRectTopLeft + 2] = zStart + z * deltaZ;
             // bottom-left vertex of the square
             vbo_data[indexRectTopLeft + 10 + 0] = xStart + x * deltaX;
-            vbo_data[indexRectTopLeft + 10 + 1] = heightMap[x][z + 1];
+            vbo_data[indexRectTopLeft + 10 + 1] = heightMap[x * (zNumPoints - 1) + (z + 1)];
             vbo_data[indexRectTopLeft + 10 + 2] = zStart + (z + 1) * deltaZ;
             // top-right vertex of the square
             vbo_data[indexRectTopLeft + 20 + 0] = xStart + (x + 1) * deltaX;
-            vbo_data[indexRectTopLeft + 20 + 1] = heightMap[x + 1][z];
+            vbo_data[indexRectTopLeft + 20 + 1] = heightMap[(x + 1) * (zNumPoints - 1) + z];
             vbo_data[indexRectTopLeft + 20 + 2] = zStart + z * deltaZ;
             // add the same normal to all three vertices:
             // top-left --> bottom-left
@@ -282,15 +266,15 @@ phyPlane::phyPlane(float xStart,
             //// BOTTOM-RIGHT TRIANGLE ////
             // bottom-left vertex of the square
             vbo_data[indexRectTopLeft + 30 + 0] = xStart + x * deltaX;
-            vbo_data[indexRectTopLeft + 30 + 1] = heightMap[x][z + 1];
+            vbo_data[indexRectTopLeft + 30 + 1] = heightMap[x * (zNumPoints - 1) + (z + 1)];
             vbo_data[indexRectTopLeft + 30 + 2] = zStart + (z + 1) * deltaZ;
             // top-right vertex of the square
             vbo_data[indexRectTopLeft + 40 + 0] = xStart + (x + 1) * deltaX;
-            vbo_data[indexRectTopLeft + 40 + 1] = heightMap[x + 1][z];
+            vbo_data[indexRectTopLeft + 40 + 1] = heightMap[(x + 1) * (zNumPoints - 1) + z];
             vbo_data[indexRectTopLeft + 40 + 2] = zStart + z * deltaZ;
             // bottom-right vertex of the square
             vbo_data[indexRectTopLeft + 50 + 0] = xStart + (x + 1) * deltaX;
-            vbo_data[indexRectTopLeft + 50 + 1] = heightMap[x + 1][z + 1];
+            vbo_data[indexRectTopLeft + 50 + 1] = heightMap[(x + 1) * (zNumPoints - 1) + (z + 1)];
             vbo_data[indexRectTopLeft + 50 + 2] = zStart + (z + 1) * deltaZ;
             // add the same normal to all three vertices:
             // bottom-right --> top-right

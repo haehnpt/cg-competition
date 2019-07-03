@@ -40,7 +40,33 @@ main(int, char* argv[]) {
     glDeleteShader(vertexShader);
     glUseProgram(shaderProgram);
 
-    phyPlane plane(-10.f, 10.f, -10.f, 10.f);
+
+    // some friendly terrain for testing
+    float heightMap[6][5] // [x][y]
+    {
+        {-0.1f, -0.1f, -0.0f, -0.0f, -0.1f},
+        {-0.0f, -0.2f, -0.4f, -0.3f, -0.0f},
+        {-0.2f, -1.6f, -1.8f, -1.2f, -0.2f},
+        {-0.1f, -1.8f, -1.7f, -1.1f, -0.0f},
+        {-0.1f, -0.2f, -0.2f, -1.3f, -0.2f},
+        {-0.1f, -0.0f, -0.1f, -0.2f, -0.1f}
+    };
+
+    // move the map down for the camera (not using transformations to
+    // keep real vertex posistions for collision detection)
+    for (int i = 0; i < sizeof(heightMap) / sizeof(heightMap[0]); i++) {
+        for (int j = 0; j < sizeof(heightMap[0]) / sizeof(heightMap[0][0]); j++) {
+            heightMap[i][j] -= 4.f;
+        }
+    }
+
+    int zNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
+    int xNumPoints = sizeof(heightMap[0]) / sizeof(heightMap[0][0]);
+
+    phyPlane plane(-10.f, 10.f, -10.f, 10.f,
+                   &heightMap[0][0],
+                   xNumPoints,
+                   zNumPoints);
 
     phySphere sphere1(glm::vec3(-10.f, 4.f, -10.f),
                       glm::vec3(1.8f, 1.f, 0.2f),
@@ -108,9 +134,9 @@ main(int, char* argv[]) {
         glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &view_matrix[0][0]);
         glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
 
-        sphere2.step(0.01);
-        sphere3.step(0.01);
-        bool above = sphere1.step(0.01);
+        sphere2.step(0.03);
+        sphere3.step(0.03);
+        bool above = sphere1.step(0.03);
         if (above) {
           glUniform4fv(special_color_loc, 1, &color_above[0]);
         } else {
