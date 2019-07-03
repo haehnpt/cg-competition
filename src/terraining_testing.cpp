@@ -12,9 +12,9 @@
 *
 */
 
-#define DEBUG true
+#define DEBUG false
 #define x64 true
-//#define RENDER_VIDEO
+#define RENDER_VIDEO
 
 const int WINDOW_WIDTH =  1920;
 const int WINDOW_HEIGHT = 1080;
@@ -24,7 +24,7 @@ const float FAR_VALUE = 100.f;
 
 const float TERRAIN_SIZE = 8.0;
 const int FRAMES = 360;
-const int RESOLUTION = (DEBUG) ? 1000 : (x64 ? 2000 : 2000);
+const int RESOLUTION = (DEBUG) ? 1000 : (x64 ? 4000 : 2000);
 
 const std::string GRASS = (DEBUG) ? "grass.jpg" : "grass_large.jpg";
 const std::string STONE = (DEBUG) ? "mountain.jpg" : "mountain_large.jpg";

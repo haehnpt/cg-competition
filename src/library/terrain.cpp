@@ -25,6 +25,9 @@ float * terrain::get_heights(float range, float rigidity)
 		}
 	}
 
+	noise.clear_gradients();
+	noise2.clear_gradients();
+
 	return heights;
 }
 
@@ -90,10 +93,8 @@ void terrain::build()
 		// Texture coordinates
 		float one = 1.0;
 		float scaling = resolution / fmax(size,8.0);
-		//col[0] = modf(i / scaling, &one);
-		//col[1] = modf(i / resolution / scaling, &one);
-		col[0] = (i % resolution) / scaling;
-		col[1] = (i / resolution) / scaling;
+		col[0] = (i % resolution) / (float) resolution;// (i % resolution) / scaling;
+		col[1] = (i / resolution) / (float)resolution;//(i / resolution) / scaling;
 
 		// Fill VBO
 		vbo_data[10 * i + 0] = pos[0];

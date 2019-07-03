@@ -31,4 +31,5 @@ class perlin_noise
         perlin_noise(int gradients_count, float grid_distance, float offset, float scaling);
         ~perlin_noise();
         float get_noise(float x, float y);
+		void clear_gradients();
 };

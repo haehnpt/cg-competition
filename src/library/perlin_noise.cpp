@@ -18,7 +18,7 @@ perlin_noise::perlin_noise(int gradients_count, float grid_distance, float offse
 
 perlin_noise::~perlin_noise()
 {
-    delete[] gradients;
+	
 }
 
 /*
@@ -106,4 +106,21 @@ float perlin_noise::get_noise(float x, float y)
     float i2 = lerp(n1,n2,sx);
 
     return offset + scaling * lerp(i1,i2,sy);
+}
+
+/*
+* Free the memory of the gradients
+*/
+void perlin_noise::clear_gradients()
+{
+	for (int i = 0; i < this->gradients_count; i++)
+	{
+		for (int j = 0; j < this->gradients_count; j++)
+		{
+			delete[] gradients[i][j];
+		}
+		delete[] gradients[i];
+	}
+	delete[] gradients;
+	gradients = nullptr;
 }
