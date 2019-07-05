@@ -147,7 +147,7 @@ main(int, char* argv[]) {
 										  phyplane.zStart + z * dz),
 								glm::vec3(0.f, 2.f, 0.f),
 								0.08f,
-								glm::vec4(col, 1.f - col, 0.2f, 1.f),
+								glm::vec4(col, 1.f - col, 1.0f, 1.f),
 								&phyplane,
 								model_mat_loc);
 		}
