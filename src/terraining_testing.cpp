@@ -9,15 +9,15 @@
 #include <string>
 
 // Global settings
-#define DEBUG
+//#define DEBUG
 #define x64
-//#define RENDER_VIDEO
-// #define DO_FULLSCREEN
+#define RENDER_VIDEO
+#define DO_FULLSCREEN
 
 // Render size
-#define RENDER_WIDTH 1920;
-#define RENDER_HEIGHT 1080;
-#define RENDER_FRAMES 1200;
+#define RENDER_WIDTH 1920
+#define RENDER_HEIGHT 1080
+#define RENDER_FRAMES 1800
 
 // Window size
 #define WINDOW_WIDTH 1920
@@ -33,7 +33,7 @@
 #define TERRAIN_SIZE 8.0f
 #define TERRAIN_FRAMES 360
 #if defined(x64) && !defined(DEBUG)
-	#define TERRAIN_RESOLUTION 2000
+	#define TERRAIN_RESOLUTION 1000
 #else
 	#define TERRAIN_RESOLUTION 1000
 #endif
@@ -50,7 +50,7 @@
 // Camera settings
 #define CAMERA_PHI 0.25f
 #define CAMERA_THETA -0.15f
-#define CAMERA_DISTANCE 5.0f
+#define CAMERA_DISTANCE 10.0f
 
 // Light settings
 #define LIGHT_PHI 0.0f
@@ -194,13 +194,6 @@ main(int, char* argv[]) {
 		glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &cam.view_matrix()[0][0]);
 		glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
 
-		glUniform1i(use_oren_nayar_loc, use_oren_nayar);
-		glUniform1f(roughness_loc, roughness);
-		// Uniform albedo
-		glUniform1f(albedo_loc, albedo);
-		glUniform1f(ref_index_loc, refraction_index);
-		glUniform4f(diffuse_loc, diffuse_color.x, diffuse_color.y, diffuse_color.z, diffuse_color.w);
-		glUniform4f(specular_loc, specular_color.x, specular_color.y, specular_color.z, specular_color.w);
 		if (frame >= SPHERES_APPEARANCE_FRAME) {
 			if (frame >= SPHERES_RELASE_FRAME) {
 				for (int i = 0; i < X_N_SPHERES * Z_N_SPHERES; i++) {
