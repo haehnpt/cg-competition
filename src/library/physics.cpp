@@ -35,7 +35,7 @@ phySphere::phySphere(glm::vec3 x,
     plane{plane},
     model_mat_loc{model_mat_loc}
 {
-    std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << "\n";
+    // std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << "\n";
     a.x = 0;
     a.y = -1;
     a.z = 0;
