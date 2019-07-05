@@ -94,7 +94,7 @@ void terrain::build()
 			std::cout << (i + 1) / step << "%" << std::endl;
 		}
 
-		glm::vec3 pos(-size/2.0 + (i % resolution) * deltaX, heights[i], -size/2.0 + (i / resolution) * deltaZ);
+		glm::vec3 pos(-size/2.0 + (i / resolution) * deltaX, heights[i], -size/2.0 + (i % resolution) * deltaZ);
 
 		// Calculate final normal after every vertex has reached its height
 		glm::vec3 nrm;
