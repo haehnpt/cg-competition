@@ -43,6 +43,7 @@ public:
 	float max_height = 1.0;
 	float lowest_height = 0.0;
 	float highest_height = 1.0;
+	glm::vec3 * get_normal_at_pos(float x, float z);
 	void get_frame_locations(int shader_program);
 	void set_frames(int start, int max);
 	void reset_current_frame();

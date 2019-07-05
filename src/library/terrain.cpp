@@ -32,6 +32,26 @@ float * terrain::get_heights(float range, float rigidity)
 }
 
 /*
+* Get the normal at a given position (x,z)
+*/
+glm::vec3 * terrain::get_normal_at_pos(float x, float z)
+{
+	float delta = this->size / (float)resolution;
+	float radius = this->size / 2.0;
+	if (x < -radius || x > radius || z < -radius || z > radius)
+	{
+		return NULL;
+	}
+
+	float face_delta = this->size / (float)(resolution - 1.0);
+	int index_x = (int)((x + radius) / face_delta);
+	int index_z = (int)((z + radius) / face_delta);
+	int index = 2 * (index_z * (resolution - 1) + index_x);
+	index = x > z ? index : index + 1;
+	return &(this->terra.faces_normals[index]);
+}
+
+/*
 Clamp the calculated heights to an specified range
 */
 void terrain::clamp_heights()
