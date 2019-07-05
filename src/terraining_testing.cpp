@@ -187,16 +187,19 @@ main(int, char* argv[]) {
 		phyplane.bind();
 		glDrawArrays(GL_TRIANGLES, 0, phyplane.mVertices);
 #endif // USE_PHY_PLANE
-		if (frame >= BALLS_APPEARANCE_FRAME) {
-			glUseProgram(sphereShaderProgram);
-			glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
-			glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &cam.view_matrix()[0][0]);
-			glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
+		glUseProgram(sphereShaderProgram);
+		glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
+		glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &cam.view_matrix()[0][0]);
+		glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
 
-			for (int i = 0; i < X_N_BALLS * Z_N_BALLS; i++) {
-				if (frame >= BALLS_RELASE_FRAME) {
+		if (frame >= BALLS_APPEARANCE_FRAME) {
+			if (frame >= BALLS_RELASE_FRAME) {
+				for (int i = 0; i < X_N_BALLS * Z_N_BALLS; i++) {
 					spheres[i]->step(0.03);
 				}
+			}
+
+			for (int i = 0; i < X_N_BALLS * Z_N_BALLS; i++) {
 				spheres[i]->render();
 			}
 		}
