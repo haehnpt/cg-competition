@@ -26,11 +26,14 @@
 phySphere::phySphere(glm::vec3 x,
                      glm::vec3 v,
                      float radius,
-                     glm::vec4 color, phyPlane *plane) :
+                     glm::vec4 color,
+                     phyPlane *plane,
+                     int model_mat_loc) :
     x{x},
     v{v},
     radius{radius},
-    plane{plane}
+    plane{plane},
+    model_mat_loc{model_mat_loc}
 {
     a.x = 0;
     a.y = -10;
@@ -72,8 +75,6 @@ phySphere::step(float deltaT) {
             x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
             // update velocity
             v = v + a * deltaT;
-            std::cout << "v=(" << v.x << ", " << v.y << ", " << v.z << ")\n";
-            std::cout << "x=(" << x.x << ", " << x.y << ", " << x.z << ")\n";
         } else {
             // TODO: x is not the position of the first contact!
             v = plane->reflectAt(x, v);
@@ -538,4 +539,11 @@ phyPlane::reflectAt(glm::vec3 pos, glm::vec3 v) {
                    vbo_data[index * 3 * 10 + 3 + 2]);
 
     return v - 2*glm::dot(norm, v) * norm;
+}
+
+void
+phySphere::render() {
+    glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &geo.transform[0][0]);
+    geo.bind();
+    glDrawElements(GL_TRIANGLES, geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
 }

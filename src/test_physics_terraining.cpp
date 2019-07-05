@@ -22,9 +22,9 @@ const float FOV = 45.f;
 const float NEAR_VALUE = 0.1f;
 const float FAR_VALUE = 100.f;
 
-const float TERRAIN_SIZE = 8.0;
+const float TERRAIN_SIZE = 20.0;
 const int FRAMES = 180;
-const int RESOLUTION = (DEBUG) ? 1000 : (x64 ? 2000 : 2000);
+const int RESOLUTION = 500; // (DEBUG) ? 1000 : (x64 ? 2000 : 2000);
 
 const std::string GRASS = (DEBUG) ? "grass.jpg" : "grass_large.jpg";
 const std::string STONE = (DEBUG) ? "mountain.jpg" : "mountain_large.jpg";
@@ -48,8 +48,8 @@ main(int, char* argv[]) {
     camera cam(window);
 
     // load and compile shaders and link program
-    unsigned int vertexShader = compileShader("terrain_shader.vert", GL_VERTEX_SHADER);
-    unsigned int fragmentShader = compileShader("terrain_shader.frag", GL_FRAGMENT_SHADER);
+    unsigned int vertexShader = compileShader("simple.vert", GL_VERTEX_SHADER);
+    unsigned int fragmentShader = compileShader("simple.frag", GL_FRAGMENT_SHADER);
     unsigned int shaderProgram = linkProgram(vertexShader, fragmentShader);
     // after linking the program the shader objects are no longer needed
     glDeleteShader(fragmentShader);
@@ -98,15 +98,26 @@ main(int, char* argv[]) {
                       terr.heights,
                       RESOLUTION,
                       RESOLUTION,
-                      false);
+                      true);
 
-    phySphere sphere1(glm::vec3(0.f, 2.f, 0.f),
+    phySphere sphere1(glm::vec3(-1.0f, 1.f, 1.0f),
                       glm::vec3(0.f, 2.f, 0.f),
-                      0.08f, glm::vec4(1.0f, 1.0f, 0.0f, 1.f), &phyplane);
+                      0.08f, glm::vec4(1.0f, 0.2f, 0.2f, 1.f), &phyplane,
+                      model_mat_loc);
+    phySphere sphere2(glm::vec3(-1.0f, 1.f, -1.0f),
+                      glm::vec3(0.f, 2.f, 0.f),
+                      0.08f, glm::vec4(0.2f, 1.0f, 0.2f, 1.f), &phyplane,
+                      model_mat_loc);
+    phySphere sphere3(glm::vec3(1.0f, 1.f, 1.0f),
+                      glm::vec3(0.f, 2.f, 0.f),
+                      0.08f, glm::vec4(0.2f, 0.2f, 1.0f, 1.f), &phyplane,
+                      model_mat_loc);
+
     // customized acceleration for the first tests
-    sphere1.a.x = 0;
-    sphere1.a.y = -2;
-    sphere1.a.z = 0;
+    sphere1.a.y = -1;
+    sphere2.a.y = -1;
+    sphere3.a.y = -1;
+
 
     // rendering loop
     while (glfwWindowShouldClose(window) == false) {
@@ -128,21 +139,31 @@ main(int, char* argv[]) {
         // Uniform albedo
         glUniform1f(albedo_loc, albedo);
         glUniform1f(ref_index_loc, refraction_index);
-        glUniform4f(diffuse_loc, diffuse_color.x, diffuse_color.y, diffuse_color.z, diffuse_color.w);
-        glUniform4f(specular_loc, specular_color.x, specular_color.y, specular_color.z, specular_color.w);
+        glUniform4fv(diffuse_loc, 1, &diffuse_color[0]);
+        glUniform4fv(specular_loc, 1, &specular_color[0]);
 
         // Render terrain
-        terr.render(model_mat_loc);
-
-        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere1.geo.transform[0][0]);
+        // terr.render(model_mat_loc);
 
         sphere1.step(0.03);
-        sphere1.geo.bind();
-        glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+        sphere2.step(0.03);
+        sphere3.step(0.03);
+
+        sphere1.render();
+        sphere2.render();
+        sphere3.render();
+
+        // reset the model matrix before rendering the plane
+        glm::mat4 m = glm::mat4(1.f);
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &m[0][0]);
+        phyplane.bind();
+        // glUniform1i(use_special_color_loc, true);
+        glDrawArrays(GL_TRIANGLES, 0, phyplane.mVertices);
 
 
         // Light motion
-        light_phi = (light_phi += 0.01) > 2 * M_PI ? 0.0 : light_phi;
+        // commented out for testing, it's annoying :D
+        // light_phi = (light_phi += 0.01) > 2 * M_PI ? 0.0 : light_phi;
 
         // render UI
         glfwSwapBuffers(window);

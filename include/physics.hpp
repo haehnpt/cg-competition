@@ -29,13 +29,16 @@ struct phySphere {
     // float aNext[3];
 
     struct phyPlane *plane;
+    int model_mat_loc;
 
     phySphere(glm::vec3 x,
               glm::vec3 v,
               float radius, glm::vec4 color,
-              struct phyPlane *plane);
+              struct phyPlane *plane,
+              int model_mat_loc);
     ~phySphere();
 
+    void render();
     // calculates the new position, velocity, acceleration
     bool step(float deltaT);
     void setPosition(glm::vec3 pos);
