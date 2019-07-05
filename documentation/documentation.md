@@ -138,6 +138,6 @@ public:
 
 ## Referenzen
 
-[1] Wikipedia, https://en.wikipedia.org/wiki/Perlin_noise, abgerufen: 05.07.2019
-[2] Red Blob Games, https://www.redblobgames.com/maps/terrain-from-noise/, abgerufen: 05.07.2019
-[3] FFMPEG, https://ffmpeg.org/, abgerufen: 05.07.2019
+- [1] Wikipedia, https://en.wikipedia.org/wiki/Perlin_noise, abgerufen: 05.07.2019
+- [2] Red Blob Games, https://www.redblobgames.com/maps/terrain-from-noise/, abgerufen: 05.07.2019
+- [3] FFMPEG, https://ffmpeg.org/, abgerufen: 05.07.2019
