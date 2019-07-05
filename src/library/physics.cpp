@@ -26,14 +26,18 @@
 phySphere::phySphere(glm::vec3 x,
                      glm::vec3 v,
                      float radius,
-                     glm::vec4 color, phyPlane *plane) :
+                     glm::vec4 color,
+                     phyPlane *plane,
+                     int model_mat_loc) :
     x{x},
     v{v},
     radius{radius},
-    plane{plane}
+    plane{plane},
+    model_mat_loc{model_mat_loc}
 {
+    // std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << "\n";
     a.x = 0;
-    a.y = -10;
+    a.y = -1;
     a.z = 0;
 
     geo = loadMesh("sphere.obj", false, color);
@@ -48,77 +52,75 @@ phySphere::step(float deltaT) {
     // next position if there were no obstacles
     glm::vec3 targetPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
 
-    int i = plane->getNextTriangle(x, targetPos - x);
-
-    if (i != lastTriangleIndex) {
-#ifdef PHYSICS_DEBUG
-        std::cout << "next triangle: " << i << "\n";
-#endif
-        lastTriangleIndex = i;
-    }
-
-    int currentIndex = plane->getTriangleAt(x);
-    int targetIndex = plane->getTriangleAt(targetPos);
-
-    // TODO: iterate over all triangles on the way to targetPos:
-    //
-    // while (currentIndex != targetIndex) {
-    //     // the position where the sphere enters/leaves the next
-    //     // triangle
-    //     glm::vec3 enterPos;
-    //     glm::vec3 exitPos;
-
-    //     if (!isAbove(enterNextPos) && !isAbove(exitPos)) {
-    //         // passing over this triangle
-    //         currentIndex = getNextTriangle(currentIndex, phyDirection d);
-    //     } else {
-    //         // TODO: calculate intersection position and time of
-    //         // trajectory with the triangle. Based on this, calculate
-    //         // the new position.
-    //     }
-    // }
-
-    // For now we simply assume currentIndex == targetIndex. This
-    // holds most of the time unless the sphere enters another
-    // triangle AND dives below the plane in one step.
-    if (plane->isAbove(targetPos)) {
-        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-        // update velocity
-        v = v + a * deltaT;
-    } else {
-        // TODO: Calculate new position and direction based on the
-        // normal of the triangle.
-        // Super hacky ducktape stuff follows...
-        // TODO: x is not the position of the first contact!
-        v = plane->reflectAt(x, v);
-        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-        // update velocity
-        v = v + a * deltaT;
-        // lost energy when bouncing
-        v *= 0.98;
-    }
-
-    // hard-coded bounding box
-    for (int i = 0; i < 3; i++) {
-        // for TESTING: a hard-coded bounding box
-        if (x[i] < -10 && v[i] < 0) {
-            v[i] = -1.0 * v[i];
-        } else if (x[i] > 10 && v[i] > 0) {
-            v[i] = -1.0 * v[i];
+    if(plane->useBoundingBox) {
+        // maybe reflect in x direction
+        if (targetPos.x < plane->xStart) {
+            x.x = plane->xStart + 0.0001f;
+            v.x = -v.x;
+        } else if (targetPos.x > plane->xEnd) {
+            x.x = plane->xEnd - 0.0001f;
+            v.x = -v.x;
         }
+
+        // maybe reflect in z direction
+        if (targetPos.z < plane->zStart) {
+            x.z = plane->zStart + 0.0001f;
+            v.z = -v.z;
+        } else if (targetPos.z > plane->zEnd) {
+            x.z = plane->zEnd - 0.0001f;
+            v.z = -v.z;
+        }
+
+        // the sphere is now back in the  plane area
+        if (plane->isAbove(x)) {
+            x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+            // update velocity
+            v = v + a * deltaT;
+        } else {
+            // TODO: x is not the position of the first contact!
+            v = plane->reflectAt(x, v);
+            x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+            // update velocity
+            v = v + a * deltaT;
+            // lost energy when bouncing
+            v *= 0.98;
+        }
+    } else {
+        // ignoring the bounding box
+        if(targetPos.x < plane->xStart || targetPos.x > plane->xEnd
+           || targetPos.z < plane->zStart || targetPos.z > plane->zEnd) {
+            // outside of the plane
+            x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+            // update velocity
+            v = v + a * deltaT;
+        } else {
+            // inside bounding box, reflect
+            if (plane->isAbove(targetPos)) {
+                x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+                // update velocity
+                v = v + a * deltaT;
+            } else {
+                // TODO: x is not the position of the first contact!
+                v = plane->reflectAt(x, v);
+                x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+                // update velocity
+                v = v + a * deltaT;
+                // lost energy when bouncing
+                v *= 0.90;
+            }
+        }
+
+        // drag
+        // a = glm::vec3(0, -10.f, 0.f);
+        // a = a - 0.01f * (float)pow(glm::length(v), 2.f) * glm::normalize(v);
+
+        // plane->getTriangleIndex(this);
     }
-
-    // drag
-    // a = glm::vec3(0, -10.f, 0.f);
-    // a = a - 0.01f * (float)pow(glm::length(v), 2.f) * glm::normalize(v);
-
-
-// plane->getTriangleIndex(this);
 
     geo.transform = glm::translate(x)
         * glm::scale(glm::vec3(radius));
 
-    return plane->isAbove(x);
+    return true;
 }
 
 void
@@ -156,37 +158,24 @@ phySphere::moveToPlaneHeight() {
 phyPlane::phyPlane(float xStart,
                    float xEnd,
                    float zStart,
-                   float zEnd) :
+                   float zEnd,
+                   float *heightMap,
+                   int xNumPoints,
+                   int zNumPoints,
+                   bool useBoundingBox) :
     xStart{xStart},
     xEnd{xEnd},
     zStart{zStart},
-    zEnd{zEnd}
+    zEnd{zEnd},
+    xNumPoints{xNumPoints},
+    zNumPoints{zNumPoints},
+    useBoundingBox{useBoundingBox}
 {
-    // some friendly terrain for testing
-    float heightMap[6][5]
-    {
-        {-0.1f, -0.1f, -0.0f, -0.0f, -0.1f},
-        {-0.0f, -0.2f, -0.4f, -0.3f, -0.0f},
-        {-0.2f, -1.6f, -1.8f, -1.2f, -0.2f},
-        {-0.1f, -1.8f, -1.7f, -1.1f, -0.0f},
-        {-0.1f, -0.2f, -0.2f, -1.3f, -0.2f},
-        {-0.1f, -0.0f, -0.1f, -0.2f, -0.1f}
-    };
-
-    // move the map down for the camera (not using transformations to
-    // keep real vertex posistions for collision detection)
-    for (int i = 0; i < sizeof(heightMap) / sizeof(heightMap[0]); i++) {
-      for (int j = 0; j < sizeof(heightMap[0]) / sizeof(heightMap[0][0]); j++) {
-            heightMap[i][j] -= 4.f;
-        }
-    }
-
-    zNumPoints = sizeof(heightMap) / sizeof(heightMap[0]);
-    xNumPoints = sizeof(heightMap[0]) / sizeof(heightMap[0][0]);
-    zTileWidth = (zEnd - zStart) / (zNumPoints - 1);
-    xTileWidth = (xEnd - xStart) / (xNumPoints - 1);
+    this->xTileWidth = (xEnd - xStart) / (float)(xNumPoints - 1);
+    this->zTileWidth = (zEnd - zStart) / (float)(zNumPoints - 1);
 
     std::cout << "xTileWidth: " << xTileWidth << ", zTileWidth: " << zTileWidth << "\n";
+    std::cout << "xNumPoints: " << xNumPoints << ", zNumPoints: " << zNumPoints << "\n";
     // Set vertex coordinates using the heightMap for the y-value.
     //
     // Each square of the (m-1)*(n-1) squares is separated into two
@@ -234,26 +223,35 @@ phyPlane::phyPlane(float xStart,
     // square. For each square the two contained triangles (called
     // top-left and bottom-right triangle) are added to the VBO data.
     int indexRectTopLeft = 0;
-    for (int z = 0; z < zNumPoints - 1; z++) {
-        for (int x = 0; x < xNumPoints - 1; x++) {
+    for (int x = 0; x < xNumPoints - 1; x++) {
+        for (int z = 0; z < zNumPoints - 1; z++) {
             glm::vec3 a, b, nrm;
+            // coordinates in the plane:
+            //  +----→ x
+            //  |
+            //  |
+            //  ↓
+            //  z
+
             //// TOP-LEFT TRIANGLE ////
             // top-left vertex of the square
             vbo_data[indexRectTopLeft + 0] = xStart + x * deltaX;
-            vbo_data[indexRectTopLeft + 1] = heightMap[x][z];
+            vbo_data[indexRectTopLeft + 1] = heightMap[x * zNumPoints + z];
             vbo_data[indexRectTopLeft + 2] = zStart + z * deltaZ;
             // bottom-left vertex of the square
             vbo_data[indexRectTopLeft + 10 + 0] = xStart + x * deltaX;
-            vbo_data[indexRectTopLeft + 10 + 1] = heightMap[x][z + 1];
+            vbo_data[indexRectTopLeft + 10 + 1] = heightMap[x * zNumPoints + (z + 1)];
             vbo_data[indexRectTopLeft + 10 + 2] = zStart + (z + 1) * deltaZ;
             // top-right vertex of the square
             vbo_data[indexRectTopLeft + 20 + 0] = xStart + (x + 1) * deltaX;
-            vbo_data[indexRectTopLeft + 20 + 1] = heightMap[x + 1][z];
+            vbo_data[indexRectTopLeft + 20 + 1] = heightMap[(x + 1) * zNumPoints + z];
             vbo_data[indexRectTopLeft + 20 + 2] = zStart + z * deltaZ;
             // add the same normal to all three vertices:
+            // top-left --> bottom-left
             a = glm::vec3(vbo_data[indexRectTopLeft + 10 + 0] - vbo_data[indexRectTopLeft + 0],
                           vbo_data[indexRectTopLeft + 10 + 1] - vbo_data[indexRectTopLeft + 1],
                           vbo_data[indexRectTopLeft + 10 + 2] - vbo_data[indexRectTopLeft + 2]);
+            // top-left --> top-right
             b = glm::vec3(vbo_data[indexRectTopLeft + 20 + 0] - vbo_data[indexRectTopLeft + 0],
                           vbo_data[indexRectTopLeft + 20 + 1] - vbo_data[indexRectTopLeft + 1],
                           vbo_data[indexRectTopLeft + 20 + 2] - vbo_data[indexRectTopLeft + 2]);
@@ -273,20 +271,22 @@ phyPlane::phyPlane(float xStart,
             //// BOTTOM-RIGHT TRIANGLE ////
             // bottom-left vertex of the square
             vbo_data[indexRectTopLeft + 30 + 0] = xStart + x * deltaX;
-            vbo_data[indexRectTopLeft + 30 + 1] = heightMap[x][z + 1];
+            vbo_data[indexRectTopLeft + 30 + 1] = heightMap[x * zNumPoints + (z + 1)];
             vbo_data[indexRectTopLeft + 30 + 2] = zStart + (z + 1) * deltaZ;
             // top-right vertex of the square
             vbo_data[indexRectTopLeft + 40 + 0] = xStart + (x + 1) * deltaX;
-            vbo_data[indexRectTopLeft + 40 + 1] = heightMap[x + 1][z];
+            vbo_data[indexRectTopLeft + 40 + 1] = heightMap[(x + 1) * zNumPoints + z];
             vbo_data[indexRectTopLeft + 40 + 2] = zStart + z * deltaZ;
             // bottom-right vertex of the square
             vbo_data[indexRectTopLeft + 50 + 0] = xStart + (x + 1) * deltaX;
-            vbo_data[indexRectTopLeft + 50 + 1] = heightMap[x + 1][z + 1];
+            vbo_data[indexRectTopLeft + 50 + 1] = heightMap[(x + 1) * zNumPoints + (z + 1)];
             vbo_data[indexRectTopLeft + 50 + 2] = zStart + (z + 1) * deltaZ;
             // add the same normal to all three vertices:
+            // bottom-right --> top-right
             a = glm::vec3(vbo_data[indexRectTopLeft + 40 + 0] - vbo_data[indexRectTopLeft + 50 + 0],
                           vbo_data[indexRectTopLeft + 40 + 1] - vbo_data[indexRectTopLeft + 50 + 1],
                           vbo_data[indexRectTopLeft + 40 + 2] - vbo_data[indexRectTopLeft + 50 + 2]);
+            // bottom-right --> bottom-left
             b = glm::vec3(vbo_data[indexRectTopLeft + 30 + 0] - vbo_data[indexRectTopLeft + 50 + 0],
                           vbo_data[indexRectTopLeft + 30 + 1] - vbo_data[indexRectTopLeft + 50 + 1],
                           vbo_data[indexRectTopLeft + 30 + 2] - vbo_data[indexRectTopLeft + 50 + 2]);
@@ -375,6 +375,11 @@ phyPlane::getTriangleAt(glm::vec3 pos) {
     float xInPlane = pos.x - xStart;
     float zInPlane = pos.z - zStart;
 
+    if(pos.x < xStart || pos.x > xEnd
+       || pos.z < zStart || pos.z > zEnd) {
+        return -1;
+    }
+
     // indices of the rectangle containing the sphere's center
     int xIndexRect = floor(xInPlane / xTileWidth);
     int zIndexRect = floor(zInPlane / zTileWidth);
@@ -388,7 +393,7 @@ phyPlane::getTriangleAt(glm::vec3 pos) {
     int oldTriangleIndex = triangleIndex;
 
     // two triangles per rectangle
-    triangleIndex = 2 * (zIndexRect * (xNumPoints - 1) + xIndexRect);
+    triangleIndex = 2 * (xIndexRect * (zNumPoints - 1) + zIndexRect);
     // if the sphere is in the 'upper'-left triangle it's one less
     if (zInRect > zTileWidth - xInRect * zTileWidth / xTileWidth) {
         triangleIndex++;
@@ -498,7 +503,6 @@ phyPlane::getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd)
 bool
 phyPlane::isAbove(glm::vec3 x) {
     int index = getTriangleAt(x);
-
     // first vertex of the triangle
     glm::vec3 v1(vbo_data[index * 3 * 10 + 0],
                  vbo_data[index * 3 * 10 + 1],
@@ -519,11 +523,29 @@ phyPlane::isAbove(glm::vec3 x) {
 // @pos
 glm::vec3
 phyPlane::reflectAt(glm::vec3 pos, glm::vec3 v) {
+    if (!useBoundingBox) {
+        if(pos.x < xStart  || pos.x > xEnd
+           || pos.z < zStart || pos.z > zEnd) {
+            // the bounding box is diabled, and the sphere has left
+            // the bounding box, don't reflect at all, just 'fall of
+            // the world'
+            return v;
+        }
+    }
+
     int index = getTriangleAt(pos);
 
     // normal of the triangle's plane
     glm::vec3 norm(vbo_data[index * 3 * 10 + 3 + 0],
                    vbo_data[index * 3 * 10 + 3 + 1],
                    vbo_data[index * 3 * 10 + 3 + 2]);
+
     return v - 2*glm::dot(norm, v) * norm;
+}
+
+void
+phySphere::render() {
+    glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &geo.transform[0][0]);
+    geo.bind();
+    glDrawElements(GL_TRIANGLES, geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
 }
