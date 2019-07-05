@@ -183,7 +183,7 @@ main(int, char* argv[]) {
 		phyplane.bind();
 		glDrawArrays(GL_TRIANGLES, 0, phyplane.mVertices);
 #endif // USE_PHY_PLANE
-
+		glUseProgram(sphereShaderProgram);
 		glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
 		glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &cam.view_matrix()[0][0]);
 		glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
