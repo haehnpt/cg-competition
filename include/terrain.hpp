@@ -43,6 +43,7 @@ public:
 	float max_height = 1.0;
 	float lowest_height = 0.0;
 	float highest_height = 1.0;
+	glm::vec3 * get_normal_at_pos(float x, float z);
 	void get_frame_locations(int shader_program);
 	void set_frames(int start, int max);
 	void reset_current_frame();
@@ -86,6 +87,7 @@ public:
 		glCreateTextures(GL_TEXTURE_2D, 1, &handle);
 		glTextureStorage2D(handle, 1, GL_RGBA32F, width, height);
 		glTextureSubImage2D(handle, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
 
 		return handle;
 	}
@@ -113,7 +115,7 @@ public:
 	}
 
 	static void set_texture_filter_mode(unsigned int texture, GLenum mode) {
-		glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, mode);
+		glTextureParameteri(texture, /*GL_TEXTURE_MAG_FILTER*/GL_TEXTURE_MIN_FILTER, mode);
 	}
 
 	static void set_texture_wrap_mode(unsigned int texture, GLenum mode) {

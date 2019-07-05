@@ -166,6 +166,42 @@ scroll(int delta) {
     update();
 }
 
+// Rotate around vertical axis
+// value : should be between 0.0 and 2.0 (duh...)
+void camera::set_phi(float value)
+{
+	while (value > 2.0) value -= 2.0;
+	while (value < 2.0) value += 2.0;
+	state->phi = value * M_PI;
+	update();
+}
+
+// Rotate around horizontal axis
+// value : should be between 0.5 (bottom view) and -0.5 (top view)
+void camera::set_theta(float value)
+{
+	value = value < -0.5 ? -0.5 : (value > 0.5 ? 0.5 : value);
+	state->theta = value * M_PI;
+	update();
+}
+
+// Set the distance of the camera from the origin
+// value : default is 5.0, should be bigger than 1.0?
+void camera::set_distance(float value)
+{
+	value = value < 1.0 ? 1.0 : value;
+	state->radius = value;
+	update();
+}
+
+// Rotate the camera for an angle
+// value : should be between 0.0 and 2.0 (duh...)
+void camera::rotate(float angle)
+{
+	state->phi += angle;
+	update();
+}
+
 camera::camera(GLFWwindow* window) {
     state = new camera_state({});
 

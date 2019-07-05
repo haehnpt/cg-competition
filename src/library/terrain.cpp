@@ -25,7 +25,30 @@ float * terrain::get_heights(float range, float rigidity)
 		}
 	}
 
+	noise.clear_gradients();
+	noise2.clear_gradients();
+
 	return heights;
+}
+
+/*
+* Get the normal at a given position (x,z)
+*/
+glm::vec3 * terrain::get_normal_at_pos(float x, float z)
+{
+	float delta = this->size / (float)resolution;
+	float radius = this->size / 2.0;
+	if (x < -radius || x > radius || z < -radius || z > radius)
+	{
+		return NULL;
+	}
+
+	float face_delta = this->size / (float)(resolution - 1.0);
+	int index_x = (int)((x + radius) / face_delta);
+	int index_z = (int)((z + radius) / face_delta);
+	int index = 2 * (index_z * (resolution - 1) + index_x);
+	index = x > z ? index : index + 1;
+	return &(this->terra.faces_normals[index]);
 }
 
 /*
@@ -90,10 +113,8 @@ void terrain::build()
 		// Texture coordinates
 		float one = 1.0;
 		float scaling = resolution / fmax(size,8.0);
-		//col[0] = modf(i / scaling, &one);
-		//col[1] = modf(i / resolution / scaling, &one);
-		col[0] = (i % resolution) / scaling;
-		col[1] = (i / resolution) / scaling;
+		col[0] = (i % resolution) / (float) resolution;// (i % resolution) / scaling;
+		col[1] = (i / resolution) / (float)resolution;//(i / resolution) / scaling;
 
 		// Fill VBO
 		vbo_data[10 * i + 0] = pos[0];
