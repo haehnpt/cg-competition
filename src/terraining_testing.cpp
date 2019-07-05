@@ -12,9 +12,9 @@
 *
 */
 
-#define DEBUG false
+#define DEBUG true
 #define x64 true
-#define RENDER_VIDEO
+//#define RENDER_VIDEO
 
 const int WINDOW_WIDTH =  1920;
 const int WINDOW_HEIGHT = 1080;
@@ -42,9 +42,11 @@ resizeCallback(GLFWwindow* window, int width, int height);
 
 int
 main(int, char* argv[]) {
+	// Create a window
     GLFWwindow* window = initOpenGL(WINDOW_WIDTH, WINDOW_HEIGHT, argv[0]);
     glfwSetFramebufferSizeCallback(window, resizeCallback);
 
+	// Instantiate camera and modify it
     camera cam(window);
 	cam.set_phi(0.25);
 	cam.set_theta(-0.15);
