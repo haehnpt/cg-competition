@@ -7,7 +7,7 @@
 #include <string>
 
 // Global settings
-//#define DEBUG
+#define DEBUG
 #define x64
 //#define RENDER_VIDEO
 #define DO_FULLSCREEN
