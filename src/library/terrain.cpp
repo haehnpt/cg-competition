@@ -95,7 +95,7 @@ void terrain::build()
 		}
 
 		glm::vec3 pos(-size/2.0 + (i % resolution) * deltaX, heights[i], -size/2.0 + (i / resolution) * deltaZ);
-		
+
 		// Calculate final normal after every vertex has reached its height
 		glm::vec3 nrm;
 		float hl = i == 0 ? heights[i] : heights[i - 1];
@@ -205,6 +205,7 @@ int terrain::ref_index_loc;
 int terrain::terr_model_loc;
 void terrain::render(camera * cam, glm::mat4 proj_matrix, glm::vec3 light_dir)
 {
+	glUseProgram(terrainShaderProgram);
 	glm::mat4 view_matrix = cam->view_matrix();
 	glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &view_matrix[0][0]);
 	glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
@@ -341,7 +342,7 @@ void terrain::set_texture_wrap_mode(unsigned int texture, GLenum mode) {
 }
 
 int terrain::terrainShaderProgram;
-void terrain::create_terrain_shaders() 
+void terrain::create_terrain_shaders()
 {
 	// load and compile shaders and link program
 	unsigned int vertexShader = compileShader("terrain_shader.vert", GL_VERTEX_SHADER);

@@ -4,13 +4,15 @@
 #include "camera.hpp"
 #include "terrain.hpp"
 #include "ffmpeg_wrapper.hpp"
+#include "physics.hpp"
+
 #include <string>
 
 // Global settings
 #define DEBUG
 #define x64
 //#define RENDER_VIDEO
-#define DO_FULLSCREEN
+// #define DO_FULLSCREEN
 
 // Render size
 #define RENDER_WIDTH 1920;
@@ -35,6 +37,10 @@
 #else
 	#define TERRAIN_RESOLUTION 1000
 #endif
+
+// Sphere/Physics settings
+#define X_N_BALLS 20
+#define Z_N_BALLS 20
 
 // Camera settings
 #define CAMERA_PHI 0.25f
@@ -92,6 +98,17 @@ main(int, char* argv[]) {
     float light_phi = LIGHT_PHI;
     float light_theta = LIGHT_THETA;
 
+	///////////////////////// Physics /////////////////////////
+	// TODO: Move this code inside the physics class
+	unsigned int vertexShader = compileShader("simple.vert", GL_VERTEX_SHADER);
+	unsigned int fragmentShader = compileShader("simple.frag", GL_FRAGMENT_SHADER);
+	int sphereShaderProgram = linkProgram(vertexShader, fragmentShader);
+	// after linking the program the shader objects are no longer needed
+	glDeleteShader(fragmentShader);
+	glDeleteShader(vertexShader);
+    int light_dir_loc = glGetUniformLocation(sphereShaderProgram, "light_dir");
+    int sphere_model_mat_loc = glGetUniformLocation(sphereShaderProgram, "model_mat");
+
 	// Prepare terrain
 	terrain terr = terrain(TERRAIN_SIZE,
 		TERRAIN_RESOLUTION,
@@ -100,6 +117,37 @@ main(int, char* argv[]) {
 		STONE,
 		GRASS,
 		SNOW);
+
+	// Prepare physics plane
+	phyPlane phyplane(-TERRAIN_SIZE / 2.f,
+					  TERRAIN_SIZE / 2.f,
+					  -TERRAIN_SIZE / 2.f,
+					  TERRAIN_SIZE / 2.f,
+					  terr.heights,
+					  TERRAIN_RESOLUTION,
+					  TERRAIN_RESOLUTION,
+					  false);
+	// Prepare spheres
+	phySphere * spheres[X_N_BALLS * Z_N_BALLS];
+
+	float dx = (phyplane.xEnd - phyplane.xStart) / X_N_BALLS;
+	float dz = (phyplane.zEnd - phyplane.zStart) / Z_N_BALLS;
+
+	for (int x = 0; x < X_N_BALLS; x++ ) {
+		for (int z = 0; z < Z_N_BALLS; z++ ) {
+			float col = (float)x * (float)z / X_N_BALLS / X_N_BALLS;
+
+			spheres[x * Z_N_BALLS + z]
+				= new phySphere(glm::vec3(phyplane.xStart + x * dx,
+										  1.f,
+										  phyplane.zStart + z * dz),
+								glm::vec3(0.f, 2.f, 0.f),
+								0.08f,
+								glm::vec4(col, 1.f - col, 0.2f, 1.f),
+								&phyplane,
+								sphere_model_mat_loc);
+		}
+	}
 
 	// "ffmpeg" command and preparation
 	#ifdef RENDER_VIDEO
@@ -121,6 +169,14 @@ main(int, char* argv[]) {
 
 		// Render terrain
 		terr.render(&cam, proj_matrix, light_dir);
+
+		// FIXME: Uncommenting this makes the spheres disappear!
+		// glUseProgram(sphereShaderProgram);
+        glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
+		for (int i = 0; i < X_N_BALLS * Z_N_BALLS; i++) {
+			spheres[i]->step(0.03);
+			spheres[i]->render();
+		}
 
 		// Rotate camera
 		cam.rotate();
