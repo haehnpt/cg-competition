@@ -64,10 +64,13 @@ struct phyPlane {
     float xTileWidth;
     float zTileWidth;
 
+    // cheat variable! Radius of the spheres
+    float radius;
+
     int triangleIndex;
 
     phyPlane(float xStart, float xEnd, float zStart, float zEnd,
-             float *heightMap, int xNumPoints, int zNumPoints, bool useBoundingBox);
+             float *heightMap, int xNumPoints, int zNumPoints, bool useBoundingBox, float radius);
     ~phyPlane();
 
     int getTriangleAt(glm::vec3 x);
