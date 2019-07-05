@@ -35,8 +35,9 @@ phySphere::phySphere(glm::vec3 x,
     plane{plane},
     model_mat_loc{model_mat_loc}
 {
+    std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << "\n";
     a.x = 0;
-    a.y = -10;
+    a.y = -1;
     a.z = 0;
 
     geo = loadMesh("sphere.obj", false, color);
@@ -105,7 +106,7 @@ phySphere::step(float deltaT) {
                 // update velocity
                 v = v + a * deltaT;
                 // lost energy when bouncing
-                v *= 0.98;
+                v *= 0.90;
             }
         }
 
@@ -170,10 +171,11 @@ phyPlane::phyPlane(float xStart,
     zNumPoints{zNumPoints},
     useBoundingBox{useBoundingBox}
 {
-    xTileWidth = (xEnd - xStart) / (xNumPoints - 1);
-    zTileWidth = (zEnd - zStart) / (zNumPoints - 1);
+    this->xTileWidth = (xEnd - xStart) / (float)(xNumPoints - 1);
+    this->zTileWidth = (zEnd - zStart) / (float)(zNumPoints - 1);
 
     std::cout << "xTileWidth: " << xTileWidth << ", zTileWidth: " << zTileWidth << "\n";
+    std::cout << "xNumPoints: " << xNumPoints << ", zNumPoints: " << zNumPoints << "\n";
     // Set vertex coordinates using the heightMap for the y-value.
     //
     // Each square of the (m-1)*(n-1) squares is separated into two
