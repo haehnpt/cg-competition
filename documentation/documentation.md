@@ -6,9 +6,9 @@
 - Sebastian Kühn
 - Volker Sobek
 
-## Künstlerisches Konzept
+## Künstlerisches und technisches Konzept
 
-## Technisches Konzept
+(COPY FROM CONCEPT)
 
 ## Arbeitsschritte, Komponenten, Teilergebnisse
 
@@ -45,6 +45,8 @@ public:
 	void clear_gradients();
 };
 ```
+
+(INSERT IMAGE)
 
 ### Terrain Generation
 
@@ -102,9 +104,16 @@ public:
 	void render(int model_loc);
 };
 ```
+
+(INSERT IMAGE)
+
 ### Physikalische Simulation
 
+(VOLKER)
+
 ### Kamera Effekte
+
+(SEBASTIAN)
 
 ### Video Rendering
 
@@ -133,8 +142,11 @@ public:
 };
 ```
 
+(INSERT GIF)
+
 ## Ergebnis
 
+(INSERT TEXT & VIDEO)
 
 ## Referenzen
 
