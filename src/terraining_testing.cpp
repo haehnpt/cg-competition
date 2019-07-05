@@ -7,11 +7,10 @@
 #include <string>
 
 // Global settings
-#define DEBUG
+//#define DEBUG
 #define x64
 //#define RENDER_VIDEO
 #define DO_FULLSCREEN
-//#define LIGHT_BACKGROUND
 
 // Render size
 #define RENDER_WIDTH 1920;
@@ -26,15 +25,25 @@
 #define FOV 45.0f
 #define NEAR_VALUE 0.1f
 #define FAR_VALUE 100.0f
+#define BACKGROUND_COLOR 0.2f, 0.2f, 0.2f, 1.0f
 
 // Terrain settings
 #define TERRAIN_SIZE 8.0f
 #define TERRAIN_FRAMES 360
 #if defined(x64) && !defined(DEBUG)
-	#define TERRAIN_RESOLUTION 4000
+	#define TERRAIN_RESOLUTION 2000
 #else
 	#define TERRAIN_RESOLUTION 1000
 #endif
+
+// Camera settings
+#define CAMERA_PHI 0.25f
+#define CAMERA_THETA -0.15f
+#define CAMERA_DISTANCE 5.0f
+
+// Light settings
+#define LIGHT_PHI 0.0f
+#define LIGHT_THETA 0.3f
 
 // Texture settings
 #if defined(DEBUG)
@@ -69,9 +78,9 @@ main(int, char* argv[]) {
 
 	// Instantiate camera and modify it
     camera cam(window);
-	cam.set_phi(0.25);
-	cam.set_theta(-0.15);
-	cam.set_distance(10.0);
+	cam.set_phi(CAMERA_PHI);
+	cam.set_theta(CAMERA_THETA);
+	cam.set_distance(CAMERA_DISTANCE);
 
 	// Projection matrix
     proj_matrix = glm::perspective(FOV, 1.f, NEAR_VALUE, FAR_VALUE);
@@ -80,8 +89,8 @@ main(int, char* argv[]) {
     glEnable(GL_DEPTH_TEST);
 
 	// Light position
-    float light_phi = 0.0f;
-    float light_theta = 0.3f;
+    float light_phi = LIGHT_PHI;
+    float light_theta = LIGHT_THETA;
 
 	// Prepare terrain
 	terrain terr = terrain(TERRAIN_SIZE,
@@ -102,11 +111,7 @@ main(int, char* argv[]) {
 	{
 		// Poll and set background color
 		glfwPollEvents();
-#ifdef LIGHT_BACKGROUND
-		glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
-#else
-		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-#endif
+		glClearColor(BACKGROUND_COLOR);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Light direction
