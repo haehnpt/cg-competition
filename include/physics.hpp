@@ -48,6 +48,7 @@ struct phyPlane {
     unsigned int vbo;
     float *vbo_data;
     unsigned int mVertices;
+    bool useBoundingBox;
 
     int zNumPoints;
     int xNumPoints;
@@ -63,7 +64,7 @@ struct phyPlane {
     int triangleIndex;
 
     phyPlane(float xStart, float xEnd, float zStart, float zEnd,
-             float *heightMap, int xNumPoints, int zNumPoints);
+             float *heightMap, int xNumPoints, int zNumPoints, bool useBoundingBox);
     ~phyPlane();
 
     int getTriangleAt(glm::vec3 x);

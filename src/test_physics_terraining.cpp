@@ -97,7 +97,8 @@ main(int, char* argv[]) {
                       TERRAIN_SIZE / 2.f,
                       terr.heights,
                       RESOLUTION,
-                      RESOLUTION);
+                      RESOLUTION,
+                      false);
 
     phySphere sphere1(glm::vec3(0.f, 2.f, 0.f),
                       glm::vec3(0.f, 2.f, 0.f),

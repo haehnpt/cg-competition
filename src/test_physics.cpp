@@ -66,7 +66,8 @@ main(int, char* argv[]) {
     phyPlane plane(-10.f, 10.f, -10.f, 10.f,
                    &heightMap[0][0],
                    xNumPoints,
-                   zNumPoints);
+                   zNumPoints,
+                   true);
 
     phySphere sphere1(glm::vec3(-10.f, 4.f, -10.f),
                       glm::vec3(1.8f, 1.f, 0.2f),

@@ -97,15 +97,24 @@ main(int, char* argv[]) {
                       TERRAIN_SIZE / 2.f,
                       terr.heights,
                       RESOLUTION,
-                      RESOLUTION);
+                      RESOLUTION,
+                      true);
 
-    phySphere sphere1(glm::vec3(0.f, 1.f, 0.f),
+    phySphere sphere1(glm::vec3(-1.0f, 1.f, 1.0f),
                       glm::vec3(0.f, 2.f, 0.f),
-                      0.08f, glm::vec4(1.0f, 1.0f, 0.0f, 1.f), &phyplane);
+                      0.08f, glm::vec4(1.0f, 0.2f, 0.2f, 1.f), &phyplane);
+    phySphere sphere2(glm::vec3(-1.0f, 1.f, -1.0f),
+                      glm::vec3(0.f, 2.f, 0.f),
+                      0.08f, glm::vec4(0.2f, 1.0f, 0.2f, 1.f), &phyplane);
+    phySphere sphere3(glm::vec3(1.0f, 1.f, 1.0f),
+                      glm::vec3(0.f, 2.f, 0.f),
+                      0.08f, glm::vec4(0.2f, 0.2f, 1.0f, 1.f), &phyplane);
+
     // customized acceleration for the first tests
-    sphere1.a.x = 0;
     sphere1.a.y = -1;
-    sphere1.a.z = 0;
+    sphere2.a.y = -1;
+    sphere3.a.y = -1;
+
 
     // rendering loop
     while (glfwWindowShouldClose(window) == false) {
@@ -134,10 +143,19 @@ main(int, char* argv[]) {
         // terr.render(model_mat_loc);
 
         glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere1.geo.transform[0][0]);
-
         sphere1.step(0.03);
         sphere1.geo.bind();
         glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere2.geo.transform[0][0]);
+        sphere2.step(0.03);
+        sphere2.geo.bind();
+        glDrawElements(GL_TRIANGLES, sphere2.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere3.geo.transform[0][0]);
+        sphere3.step(0.03);
+        sphere3.geo.bind();
+        glDrawElements(GL_TRIANGLES, sphere3.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
 
         // reset the model matrix before rendering the plane
         glm::mat4 m = glm::mat4(1.f);

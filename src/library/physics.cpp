@@ -48,77 +48,77 @@ phySphere::step(float deltaT) {
     // next position if there were no obstacles
     glm::vec3 targetPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
 
-    int i = plane->getNextTriangle(x, targetPos - x);
-
-    if (i != lastTriangleIndex) {
-#ifdef PHYSICS_DEBUG
-        std::cout << "next triangle: " << i << "\n";
-#endif
-        lastTriangleIndex = i;
-    }
-
-    int currentIndex = plane->getTriangleAt(x);
-    int targetIndex = plane->getTriangleAt(targetPos);
-
-    // TODO: iterate over all triangles on the way to targetPos:
-    //
-    // while (currentIndex != targetIndex) {
-    //     // the position where the sphere enters/leaves the next
-    //     // triangle
-    //     glm::vec3 enterPos;
-    //     glm::vec3 exitPos;
-
-    //     if (!isAbove(enterNextPos) && !isAbove(exitPos)) {
-    //         // passing over this triangle
-    //         currentIndex = getNextTriangle(currentIndex, phyDirection d);
-    //     } else {
-    //         // TODO: calculate intersection position and time of
-    //         // trajectory with the triangle. Based on this, calculate
-    //         // the new position.
-    //     }
-    // }
-
-    // For now we simply assume currentIndex == targetIndex. This
-    // holds most of the time unless the sphere enters another
-    // triangle AND dives below the plane in one step.
-    if (plane->isAbove(targetPos)) {
-        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-        // update velocity
-        v = v + a * deltaT;
-    } else {
-        // TODO: Calculate new position and direction based on the
-        // normal of the triangle.
-        // Super hacky ducktape stuff follows...
-        // TODO: x is not the position of the first contact!
-        v = plane->reflectAt(x, v);
-        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-        // update velocity
-        v = v + a * deltaT;
-        // lost energy when bouncing
-        v *= 0.98;
-    }
-
-    // hard-coded bounding box
-    for (int i = 0; i < 3; i++) {
-        // for TESTING: a hard-coded bounding box
-        if (x[i] < -10 && v[i] < 0) {
-            v[i] = -1.0 * v[i];
-        } else if (x[i] > 10 && v[i] > 0) {
-            v[i] = -1.0 * v[i];
+    if(plane->useBoundingBox) {
+        // maybe reflect in x direction
+        if (targetPos.x < plane->xStart) {
+            x.x = plane->xStart + 0.0001f;
+            v.x = -v.x;
+        } else if (targetPos.x > plane->xEnd) {
+            x.x = plane->xEnd - 0.0001f;
+            v.x = -v.x;
         }
+
+        // maybe reflect in z direction
+        if (targetPos.z < plane->zStart) {
+            x.z = plane->zStart + 0.0001f;
+            v.z = -v.z;
+        } else if (targetPos.z > plane->zEnd) {
+            x.z = plane->zEnd - 0.0001f;
+            v.z = -v.z;
+        }
+
+        // the sphere is now back in the  plane area
+        if (plane->isAbove(x)) {
+            x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+            // update velocity
+            v = v + a * deltaT;
+            std::cout << "v=(" << v.x << ", " << v.y << ", " << v.z << ")\n";
+            std::cout << "x=(" << x.x << ", " << x.y << ", " << x.z << ")\n";
+        } else {
+            // TODO: x is not the position of the first contact!
+            v = plane->reflectAt(x, v);
+            x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+            // update velocity
+            v = v + a * deltaT;
+            // lost energy when bouncing
+            v *= 0.98;
+        }
+    } else {
+        // ignoring the bounding box
+        if(targetPos.x < plane->xStart || targetPos.x > plane->xEnd
+           || targetPos.z < plane->zStart || targetPos.z > plane->zEnd) {
+            // outside of the plane
+            x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+            // update velocity
+            v = v + a * deltaT;
+        } else {
+            // inside bounding box, reflect
+            if (plane->isAbove(targetPos)) {
+                x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+                // update velocity
+                v = v + a * deltaT;
+            } else {
+                // TODO: x is not the position of the first contact!
+                v = plane->reflectAt(x, v);
+                x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+                // update velocity
+                v = v + a * deltaT;
+                // lost energy when bouncing
+                v *= 0.98;
+            }
+        }
+
+        // drag
+        // a = glm::vec3(0, -10.f, 0.f);
+        // a = a - 0.01f * (float)pow(glm::length(v), 2.f) * glm::normalize(v);
+
+        // plane->getTriangleIndex(this);
     }
-
-    // drag
-    // a = glm::vec3(0, -10.f, 0.f);
-    // a = a - 0.01f * (float)pow(glm::length(v), 2.f) * glm::normalize(v);
-
-
-// plane->getTriangleIndex(this);
 
     geo.transform = glm::translate(x)
         * glm::scale(glm::vec3(radius));
 
-    return plane->isAbove(x);
+    return true;
 }
 
 void
@@ -159,13 +159,15 @@ phyPlane::phyPlane(float xStart,
                    float zEnd,
                    float *heightMap,
                    int xNumPoints,
-                   int zNumPoints) :
+                   int zNumPoints,
+                   bool useBoundingBox) :
     xStart{xStart},
     xEnd{xEnd},
     zStart{zStart},
     zEnd{zEnd},
     xNumPoints{xNumPoints},
-    zNumPoints{zNumPoints}
+    zNumPoints{zNumPoints},
+    useBoundingBox{useBoundingBox}
 {
     xTileWidth = (xEnd - xStart) / (xNumPoints - 1);
     zTileWidth = (zEnd - zStart) / (zNumPoints - 1);
@@ -370,6 +372,11 @@ phyPlane::getTriangleAt(glm::vec3 pos) {
     float xInPlane = pos.x - xStart;
     float zInPlane = pos.z - zStart;
 
+    if(pos.x < xStart || pos.x > xEnd
+       || pos.z < zStart || pos.z > zEnd) {
+        return -1;
+    }
+
     // indices of the rectangle containing the sphere's center
     int xIndexRect = floor(xInPlane / xTileWidth);
     int zIndexRect = floor(zInPlane / zTileWidth);
@@ -493,7 +500,6 @@ phyPlane::getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd)
 bool
 phyPlane::isAbove(glm::vec3 x) {
     int index = getTriangleAt(x);
-
     // first vertex of the triangle
     glm::vec3 v1(vbo_data[index * 3 * 10 + 0],
                  vbo_data[index * 3 * 10 + 1],
@@ -514,11 +520,22 @@ phyPlane::isAbove(glm::vec3 x) {
 // @pos
 glm::vec3
 phyPlane::reflectAt(glm::vec3 pos, glm::vec3 v) {
+    if (!useBoundingBox) {
+        if(pos.x < xStart  || pos.x > xEnd
+           || pos.z < zStart || pos.z > zEnd) {
+            // the bounding box is diabled, and the sphere has left
+            // the bounding box, don't reflect at all, just 'fall of
+            // the world'
+            return v;
+        }
+    }
+
     int index = getTriangleAt(pos);
 
     // normal of the triangle's plane
     glm::vec3 norm(vbo_data[index * 3 * 10 + 3 + 0],
                    vbo_data[index * 3 * 10 + 3 + 1],
                    vbo_data[index * 3 * 10 + 3 + 2]);
+
     return v - 2*glm::dot(norm, v) * norm;
 }
