@@ -106,6 +106,8 @@ main(int, char* argv[]) {
 	// after linking the program the shader objects are no longer needed
 	glDeleteShader(fragmentShader);
 	glDeleteShader(vertexShader);
+
+	glUseProgram(sphereShaderProgram);
     int light_dir_loc = glGetUniformLocation(sphereShaderProgram, "light_dir");
     int sphere_model_mat_loc = glGetUniformLocation(sphereShaderProgram, "model_mat");
 
