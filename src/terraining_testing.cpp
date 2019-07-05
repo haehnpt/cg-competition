@@ -104,18 +104,34 @@ main(int, char* argv[]) {
 
 	///////////////////////// Physics /////////////////////////
 	// TODO: Move this code inside the physics class
-	unsigned int vertexShader = compileShader("simple.vert", GL_VERTEX_SHADER);
-	unsigned int fragmentShader = compileShader("simple.frag", GL_FRAGMENT_SHADER);
-	int sphereShaderProgram = linkProgram(vertexShader, fragmentShader);
+	unsigned int vertexShader = compileShader("shading_models.vert", GL_VERTEX_SHADER);
+	unsigned int fragmentShader = compileShader("shading_models.frag", GL_FRAGMENT_SHADER);
+	int phyShaderProgram = linkProgram(vertexShader, fragmentShader);
 	// after linking the program the shader objects are no longer needed
 	glDeleteShader(fragmentShader);
 	glDeleteShader(vertexShader);
 
-	glUseProgram(sphereShaderProgram);
-    int light_dir_loc = glGetUniformLocation(sphereShaderProgram, "light_dir");
-    int model_mat_loc = glGetUniformLocation(sphereShaderProgram, "model_mat");
-    int proj_mat_loc = glGetUniformLocation(sphereShaderProgram, "proj_mat");
-    int view_mat_loc = glGetUniformLocation(sphereShaderProgram, "view_mat");
+	glUseProgram(phyShaderProgram);
+	int light_dir_loc = glGetUniformLocation(phyShaderProgram, "light_dir");
+	int model_mat_loc = glGetUniformLocation(phyShaderProgram, "model_mat");
+	int proj_mat_loc = glGetUniformLocation(phyShaderProgram, "proj_mat");
+	int view_mat_loc = glGetUniformLocation(phyShaderProgram, "view_mat");
+	int roughness_loc = glGetUniformLocation(phyShaderProgram, "roughness");
+	int ref_index_loc = glGetUniformLocation(phyShaderProgram, "refractionIndex");
+	int diffuse_loc = glGetUniformLocation(phyShaderProgram, "diffuse");
+	int specular_loc = glGetUniformLocation(phyShaderProgram, "specular");
+	int use_oren_nayar_loc = glGetUniformLocation(phyShaderProgram, "useOrenNayar");
+	// Add albedo location
+	int albedo_loc = glGetUniformLocation(phyShaderProgram, "albedo");
+
+	// Shader variables
+	float roughness = 0.4f;
+	float refraction_index = 0.4f;
+	// Add variable for albedo
+	float albedo = 1.0f;
+	int use_oren_nayar = 1;
+	glm::vec4 diffuse_color(0.7f, 0.7f, 0.7f, 1.f);
+	glm::vec4 specular_color(1.0f, 1.0f, 1.0f, 1.f);
 
 	// Prepare terrain
 	terrain terr = terrain(TERRAIN_SIZE,
@@ -180,18 +196,31 @@ main(int, char* argv[]) {
 #ifndef USE_PHY_PLANE
 		terr.render(&cam, proj_matrix, light_dir);
 #else
-		glUseProgram(sphereShaderProgram);
+		glUseProgram(phyShaderProgram);
 		// reset the model matrix before rendering the plane
 		glm::mat4 m = glm::mat4(1.f);
 		glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &m[0][0]);
 		phyplane.bind();
+		glUniform1i(use_oren_nayar_loc, use_oren_nayar);
+		glUniform1f(roughness_loc, roughness);
+		// Uniform albedo
+		glUniform1f(albedo_loc, albedo);
+		glUniform1f(ref_index_loc, refraction_index);
+		glUniform4f(diffuse_loc, diffuse_color.x, diffuse_color.y, diffuse_color.z, diffuse_color.w);
+		glUniform4f(specular_loc, specular_color.x, specular_color.y, specular_color.z, specular_color.w)
 		glDrawArrays(GL_TRIANGLES, 0, phyplane.mVertices);
 #endif // USE_PHY_PLANE
-		glUseProgram(sphereShaderProgram);
+		glUseProgram(phyShaderProgram);
 		glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
 		glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &cam.view_matrix()[0][0]);
 		glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
-
+		glUniform1i(use_oren_nayar_loc, use_oren_nayar);
+		glUniform1f(roughness_loc, roughness);
+		// Uniform albedo
+		glUniform1f(albedo_loc, albedo);
+		glUniform1f(ref_index_loc, refraction_index);
+		glUniform4f(diffuse_loc, diffuse_color.x, diffuse_color.y, diffuse_color.z, diffuse_color.w);
+		glUniform4f(specular_loc, specular_color.x, specular_color.y, specular_color.z, specular_color.w);
 		if (frame >= BALLS_APPEARANCE_FRAME) {
 			if (frame >= BALLS_RELASE_FRAME) {
 				for (int i = 0; i < X_N_BALLS * Z_N_BALLS; i++) {
