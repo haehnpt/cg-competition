@@ -48,8 +48,8 @@ main(int, char* argv[]) {
     camera cam(window);
 
     // load and compile shaders and link program
-    unsigned int vertexShader = compileShader("terrain_shader.vert", GL_VERTEX_SHADER);
-    unsigned int fragmentShader = compileShader("terrain_shader.frag", GL_FRAGMENT_SHADER);
+    unsigned int vertexShader = compileShader("simple.vert", GL_VERTEX_SHADER);
+    unsigned int fragmentShader = compileShader("simple.frag", GL_FRAGMENT_SHADER);
     unsigned int shaderProgram = linkProgram(vertexShader, fragmentShader);
     // after linking the program the shader objects are no longer needed
     glDeleteShader(fragmentShader);
@@ -99,7 +99,7 @@ main(int, char* argv[]) {
                       RESOLUTION,
                       RESOLUTION);
 
-    phySphere sphere1(glm::vec3(0.f, 4.f, 0.f),
+    phySphere sphere1(glm::vec3(0.f, 1.f, 0.f),
                       glm::vec3(0.f, 2.f, 0.f),
                       0.08f, glm::vec4(1.0f, 1.0f, 0.0f, 1.f), &phyplane);
     // customized acceleration for the first tests
@@ -131,13 +131,20 @@ main(int, char* argv[]) {
         glUniform4fv(specular_loc, 1, &specular_color[0]);
 
         // Render terrain
-        terr.render(model_mat_loc);
+        // terr.render(model_mat_loc);
 
         glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &sphere1.geo.transform[0][0]);
 
         sphere1.step(0.03);
         sphere1.geo.bind();
         glDrawElements(GL_TRIANGLES, sphere1.geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+
+        // reset the model matrix before rendering the plane
+        glm::mat4 m = glm::mat4(1.f);
+        glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &m[0][0]);
+        phyplane.bind();
+        // glUniform1i(use_special_color_loc, true);
+        glDrawArrays(GL_TRIANGLES, 0, phyplane.mVertices);
 
 
         // Light motion
