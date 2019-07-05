@@ -39,11 +39,12 @@
 #endif
 
 // Sphere/Physics settings
-#define X_N_BALLS 25
-#define Z_N_BALLS 25
+#define SPHERE_RADIUS 0.08f
+#define X_N_SPHERES 25
+#define Z_N_SPHERES 25
 // #define USE_PHY_PLANE
-#define BALLS_APPEARANCE_FRAME 200
-#define BALLS_RELASE_FRAME 300
+#define SPHERES_APPEARANCE_FRAME 300
+#define SPHERES_RELASE_FRAME 400
 
 
 // Camera settings
@@ -128,32 +129,33 @@ main(int, char* argv[]) {
 
 	// Prepare physics plane
 	phyPlane phyplane(-TERRAIN_SIZE / 2.f,
-					  TERRAIN_SIZE / 2.f,
-					  -TERRAIN_SIZE / 2.f,
-					  TERRAIN_SIZE / 2.f,
-					  terr.heights,
-					  TERRAIN_RESOLUTION,
-					  TERRAIN_RESOLUTION,
-					  false);
+			  TERRAIN_SIZE / 2.f,
+			  -TERRAIN_SIZE / 2.f,
+			  TERRAIN_SIZE / 2.f,
+			  terr.heights,
+			  TERRAIN_RESOLUTION,
+			  TERRAIN_RESOLUTION,
+			  false,
+			  SPHERE_RADIUS);
 	// Prepare spheres
-	phySphere * spheres[X_N_BALLS * Z_N_BALLS];
+	phySphere * spheres[X_N_SPHERES * Z_N_SPHERES];
 
-	float dx = (phyplane.xEnd - phyplane.xStart) / X_N_BALLS;
-	float dz = (phyplane.zEnd - phyplane.zStart) / Z_N_BALLS;
+	float dx = (phyplane.xEnd - phyplane.xStart) / X_N_SPHERES;
+	float dz = (phyplane.zEnd - phyplane.zStart) / Z_N_SPHERES;
 
-	for (int x = 0; x < X_N_BALLS; x++ ) {
-		for (int z = 0; z < Z_N_BALLS; z++ ) {
-			float col = (float)x * (float)z / X_N_BALLS / X_N_BALLS;
+	for (int x = 0; x < X_N_SPHERES; x++ ) {
+		for (int z = 0; z < Z_N_SPHERES; z++ ) {
+			float col = (float)x * (float)z / X_N_SPHERES / X_N_SPHERES;
 
-			spheres[x * Z_N_BALLS + z]
-				= new phySphere(glm::vec3(phyplane.xStart + x * dx,
-										  1.f,
-										  phyplane.zStart + z * dz),
-								glm::vec3(0.f, 2.f, 0.f),
-								0.08f,
-								glm::vec4(col, 1.f - col, 1.0f, 1.f),
-								&phyplane,
-								model_mat_loc);
+			spheres[x * Z_N_SPHERES + z]
+			    = new phySphere(glm::vec3(phyplane.xStart + x * dx,
+						      1.f,
+						      phyplane.zStart + z * dz),
+					    glm::vec3(0.f, 0.f, 0.f),
+					    SPHERE_RADIUS,
+					    glm::vec4(col, 1.f - col, 1.0f, 1.f),
+					    &phyplane,
+					    model_mat_loc);
 		}
 	}
 
@@ -192,14 +194,21 @@ main(int, char* argv[]) {
 		glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &cam.view_matrix()[0][0]);
 		glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
 
-		if (frame >= BALLS_APPEARANCE_FRAME) {
-			if (frame >= BALLS_RELASE_FRAME) {
-				for (int i = 0; i < X_N_BALLS * Z_N_BALLS; i++) {
-					spheres[i]->step(0.03);
+		glUniform1i(use_oren_nayar_loc, use_oren_nayar);
+		glUniform1f(roughness_loc, roughness);
+		// Uniform albedo
+		glUniform1f(albedo_loc, albedo);
+		glUniform1f(ref_index_loc, refraction_index);
+		glUniform4f(diffuse_loc, diffuse_color.x, diffuse_color.y, diffuse_color.z, diffuse_color.w);
+		glUniform4f(specular_loc, specular_color.x, specular_color.y, specular_color.z, specular_color.w);
+		if (frame >= SPHERES_APPEARANCE_FRAME) {
+			if (frame >= SPHERES_RELASE_FRAME) {
+				for (int i = 0; i < X_N_SPHERES * Z_N_SPHERES; i++) {
+					spheres[i]->step(0.015);
 				}
 			}
 
-			for (int i = 0; i < X_N_BALLS * Z_N_BALLS; i++) {
+			for (int i = 0; i < X_N_SPHERES * Z_N_SPHERES; i++) {
 				spheres[i]->render();
 			}
 		}
