@@ -10,13 +10,43 @@
 
 ## Technisches Konzept
 
-## Arbeitsschritte + Teilergebnisse
+## Arbeitsschritte, Komponenten, Teilergebnisse
 
-## Noise Generation
+### Noise Generation (Perlin Noise)
+
+Die Noise Generation ist für die nachfolgende Terrain Generation essenziell. Wir haben uns für *Perlin Noise* [1] entschieden, da diese Methode für unsere Zwecke hinreichend ist und durch Überlagerung von verschiedenen Frequenzen anschauliche Height-Maps generiert werden können. Die Funktionalität wurde in der Klasse **perlin_noise** gekapselt, die ausschließlich innerhalb der nachfolgenden Terrain Generation verwendet wird.
+
+```cpp
+class perlin_noise 
+{
+	// Private member properties
+    float *** gradients;
+    int gradients_count;
+    float max_distance;
+    float offset;
+    float scaling;
+    float gradient_grid_distance;
+
+	// Private member functions
+    void create_gradients();
+    float dot_grid_gradient(int index_x, int index_y, float x, float y);
+    float lerp(float high, float low, float weight);
+	float fade(float x);
+
+public:
+	// Public constructor & destructor
+    perlin_noise(int gradients_count, float grid_distance, float offset, float scaling);
+    ~perlin_noise();
+
+	// Public member functions
+    float get_noise(float x, float y);
+	void clear_gradients();
+};
+```
 
 ### Terrain Generation
 
-Die Generierung der Terrains sowie dessen Visualisierung werden in einer Klasse **terrain** gekapselt, sodass nach deren Instanziierung lediglich die öffentliche Funktion **terrain::render(int)** in der Render-Loop aufgerufen werden muss. Die Klasse bietet desweiteren eine Funktion **terrain::get_normal_at_pos(float,float)**, die für die physikalischen Berechnungen benötigt wird. Die Generierung des Terrains basiert auf der obigen eigenen Implementierung von **perlin_noise** und wurde inspiriert durch *Red Blob Games*[1].
+Die Generierung der Terrains sowie dessen Visualisierung werden in einer Klasse **terrain** gekapselt, sodass nach deren Instanziierung lediglich die öffentliche Funktion **terrain::render(int)** in der Render-Loop aufgerufen werden muss. Die Klasse bietet desweiteren eine Funktion **terrain::get_normal_at_pos(float,float)**, die für die physikalischen Berechnungen benötigt wird. Die Generierung des Terrains basiert auf der obigen eigenen Implementierung von **perlin_noise** und wurde inspiriert durch *Red Blob Games* [2].
 
 ```cpp
 class terrain
@@ -68,12 +98,16 @@ public:
 	void render(int model_loc);
 };
 ```
+### Physikalische Simulation
 
+### Kamera Effekte
+
+### Video Rendering
 
 ## Ergebnis
 
-## Kommentare
 
 ## Referenzen
 
-[1] Red Blob Games, https://www.redblobgames.com/maps/terrain-from-noise/, abgerufen: 05.07.2019
+[1] Wikipedia, https://en.wikipedia.org/wiki/Perlin_noise, abgerufen: 05.07.2019
+[2] Red Blob Games, https://www.redblobgames.com/maps/terrain-from-noise/, abgerufen: 05.07.2019
