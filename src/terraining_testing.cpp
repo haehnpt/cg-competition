@@ -42,6 +42,9 @@
 #define X_N_BALLS 25
 #define Z_N_BALLS 25
 // #define USE_PHY_PLANE
+#define BALLS_APPEARANCE_FRAME 200
+#define BALLS_RELASE_FRAME 300
+
 
 // Camera settings
 #define CAMERA_PHI 0.25f
@@ -159,6 +162,7 @@ main(int, char* argv[]) {
 	ffmpeg_wrapper fw(RENDER_WIDTH, RENDER_HEIGHT, RENDER_FRAMES);
 	#endif
 
+	int frame = 0;
     // rendering loop
 	while (glfwWindowShouldClose(window) == false)
 	{
@@ -183,13 +187,18 @@ main(int, char* argv[]) {
 		phyplane.bind();
 		glDrawArrays(GL_TRIANGLES, 0, phyplane.mVertices);
 #endif // USE_PHY_PLANE
-		glUseProgram(sphereShaderProgram);
-		glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
-		glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &cam.view_matrix()[0][0]);
-		glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
-		for (int i = 0; i < X_N_BALLS * Z_N_BALLS; i++) {
-			spheres[i]->step(0.03);
-			spheres[i]->render();
+		if (frame >= BALLS_APPEARANCE_FRAME) {
+			glUseProgram(sphereShaderProgram);
+			glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
+			glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &cam.view_matrix()[0][0]);
+			glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
+
+			for (int i = 0; i < X_N_BALLS * Z_N_BALLS; i++) {
+				if (frame >= BALLS_RELASE_FRAME) {
+					spheres[i]->step(0.03);
+				}
+				spheres[i]->render();
+			}
 		}
 
 		// Rotate camera
@@ -210,6 +219,7 @@ main(int, char* argv[]) {
 			break;
 		}
 		#endif
+		frame++;
 	}
 
 	glfwTerminate();
