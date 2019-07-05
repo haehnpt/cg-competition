@@ -39,8 +39,8 @@
 #endif
 
 // Sphere/Physics settings
-#define X_N_BALLS 20
-#define Z_N_BALLS 20
+#define X_N_BALLS 25
+#define Z_N_BALLS 25
 // #define USE_PHY_PLANE
 
 // Camera settings

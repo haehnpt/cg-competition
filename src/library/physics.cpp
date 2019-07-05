@@ -37,7 +37,7 @@ phySphere::phySphere(glm::vec3 x,
 {
     // std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << "\n";
     a.x = 0;
-    a.y = -1;
+    a.y = -4;
     a.z = 0;
 
     geo = loadMesh("sphere.obj", false, color);
@@ -83,7 +83,7 @@ phySphere::step(float deltaT) {
             // update velocity
             v = v + a * deltaT;
             // lost energy when bouncing
-            v *= 0.98;
+            v *= 0.80;
         }
     } else {
         // ignoring the bounding box
