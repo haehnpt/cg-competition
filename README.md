@@ -1,9 +1,9 @@
 ﻿# cg-competition
 Repository für die "Computer Animation Challenge" der Vorlesung "Computergraphik" an der Universität Bonn (SS 2019)
 
-## Gif preview of "ffmpeg/Terrain_Rising.mp4"
+## Gif "Vorschauvideo"
 
-![](ffmpeg/Terrain_Rising.gif)
+![](ffmpeg/Vorschauvideo.gif)
 
 ## Image of Terrain
 
