@@ -3,7 +3,7 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec4 color;
 
-uniform mat4 model_mat;
+uniform mat4 terr_model_mat;
 
 uniform mat4 view_mat;
 uniform mat4 proj_mat;
@@ -44,7 +44,7 @@ void main()
 
 	// LIGHT DIRECTION
 	vec3 temp_normal = normalize((1.0 - delta) * vec3(0.0,1.0,0.0) + delta * normal);
-    interp_normal = normalize((transpose(inverse(view_mat * model_mat)) * vec4(temp_normal, 0.0)).xyz);
+    interp_normal = normalize((transpose(inverse(view_mat * terr_model_mat)) * vec4(temp_normal, 0.0)).xyz);
     interp_light_dir = normalize((view_mat * vec4(light_dir, 0.0)).xyz);
 
 	// POSITION & DISPLACEMENT MAPPING
@@ -56,7 +56,7 @@ void main()
 	float displacement_scalar = ((displacement.r + displacement.g + displacement.b) / 3.0 / (0.5 / displacement_amplitude) - displacement_amplitude) * tex_height.x;
 
 	vec4 displaced_position = vec4(position.x, delta * position.y, position.z, 1.0) + displacement_scalar * vec4(interp_normal, 0.0);
-    gl_Position = proj_mat * view_mat * model_mat * displaced_position;
+    gl_Position = proj_mat * view_mat * terr_model_mat * displaced_position;
 
 	// COLOR
 	interp_color = vec4(1.0,1.0,1.0,1.0);
