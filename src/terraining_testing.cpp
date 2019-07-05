@@ -41,6 +41,7 @@
 // Sphere/Physics settings
 #define X_N_BALLS 20
 #define Z_N_BALLS 20
+#define USE_PHY_PLANE
 
 // Camera settings
 #define CAMERA_PHI 0.25f
@@ -172,12 +173,20 @@ main(int, char* argv[]) {
 			std::sin(light_phi) * std::sin(light_theta));
 
 		// Render terrain
+#ifndef USE_PHY_PLANE
 		terr.render(&cam, proj_matrix, light_dir);
-
+#else
 		glUseProgram(sphereShaderProgram);
+		// reset the model matrix before rendering the plane
+		glm::mat4 m = glm::mat4(1.f);
+		glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &m[0][0]);
+		phyplane.bind();
+		glDrawArrays(GL_TRIANGLES, 0, phyplane.mVertices);
+#endif // USE_PHY_PLANE
+
 		glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
 		glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &cam.view_matrix()[0][0]);
-        glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
+		glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
 		for (int i = 0; i < X_N_BALLS * Z_N_BALLS; i++) {
 			spheres[i]->step(0.03);
 			spheres[i]->render();
@@ -191,8 +200,8 @@ main(int, char* argv[]) {
 		fw.save_frame();
 		#endif
 
-        // render UI
-        glfwSwapBuffers(window);
+		// render UI
+		glfwSwapBuffers(window);
 
 		// Check for stop
 		#ifdef RENDER_VIDEO
@@ -201,9 +210,9 @@ main(int, char* argv[]) {
 			break;
 		}
 		#endif
-    }
+	}
 
-    glfwTerminate();
+	glfwTerminate();
 }
 
 void resizeCallback(GLFWwindow*, int width, int height)
