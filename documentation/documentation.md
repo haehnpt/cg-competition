@@ -14,7 +14,7 @@
 
 ### Terrain Generation
 
-`
+```cpp
 class terrain
 {
 	float * get_heights(float range, float rigidity);
@@ -56,7 +56,7 @@ public:
 	static void set_texture_filter_mode(unsigned int texture, GLenum mode);
 	static void set_texture_wrap_mode(unsigned int texture, GLenum mode);
 };
-`
+```
 
 
 ## Ergebnis
