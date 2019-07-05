@@ -12,6 +12,8 @@
 #include "mesh.hpp"
 #include "perlin_noise.hpp"
 #include <buffer.hpp>
+#include <camera.hpp>
+#include <shader.hpp>
 #include <math.h>
 #include <ctime>
 
@@ -33,9 +35,17 @@ class terrain
 	float highest_height = 1.0;
 
 	// Static private class properties
+	static int terrainShaderProgram;
 	static int stone_loc;
 	static int grass_loc;
 	static int snow_loc;
+	static int view_mat_loc;
+	static int proj_mat_loc;
+	static int light_dir_loc;
+	static int albedo_loc;
+	static int roughness_loc;
+	static int ref_index_loc;
+	static int terr_model_loc;
 
 	// Private member functions
 	float * get_heights(float range, float rigidity);
@@ -56,11 +66,14 @@ class terrain
 
 public:
 	// Public constructor & destructor
-	terrain(float size, int resolution, int start_frame, int max_frame, int shader_program, std::string stone, std::string grass, std::string snow);
+	terrain(float size, int resolution, int start_frame, int max_frame, std::string stone, std::string grass, std::string snow);
 	~terrain();
 
 	// Public member functions
 	glm::vec3 * get_normal_at_pos(float x, float z);
-	void render(int model_loc);
+	void render(camera * cam, glm::mat4 proj_matrix, glm::vec3 light_dir);
+
+	// Public static functions
+	static void create_terrain_shaders();
 };
 

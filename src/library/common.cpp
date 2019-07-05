@@ -9,7 +9,9 @@ initOpenGL(int width, int height, const char* title) {
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
 #endif
-    GLFWwindow* window = glfwCreateWindow(width, height, title, glfwGetPrimaryMonitor(), nullptr);
+	GLFWmonitor * monitor = glfwGetPrimaryMonitor();
+	bool fullscreen = width == 0 | height == 0;
+    GLFWwindow* window = glfwCreateWindow(fullscreen ? 1920 : width, fullscreen ? 1080 : height, title, fullscreen ? monitor : nullptr, nullptr);
 
     // Check for Valid Context
     if (window == nullptr) {

@@ -196,8 +196,24 @@ void terrain::increase_current_frame(int increase)
 	this->current_frame += (this->current_frame < this->frames ? increase : 0);
 }
 
-void terrain::render(int model_loc)
+int terrain::view_mat_loc;
+int terrain::proj_mat_loc;
+int terrain::light_dir_loc;
+int terrain::albedo_loc;
+int terrain::roughness_loc;
+int terrain::ref_index_loc;
+int terrain::terr_model_loc;
+void terrain::render(camera * cam, glm::mat4 proj_matrix, glm::vec3 light_dir)
 {
+	glm::mat4 view_matrix = cam->view_matrix();
+	glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &view_matrix[0][0]);
+	glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
+
+	glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
+	glUniform1f(roughness_loc, 0.6f);
+	glUniform1f(albedo_loc, 1.0f);
+	glUniform1f(ref_index_loc, 0.5f);
+
 	glUniform1f(this->frame_loc, this->current_frame);
 	glUniform1f(this->max_frame_loc, this->frames);
 
@@ -205,7 +221,7 @@ void terrain::render(int model_loc)
 	glUniform1i(grass_loc, 1);
 	glUniform1i(snow_loc, 2);
 
-	glUniformMatrix4fv(model_loc, 1, GL_FALSE, &this->terra.transform[0][0]);
+	glUniformMatrix4fv(terr_model_loc, 1, GL_FALSE, &this->terra.transform[0][0]);
 	this->terra.bind();
 	glDrawElements(GL_TRIANGLES, this->terra.vertex_count, GL_UNSIGNED_INT, (void*)0);
 
@@ -223,16 +239,17 @@ Get an new terrain instance
 - grass : grass - - -
 - snow : snow - - -
 */
-terrain::terrain(float size, int resolution, int start_frame, int max_frame, int shader_program, std::string stone, std::string grass, std::string snow)
+terrain::terrain(float size, int resolution, int start_frame, int max_frame, std::string stone, std::string grass, std::string snow)
 {
 	this->size = size;
 	this->resolution = resolution;
 	heights = get_heights(size, 1.0);
 	clamp_heights();
 	build();
-	get_texture_locations(shader_program);
+	create_terrain_shaders();
+	get_texture_locations(terrainShaderProgram);
 	load_textures(stone, grass, snow);
-	get_frame_locations(shader_program);
+	get_frame_locations(terrainShaderProgram);
 	set_frames(start_frame, max_frame);
 }
 
@@ -321,4 +338,26 @@ void terrain::set_texture_filter_mode(unsigned int texture, GLenum mode) {
 void terrain::set_texture_wrap_mode(unsigned int texture, GLenum mode) {
 	glTextureParameteri(texture, GL_TEXTURE_WRAP_S, mode);
 	glTextureParameteri(texture, GL_TEXTURE_WRAP_T, mode);
+}
+
+int terrain::terrainShaderProgram;
+void terrain::create_terrain_shaders() 
+{
+	// load and compile shaders and link program
+	unsigned int vertexShader = compileShader("terrain_shader.vert", GL_VERTEX_SHADER);
+	unsigned int fragmentShader = compileShader("terrain_shader.frag", GL_FRAGMENT_SHADER);
+	terrainShaderProgram = linkProgram(vertexShader, fragmentShader);
+	// after linking the program the shader objects are no longer needed
+	glDeleteShader(fragmentShader);
+	glDeleteShader(vertexShader);
+
+	glUseProgram(terrainShaderProgram);
+	terr_model_loc = glGetUniformLocation(terrainShaderProgram, "terr_model_mat");
+	view_mat_loc = glGetUniformLocation(terrainShaderProgram, "view_mat");
+	proj_mat_loc = glGetUniformLocation(terrainShaderProgram, "proj_mat");
+	light_dir_loc = glGetUniformLocation(terrainShaderProgram, "light_dir");
+	roughness_loc = glGetUniformLocation(terrainShaderProgram, "roughness");
+	ref_index_loc = glGetUniformLocation(terrainShaderProgram, "refractionIndex");
+	albedo_loc = glGetUniformLocation(terrainShaderProgram, "albedo");
+
 }

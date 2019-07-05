@@ -9,8 +9,6 @@ in vec2 tex_height;
 
 out vec4 frag_color;
 
-uniform bool useOrenNayar;
-
 uniform sampler2D stone_tex;
 uniform sampler2D grass_tex;
 uniform sampler2D snow_tex;
@@ -18,8 +16,6 @@ uniform sampler2D snow_tex;
 uniform float albedo; // albedo
 uniform float roughness; // sigma
 uniform float refractionIndex;
-uniform vec4 diffuse; // diffuse part as color
-uniform vec4 specular; // specular part as color
 
 const float pi = 3.14159265359;
 
@@ -99,9 +95,7 @@ void main() {
     float diffuseTerm = cdot(interp_normal, interp_light_dir);
     // define the diffuse part to be Lambertian - unless we choose Oren-Nayer
     // in this case compute Oren-Nayar reusing the Lambertian term and use that
-    if (useOrenNayar) {
-        diffuseTerm = orennayarTerm(diffuseTerm, interp_normal, interp_light_dir);
-    }
+    diffuseTerm = orennayarTerm(diffuseTerm, interp_normal, interp_light_dir);
     // lowest possbile value = ambient fake light term
     diffuseTerm = max(diffuseTerm, 0.1);
     // as specular part we compute the Cook-Torrance term
@@ -129,8 +123,7 @@ void main() {
 		diff = texture2D(grass_tex, uv);
 	}
 
-	//diff = vec4(0.0,0.0,0.0,1.0);
-	float intensity = 100.0;
-	spec = intensity * (diff + vec4(0.2,0.2,0.2,0.0));
+	spec = diff + vec4(0.1,0.1,0.09,0.0);
+	// spec = vec4(10.0,0.0,0.0,1.0);
 	frag_color = vec4(vec3(clamp(diff * diffuseTerm + spec * specularTerm, 0.0, 1.0)), 1);
 }
