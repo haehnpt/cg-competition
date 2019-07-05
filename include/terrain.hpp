@@ -50,77 +50,10 @@ public:
 	void increase_current_frame(int increase = 1);
 	void render(int model_loc);
 	static void get_texture_locations(int shader_program);
-
-	static void load_textures(std::string stone, std::string grass, std::string snow){
-		int image_width, image_height;
-
-		// Stone texture
-		float* image_tex_data = terrain::load_texture_data(std::string(DATA_ROOT) + stone, &image_width, &image_height);
-		unsigned int image_tex1 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
-		glBindTextureUnit(0, image_tex1);
-		delete[] image_tex_data;
-
-		// Grass texture
-		image_tex_data = terrain::load_texture_data(std::string(DATA_ROOT) + grass, &image_width, &image_height);
-		unsigned int image_tex2 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
-		glBindTextureUnit(1, image_tex2);
-		delete[] image_tex_data;
-
-		// Snow texture
-		image_tex_data = terrain::load_texture_data(std::string(DATA_ROOT) + snow, &image_width, &image_height);
-		unsigned int image_tex3 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
-		glBindTextureUnit(2, image_tex3);
-		delete[] image_tex_data;
-
-		// Set properties
-		set_texture_filter_mode(image_tex1, GL_LINEAR_MIPMAP_LINEAR);
-		set_texture_filter_mode(image_tex2, GL_LINEAR_MIPMAP_LINEAR);
-		set_texture_filter_mode(image_tex3, GL_LINEAR_MIPMAP_LINEAR);
-
-		set_texture_wrap_mode(image_tex1, GL_MIRRORED_REPEAT);
-		set_texture_wrap_mode(image_tex2, GL_MIRRORED_REPEAT);
-		set_texture_wrap_mode(image_tex3, GL_MIRRORED_REPEAT);
-	}
-
-	static unsigned create_texture_rgba32f(int width, int height, float* data) {
-		unsigned handle;
-		glCreateTextures(GL_TEXTURE_2D, 1, &handle);
-		glTextureStorage2D(handle, 1, GL_RGBA32F, width, height);
-		glTextureSubImage2D(handle, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		return handle;
-	}
-
-	static float* load_texture_data(std::string filename, int* width, int* height) {
-		int channels;
-		unsigned char* file_data = stbi_load(filename.c_str(), width, height, &channels, 3);
-
-		int w = *width;
-		int h = *height;
-
-		float* data = new float[4 * w * h];
-		for (int j = 0; j < h; ++j) {
-			for (int i = 0; i < w; ++i) {
-				data[j*w * 4 + i * 4 + 0] = static_cast<float>(file_data[j*w * 3 + i * 3 + 0]) / 255;
-				data[j*w * 4 + i * 4 + 1] = static_cast<float>(file_data[j*w * 3 + i * 3 + 1]) / 255;
-				data[j*w * 4 + i * 4 + 2] = static_cast<float>(file_data[j*w * 3 + i * 3 + 2]) / 255;
-				data[j*w * 4 + i * 4 + 3] = 1.f;
-			}
-		}
-
-		delete[] file_data;
-
-		return data;
-	}
-
-	static void set_texture_filter_mode(unsigned int texture, GLenum mode) {
-		glTextureParameteri(texture, /*GL_TEXTURE_MAG_FILTER*/GL_TEXTURE_MIN_FILTER, mode);
-	}
-
-	static void set_texture_wrap_mode(unsigned int texture, GLenum mode) {
-		glTextureParameteri(texture, GL_TEXTURE_WRAP_S, mode);
-		glTextureParameteri(texture, GL_TEXTURE_WRAP_T, mode);
-	}
+	static void load_textures(std::string stone, std::string grass, std::string snow);
+	static unsigned create_texture_rgba32f(int width, int height, float* data);
+	static float* load_texture_data(std::string filename, int* width, int* height);
+	static void set_texture_filter_mode(unsigned int texture, GLenum mode);
+	static void set_texture_wrap_mode(unsigned int texture, GLenum mode);
 };
 
