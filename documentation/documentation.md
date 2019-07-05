@@ -16,6 +16,8 @@
 
 Die Noise Generation ist für die nachfolgende Terrain Generation essenziell. Wir haben uns für *Perlin Noise* [1] entschieden, da diese Methode für unsere Zwecke hinreichend ist und durch Überlagerung von verschiedenen Frequenzen anschauliche Height-Maps generiert werden können. Die Funktionalität wurde in der Klasse **perlin_noise** gekapselt, die ausschließlich innerhalb der nachfolgenden Terrain Generation verwendet wird.
 
+Verantwortlich: Patrick Hähn
+
 ```cpp
 class perlin_noise 
 {
@@ -46,7 +48,9 @@ public:
 
 ### Terrain Generation
 
-Die Generierung der Terrains sowie dessen Visualisierung werden in einer Klasse **terrain** gekapselt, sodass nach deren Instanziierung lediglich die öffentliche Funktion **terrain::render(int)** in der Render-Loop aufgerufen werden muss. Die Klasse bietet desweiteren eine Funktion **terrain::get_normal_at_pos(float,float)**, die für die physikalischen Berechnungen benötigt wird. Die Generierung des Terrains basiert auf der obigen eigenen Implementierung von **perlin_noise** und wurde inspiriert durch *Red Blob Games* [2].
+Die Generierung der Terrains sowie dessen Visualisierung werden in einer Klasse **terrain** gekapselt, sodass nach deren Instanziierung lediglich die öffentliche Funktion **terrain::render(int)** in der Render-Loop aufgerufen werden muss. Bei der Generierung wird die Klasse *geometry* des Frameworks wiederverwendet, um das Terrain zu repräsentieren. Die Klasse bietet desweiteren eine Funktion **terrain::get_normal_at_pos(float,float)**, die für die physikalischen Berechnungen benötigt wird. Die Generierung des Terrains basiert auf der obigen eigenen Implementierung von **perlin_noise** und wurde inspiriert durch *Red Blob Games* [2].
+
+Verantwortlich: Patrick Hähn
 
 ```cpp
 class terrain
@@ -104,6 +108,31 @@ public:
 
 ### Video Rendering
 
+Das Rendering des Videos wurde mit Hilfe des unter *MIT-Lizenz* veröffentlichten Tools *ffmpeg* [3] realisiert. Dazu wurde eine Wrapper-Klasse **ffmpeg_wrapper** erstellt, die den Workflow kapselt, sodass lediglich nach jedem Durchlauf der Renderloop der aktuelle Framebuffer mit der Funktion **ffmpeg_wrapper::save_frame()** an *ffmpeg* übergeben werden muss.
+
+Verantwortlich: Patrick Hähn
+
+```cpp
+class ffmpeg_wrapper
+{
+    // Private member properties
+	int width;
+	int height;
+	int frames;
+	int frame_counter;
+	FILE * ffmpeg;
+
+public:
+    // Public constructor & destructor
+	ffmpeg_wrapper(int width, int height, int frames);
+	~ffmpeg_wrapper();
+
+    // Public member functions
+	void save_frame();
+	bool is_finished();
+};
+```
+
 ## Ergebnis
 
 
@@ -111,3 +140,4 @@ public:
 
 [1] Wikipedia, https://en.wikipedia.org/wiki/Perlin_noise, abgerufen: 05.07.2019
 [2] Red Blob Games, https://www.redblobgames.com/maps/terrain-from-noise/, abgerufen: 05.07.2019
+[3] FFMPEG, https://ffmpeg.org/, abgerufen: 05.07.2019
