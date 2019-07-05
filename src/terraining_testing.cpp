@@ -11,13 +11,13 @@
 // Global settings
 #define DEBUG
 #define x64
-//#define RENDER_VIDEO
-// #define DO_FULLSCREEN
+#define RENDER_VIDEO
+#define DO_FULLSCREEN
 
 // Render size
-#define RENDER_WIDTH 1920;
-#define RENDER_HEIGHT 1080;
-#define RENDER_FRAMES 1200;
+#define RENDER_WIDTH 1920
+#define RENDER_HEIGHT 1080
+#define RENDER_FRAMES 1000
 
 // Window size
 #define WINDOW_WIDTH 1920
@@ -42,8 +42,8 @@
 #define X_N_BALLS 25
 #define Z_N_BALLS 25
 // #define USE_PHY_PLANE
-#define BALLS_APPEARANCE_FRAME 200
-#define BALLS_RELASE_FRAME 300
+#define BALLS_APPEARANCE_FRAME 300
+#define BALLS_RELASE_FRAME 400
 
 
 // Camera settings
@@ -162,14 +162,14 @@ main(int, char* argv[]) {
 			float col = (float)x * (float)z / X_N_BALLS / X_N_BALLS;
 
 			spheres[x * Z_N_BALLS + z]
-				= new phySphere(glm::vec3(phyplane.xStart + x * dx,
-										  1.f,
-										  phyplane.zStart + z * dz),
-								glm::vec3(0.f, 2.f, 0.f),
-								0.08f,
-								glm::vec4(col, 1.f - col, 1.0f, 1.f),
-								&phyplane,
-								model_mat_loc);
+			    = new phySphere(glm::vec3(phyplane.xStart + x * dx,
+						      1.f,
+						      phyplane.zStart + z * dz),
+					    glm::vec3(0.f, 0.f, 0.f),
+					    0.08f,
+					    glm::vec4(col, 1.f - col, 1.0f, 1.f),
+					    &phyplane,
+					    model_mat_loc);
 		}
 	}
 
@@ -224,7 +224,7 @@ main(int, char* argv[]) {
 		if (frame >= BALLS_APPEARANCE_FRAME) {
 			if (frame >= BALLS_RELASE_FRAME) {
 				for (int i = 0; i < X_N_BALLS * Z_N_BALLS; i++) {
-					spheres[i]->step(0.03);
+					spheres[i]->step(0.015);
 				}
 			}
 
