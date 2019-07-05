@@ -109,7 +109,9 @@ main(int, char* argv[]) {
 
 	glUseProgram(sphereShaderProgram);
     int light_dir_loc = glGetUniformLocation(sphereShaderProgram, "light_dir");
-    int sphere_model_mat_loc = glGetUniformLocation(sphereShaderProgram, "model_mat");
+    int model_mat_loc = glGetUniformLocation(sphereShaderProgram, "model_mat");
+    int proj_mat_loc = glGetUniformLocation(sphereShaderProgram, "proj_mat");
+    int view_mat_loc = glGetUniformLocation(sphereShaderProgram, "view_mat");
 
 	// Prepare terrain
 	terrain terr = terrain(TERRAIN_SIZE,
@@ -147,7 +149,7 @@ main(int, char* argv[]) {
 								0.08f,
 								glm::vec4(col, 1.f - col, 0.2f, 1.f),
 								&phyplane,
-								sphere_model_mat_loc);
+								model_mat_loc);
 		}
 	}
 
@@ -172,8 +174,9 @@ main(int, char* argv[]) {
 		// Render terrain
 		terr.render(&cam, proj_matrix, light_dir);
 
-		// FIXME: Uncommenting this makes the spheres disappear!
-		// glUseProgram(sphereShaderProgram);
+		glUseProgram(sphereShaderProgram);
+		glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
+		glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &cam.view_matrix()[0][0]);
         glUniform3f(light_dir_loc, light_dir.x, light_dir.y, light_dir.z);
 		for (int i = 0; i < X_N_BALLS * Z_N_BALLS; i++) {
 			spheres[i]->step(0.03);
