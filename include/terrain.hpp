@@ -4,7 +4,7 @@
 *
 * This terrain class was inspired by
 * - https://www.redblobgames.com/maps/terrain-from-noise/
-* 
+*
 * - author : Patrick Hähn
 *
 */
@@ -25,7 +25,6 @@ class terrain
 	int frame_loc;
 	int max_frame_loc;
 	geometry terra;
-	float * heights;
 	int frames;
 	float size;
 	int resolution;
@@ -72,6 +71,10 @@ public:
 	// Public member functions
 	glm::vec3 * get_normal_at_pos(float x, float z);
 	void render(camera * cam, glm::mat4 proj_matrix, glm::vec3 light_dir);
+
+	// Public member proterties (physics needs access)
+	float * heights;
+
 
 	// Public static functions
 	static void create_terrain_shaders();
