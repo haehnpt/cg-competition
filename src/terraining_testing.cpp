@@ -144,17 +144,17 @@ main(int, char* argv[]) {
 						   SNOW);
 
 	// Prepare physics plane
-	phyPlane phyplane(-TERRAIN_SIZE / 2.f,
-					  TERRAIN_SIZE / 2.f,
-					  -TERRAIN_SIZE / 2.f,
-					  TERRAIN_SIZE / 2.f,
-					  terr.heights,
-					  TERRAIN_RESOLUTION,
-					  TERRAIN_RESOLUTION,
-					  false);
+	phy::phyPlane phyplane(-TERRAIN_SIZE / 2.f,
+						   TERRAIN_SIZE / 2.f,
+						   -TERRAIN_SIZE / 2.f,
+						   TERRAIN_SIZE / 2.f,
+						   terr.heights,
+						   TERRAIN_RESOLUTION,
+						   TERRAIN_RESOLUTION,
+						   false);
 
 	// Prepare spheres
-	phySphere * spheres[X_N_SPHERES * Z_N_SPHERES];
+	phy::phySphere * spheres[X_N_SPHERES * Z_N_SPHERES];
 
 	float dx = (phyplane.xEnd - phyplane.xStart) / X_N_SPHERES;
 	float dz = (phyplane.zEnd - phyplane.zStart) / Z_N_SPHERES;
@@ -164,14 +164,14 @@ main(int, char* argv[]) {
 			float col = (float)x * (float)z / X_N_SPHERES / X_N_SPHERES;
 
 			spheres[x * Z_N_SPHERES + z]
-				= new phySphere(glm::vec3(phyplane.xStart + x * dx,
-										  1.f,
-										  phyplane.zStart + z * dz),
-								glm::vec3(0.f, 0.f, 0.f),
-								SPHERE_RADIUS,
-								glm::vec4(col, 1.f - col, 1.0f, 1.f),
-								&phyplane,
-								model_mat_loc);
+				= new phy::phySphere(glm::vec3(phyplane.xStart + x * dx,
+											   1.f,
+											   phyplane.zStart + z * dz),
+									 glm::vec3(0.f, 0.f, 0.f),
+									 SPHERE_RADIUS,
+									 glm::vec4(col, 1.f - col, 1.0f, 1.f),
+									 &phyplane,
+									 model_mat_loc);
 		}
 	}
 

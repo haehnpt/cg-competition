@@ -2,16 +2,17 @@
 
 #include <mesh.hpp>
 
-// 'direction' in the plane
-enum phyDirection
-{
-    right,
-    up,
-    left,
-    down,
-};
+namespace phy {
+  // 'direction' in the plane
+  enum phyDirection
+    {
+     right,
+     up,
+     left,
+     down,
+    };
 
-struct phySphere {
+  struct phySphere {
     // holds the mesh, etc.
     geometry geo;
 
@@ -46,10 +47,10 @@ struct phySphere {
     bool step(float deltaT);
     void setPosition(glm::vec3 pos);
     void moveToPlaneHeight();
-};
+  };
 
 
-struct phyPlane {
+  struct phyPlane {
     unsigned int vao;
     unsigned int vbo;
     float *vbo_data;
@@ -88,4 +89,5 @@ struct phyPlane {
     void bind();
     void release();
     void destroy();
-};
+  };
+}

@@ -23,18 +23,20 @@
 // See https://isocpp.org/wiki/faq/newbie#floating-point-arith2 for
 // more information.
 
-phySphere::phySphere(glm::vec3 x,
-                     glm::vec3 v,
-                     float radius,
-                     glm::vec4 color,
-                     phyPlane *plane,
-                     int model_mat_loc) :
+namespace phy {
+
+  phySphere::phySphere(glm::vec3 x,
+                       glm::vec3 v,
+                       float radius,
+                       glm::vec4 color,
+                       phyPlane *plane,
+                       int model_mat_loc) :
     x{x},
     v{v},
     radius{radius},
     plane{plane},
     model_mat_loc{model_mat_loc}
-{
+  {
     // std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << "\n";
     a.x = 0;
     a.y = -4;
@@ -50,97 +52,97 @@ phySphere::phySphere(glm::vec3 x,
 
     //
     geo.transform = glm::translate(x + offset_vec)
-        * glm::scale(glm::vec3(radius));
-}
+      * glm::scale(glm::vec3(radius));
+  }
 
-phySphere::~phySphere() {}
+  phySphere::~phySphere() {}
 
-bool
-phySphere::step(float deltaT) {
+  bool
+  phySphere::step(float deltaT) {
     // next position if there were no obstacles
     glm::vec3 targetPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
 
     if(plane->useBoundingBox) {
-        // maybe reflect in x direction
-        if (targetPos.x < plane->xStart) {
-            x.x = plane->xStart + 0.0001f;
-            v.x = -v.x;
-        } else if (targetPos.x > plane->xEnd) {
-            x.x = plane->xEnd - 0.0001f;
-            v.x = -v.x;
-        }
+      // maybe reflect in x direction
+      if (targetPos.x < plane->xStart) {
+        x.x = plane->xStart + 0.0001f;
+        v.x = -v.x;
+      } else if (targetPos.x > plane->xEnd) {
+        x.x = plane->xEnd - 0.0001f;
+        v.x = -v.x;
+      }
 
-        // maybe reflect in z direction
-        if (targetPos.z < plane->zStart) {
-            x.z = plane->zStart + 0.0001f;
-            v.z = -v.z;
-        } else if (targetPos.z > plane->zEnd) {
-            x.z = plane->zEnd - 0.0001f;
-            v.z = -v.z;
-        }
+      // maybe reflect in z direction
+      if (targetPos.z < plane->zStart) {
+        x.z = plane->zStart + 0.0001f;
+        v.z = -v.z;
+      } else if (targetPos.z > plane->zEnd) {
+        x.z = plane->zEnd - 0.0001f;
+        v.z = -v.z;
+      }
 
-        // the sphere is now back in the  plane area
-        if (plane->isAbove(x)) {
-            x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-            // update velocity
-            v = v + a * deltaT;
-        } else {
-            // TODO: x is not the position of the first contact!
-            v = plane->reflectAt(x, v);
-            x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-            // update velocity
-            v = v + a * deltaT;
-            // lost energy when bouncing
-            v *= 0.80;
-        }
+      // the sphere is now back in the  plane area
+      if (plane->isAbove(x)) {
+        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+        // update velocity
+        v = v + a * deltaT;
+      } else {
+        // TODO: x is not the position of the first contact!
+        v = plane->reflectAt(x, v);
+        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+        // update velocity
+        v = v + a * deltaT;
+        // lost energy when bouncing
+        v *= 0.80;
+      }
     } else {
-        // ignoring the bounding box
-        if(targetPos.x < plane->xStart || targetPos.x > plane->xEnd
-           || targetPos.z < plane->zStart || targetPos.z > plane->zEnd) {
-            // outside of the plane
-            x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-            // update velocity
-            v = v + a * deltaT;
+      // ignoring the bounding box
+      if(targetPos.x < plane->xStart || targetPos.x > plane->xEnd
+         || targetPos.z < plane->zStart || targetPos.z > plane->zEnd) {
+        // outside of the plane
+        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+        // update velocity
+        v = v + a * deltaT;
+      } else {
+        // inside bounding box, reflect
+        if (plane->isAbove(targetPos)) {
+          x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+          // update velocity
+          v = v + a * deltaT;
         } else {
-            // inside bounding box, reflect
-            if (plane->isAbove(targetPos)) {
-                x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-                // update velocity
-                v = v + a * deltaT;
-            } else {
-                // TODO: x is not the position of the first contact!
-                v = plane->reflectAt(x, v);
-                x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-                // update velocity
-                v = v + a * deltaT;
-                // lost energy when bouncing
-                v *= 0.90;
-            }
+          // TODO: x is not the position of the first contact!
+          v = plane->reflectAt(x, v);
+          x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+          // update velocity
+          v = v + a * deltaT;
+          // lost energy when bouncing
+          v *= 0.90;
         }
+      }
 
-        // drag
-        // a = glm::vec3(0, -10.f, 0.f);
-        // a = a - 0.01f * (float)pow(glm::length(v), 2.f) * glm::normalize(v);
+      // drag
+      // a = glm::vec3(0, -10.f, 0.f);
+      // a = a - 0.01f * (float)pow(glm::length(v), 2.f) * glm::normalize(v);
 
-        // plane->getTriangleIndex(this);
+      // plane->getTriangleIndex(this);
     }
 
     geo.transform = glm::translate(x + offset_vec)
-        * glm::scale(glm::vec3(radius));
+      * glm::scale(glm::vec3(radius));
 
     return true;
-}
+  }
 
-void
-phySphere::setPosition(glm::vec3 pos) {
+  void
+  phySphere::setPosition(glm::vec3 pos) {
     x = pos;
 
     geo.transform = glm::translate(x + offset_vec)
-        * glm::scale(glm::vec3(radius));
-}
+      * glm::scale(glm::vec3(radius));
+  }
 
-void
-phySphere::moveToPlaneHeight() {
+  void
+  phySphere::moveToPlaneHeight() {
     int index = plane->getTriangleAt(x);
 
     // first vertex of the triangle
@@ -159,17 +161,17 @@ phySphere::moveToPlaneHeight() {
     x.y = (d - x.x * norm.x - x.z * norm.z) / norm.y;
 
     geo.transform = glm::translate(x + offset_vec)
-        * glm::scale(glm::vec3(radius));
-}
+      * glm::scale(glm::vec3(radius));
+  }
 
-phyPlane::phyPlane(float xStart,
-                   float xEnd,
-                   float zStart,
-                   float zEnd,
-                   float *heightMap,
-                   int xNumPoints,
-                   int zNumPoints,
-                   bool useBoundingBox) :
+  phyPlane::phyPlane(float xStart,
+                     float xEnd,
+                     float zStart,
+                     float zEnd,
+                     float *heightMap,
+                     int xNumPoints,
+                     int zNumPoints,
+                     bool useBoundingBox) :
     xStart{xStart},
     xEnd{xEnd},
     zStart{zStart},
@@ -177,7 +179,7 @@ phyPlane::phyPlane(float xStart,
     xNumPoints{xNumPoints},
     zNumPoints{zNumPoints},
     useBoundingBox{useBoundingBox}
-{
+  {
     this->xTileWidth = (xEnd - xStart) / (float)(xNumPoints - 1);
     this->zTileWidth = (zEnd - zStart) / (float)(zNumPoints - 1);
 
@@ -231,89 +233,89 @@ phyPlane::phyPlane(float xStart,
     // top-left and bottom-right triangle) are added to the VBO data.
     int indexRectTopLeft = 0;
     for (int x = 0; x < xNumPoints - 1; x++) {
-        for (int z = 0; z < zNumPoints - 1; z++) {
-            glm::vec3 a, b, nrm;
-            // coordinates in the plane:
-            //  +----→ x
-            //  |
-            //  |
-            //  ↓
-            //  z
+      for (int z = 0; z < zNumPoints - 1; z++) {
+        glm::vec3 a, b, nrm;
+        // coordinates in the plane:
+        //  +----→ x
+        //  |
+        //  |
+        //  ↓
+        //  z
 
-            //// TOP-LEFT TRIANGLE ////
-            // top-left vertex of the square
-            vbo_data[indexRectTopLeft + 0] = xStart + x * deltaX;
-            vbo_data[indexRectTopLeft + 1] = heightMap[x * zNumPoints + z];
-            vbo_data[indexRectTopLeft + 2] = zStart + z * deltaZ;
-            // bottom-left vertex of the square
-            vbo_data[indexRectTopLeft + 10 + 0] = xStart + x * deltaX;
-            vbo_data[indexRectTopLeft + 10 + 1] = heightMap[x * zNumPoints + (z + 1)];
-            vbo_data[indexRectTopLeft + 10 + 2] = zStart + (z + 1) * deltaZ;
-            // top-right vertex of the square
-            vbo_data[indexRectTopLeft + 20 + 0] = xStart + (x + 1) * deltaX;
-            vbo_data[indexRectTopLeft + 20 + 1] = heightMap[(x + 1) * zNumPoints + z];
-            vbo_data[indexRectTopLeft + 20 + 2] = zStart + z * deltaZ;
-            // add the same normal to all three vertices:
-            // top-left --> bottom-left
-            a = glm::vec3(vbo_data[indexRectTopLeft + 10 + 0] - vbo_data[indexRectTopLeft + 0],
-                          vbo_data[indexRectTopLeft + 10 + 1] - vbo_data[indexRectTopLeft + 1],
-                          vbo_data[indexRectTopLeft + 10 + 2] - vbo_data[indexRectTopLeft + 2]);
-            // top-left --> top-right
-            b = glm::vec3(vbo_data[indexRectTopLeft + 20 + 0] - vbo_data[indexRectTopLeft + 0],
-                          vbo_data[indexRectTopLeft + 20 + 1] - vbo_data[indexRectTopLeft + 1],
-                          vbo_data[indexRectTopLeft + 20 + 2] - vbo_data[indexRectTopLeft + 2]);
-            nrm = glm::normalize(glm::cross(a, b));
-            for (int vert = 0; vert < 3; vert++) {
-                for (int coord = 0; coord < 3; coord++) {
-                    // normal's x,y,z values start at index 3
-                    vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
-                }
-                // default color
-                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.8f; // r
-                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.8f; // g
-                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.8f; // b
-                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.0f; // a
-            }
-
-            //// BOTTOM-RIGHT TRIANGLE ////
-            // bottom-left vertex of the square
-            vbo_data[indexRectTopLeft + 30 + 0] = xStart + x * deltaX;
-            vbo_data[indexRectTopLeft + 30 + 1] = heightMap[x * zNumPoints + (z + 1)];
-            vbo_data[indexRectTopLeft + 30 + 2] = zStart + (z + 1) * deltaZ;
-            // top-right vertex of the square
-            vbo_data[indexRectTopLeft + 40 + 0] = xStart + (x + 1) * deltaX;
-            vbo_data[indexRectTopLeft + 40 + 1] = heightMap[(x + 1) * zNumPoints + z];
-            vbo_data[indexRectTopLeft + 40 + 2] = zStart + z * deltaZ;
-            // bottom-right vertex of the square
-            vbo_data[indexRectTopLeft + 50 + 0] = xStart + (x + 1) * deltaX;
-            vbo_data[indexRectTopLeft + 50 + 1] = heightMap[(x + 1) * zNumPoints + (z + 1)];
-            vbo_data[indexRectTopLeft + 50 + 2] = zStart + (z + 1) * deltaZ;
-            // add the same normal to all three vertices:
-            // bottom-right --> top-right
-            a = glm::vec3(vbo_data[indexRectTopLeft + 40 + 0] - vbo_data[indexRectTopLeft + 50 + 0],
-                          vbo_data[indexRectTopLeft + 40 + 1] - vbo_data[indexRectTopLeft + 50 + 1],
-                          vbo_data[indexRectTopLeft + 40 + 2] - vbo_data[indexRectTopLeft + 50 + 2]);
-            // bottom-right --> bottom-left
-            b = glm::vec3(vbo_data[indexRectTopLeft + 30 + 0] - vbo_data[indexRectTopLeft + 50 + 0],
-                          vbo_data[indexRectTopLeft + 30 + 1] - vbo_data[indexRectTopLeft + 50 + 1],
-                          vbo_data[indexRectTopLeft + 30 + 2] - vbo_data[indexRectTopLeft + 50 + 2]);
-            nrm = glm::normalize(glm::cross(a, b));
-
-            for (int vert = 3; vert < 6; vert++) {
-                for (int coord = 0; coord < 3; coord++) {
-                    // normal's x,y,z values start at index 3
-                    vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
-                }
-                // default color
-                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.8f; // r
-                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.8f; // g
-                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.8f; // b
-                vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.0f; // a
-            }
-
-            // Per square (= 2 triangles) 6 vertices are added, update index
-            indexRectTopLeft += 6 * 10;
+        //// TOP-LEFT TRIANGLE ////
+        // top-left vertex of the square
+        vbo_data[indexRectTopLeft + 0] = xStart + x * deltaX;
+        vbo_data[indexRectTopLeft + 1] = heightMap[x * zNumPoints + z];
+        vbo_data[indexRectTopLeft + 2] = zStart + z * deltaZ;
+        // bottom-left vertex of the square
+        vbo_data[indexRectTopLeft + 10 + 0] = xStart + x * deltaX;
+        vbo_data[indexRectTopLeft + 10 + 1] = heightMap[x * zNumPoints + (z + 1)];
+        vbo_data[indexRectTopLeft + 10 + 2] = zStart + (z + 1) * deltaZ;
+        // top-right vertex of the square
+        vbo_data[indexRectTopLeft + 20 + 0] = xStart + (x + 1) * deltaX;
+        vbo_data[indexRectTopLeft + 20 + 1] = heightMap[(x + 1) * zNumPoints + z];
+        vbo_data[indexRectTopLeft + 20 + 2] = zStart + z * deltaZ;
+        // add the same normal to all three vertices:
+        // top-left --> bottom-left
+        a = glm::vec3(vbo_data[indexRectTopLeft + 10 + 0] - vbo_data[indexRectTopLeft + 0],
+                      vbo_data[indexRectTopLeft + 10 + 1] - vbo_data[indexRectTopLeft + 1],
+                      vbo_data[indexRectTopLeft + 10 + 2] - vbo_data[indexRectTopLeft + 2]);
+        // top-left --> top-right
+        b = glm::vec3(vbo_data[indexRectTopLeft + 20 + 0] - vbo_data[indexRectTopLeft + 0],
+                      vbo_data[indexRectTopLeft + 20 + 1] - vbo_data[indexRectTopLeft + 1],
+                      vbo_data[indexRectTopLeft + 20 + 2] - vbo_data[indexRectTopLeft + 2]);
+        nrm = glm::normalize(glm::cross(a, b));
+        for (int vert = 0; vert < 3; vert++) {
+          for (int coord = 0; coord < 3; coord++) {
+            // normal's x,y,z values start at index 3
+            vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
+          }
+          // default color
+          vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.8f; // r
+          vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.8f; // g
+          vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.8f; // b
+          vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.0f; // a
         }
+
+        //// BOTTOM-RIGHT TRIANGLE ////
+        // bottom-left vertex of the square
+        vbo_data[indexRectTopLeft + 30 + 0] = xStart + x * deltaX;
+        vbo_data[indexRectTopLeft + 30 + 1] = heightMap[x * zNumPoints + (z + 1)];
+        vbo_data[indexRectTopLeft + 30 + 2] = zStart + (z + 1) * deltaZ;
+        // top-right vertex of the square
+        vbo_data[indexRectTopLeft + 40 + 0] = xStart + (x + 1) * deltaX;
+        vbo_data[indexRectTopLeft + 40 + 1] = heightMap[(x + 1) * zNumPoints + z];
+        vbo_data[indexRectTopLeft + 40 + 2] = zStart + z * deltaZ;
+        // bottom-right vertex of the square
+        vbo_data[indexRectTopLeft + 50 + 0] = xStart + (x + 1) * deltaX;
+        vbo_data[indexRectTopLeft + 50 + 1] = heightMap[(x + 1) * zNumPoints + (z + 1)];
+        vbo_data[indexRectTopLeft + 50 + 2] = zStart + (z + 1) * deltaZ;
+        // add the same normal to all three vertices:
+        // bottom-right --> top-right
+        a = glm::vec3(vbo_data[indexRectTopLeft + 40 + 0] - vbo_data[indexRectTopLeft + 50 + 0],
+                      vbo_data[indexRectTopLeft + 40 + 1] - vbo_data[indexRectTopLeft + 50 + 1],
+                      vbo_data[indexRectTopLeft + 40 + 2] - vbo_data[indexRectTopLeft + 50 + 2]);
+        // bottom-right --> bottom-left
+        b = glm::vec3(vbo_data[indexRectTopLeft + 30 + 0] - vbo_data[indexRectTopLeft + 50 + 0],
+                      vbo_data[indexRectTopLeft + 30 + 1] - vbo_data[indexRectTopLeft + 50 + 1],
+                      vbo_data[indexRectTopLeft + 30 + 2] - vbo_data[indexRectTopLeft + 50 + 2]);
+        nrm = glm::normalize(glm::cross(a, b));
+
+        for (int vert = 3; vert < 6; vert++) {
+          for (int coord = 0; coord < 3; coord++) {
+            // normal's x,y,z values start at index 3
+            vbo_data[indexRectTopLeft + (vert * 10) + 3 + coord] = nrm[coord];
+          }
+          // default color
+          vbo_data[indexRectTopLeft + (vert * 10) + 6 + 0] = 0.8f; // r
+          vbo_data[indexRectTopLeft + (vert * 10) + 6 + 1] = 0.8f; // g
+          vbo_data[indexRectTopLeft + (vert * 10) + 6 + 2] = 0.8f; // b
+          vbo_data[indexRectTopLeft + (vert * 10) + 6 + 3] = 1.0f; // a
+        }
+
+        // Per square (= 2 triangles) 6 vertices are added, update index
+        indexRectTopLeft += 6 * 10;
+      }
     }
 
 
@@ -348,33 +350,33 @@ phyPlane::phyPlane(float xStart,
     // detection!
     //
     // delete [vbo_data];
-}
+  }
 
 
-phyPlane::~phyPlane() {
+  phyPlane::~phyPlane() {
     delete[] vbo_data;
-}
+  }
 
-void
-phyPlane::bind() {
+  void
+  phyPlane::bind() {
     glBindVertexArray(vao);
-}
+  }
 
-void
-phyPlane::release() {
+  void
+  phyPlane::release() {
     glBindVertexArray(0);
-}
+  }
 
-void
-phyPlane::destroy() {
+  void
+  phyPlane::destroy() {
     release();
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
-}
+  }
 
-// For the start we assume the sphere has a radius of zero!
-int
-phyPlane::getTriangleAt(glm::vec3 pos) {
+  // For the start we assume the sphere has a radius of zero!
+  int
+  phyPlane::getTriangleAt(glm::vec3 pos) {
     // printf("isCutting with s coordinates: %02.2f %02.2f %02.2f\n",
     //        s->x[0], s->x[1], s->x[2]);
 
@@ -384,7 +386,7 @@ phyPlane::getTriangleAt(glm::vec3 pos) {
 
     if(pos.x < xStart || pos.x > xEnd
        || pos.z < zStart || pos.z > zEnd) {
-        return -1;
+      return -1;
     }
 
     // indices of the rectangle containing the sphere's center
@@ -403,24 +405,24 @@ phyPlane::getTriangleAt(glm::vec3 pos) {
     triangleIndex = 2 * (xIndexRect * (zNumPoints - 1) + zIndexRect);
     // if the sphere is in the 'upper'-left triangle it's one less
     if (zInRect > zTileWidth - xInRect * zTileWidth / xTileWidth) {
-        triangleIndex++;
+      triangleIndex++;
     }
 
 #ifdef PHYSICS_DEBUG
     if (triangleIndex != oldTriangleIndex) {
-        std::cout << "zIndexRect: " << zIndexRect
-                  << ", xIndexRect: " << xIndexRect
-                  << ", triangleIndex: " << triangleIndex << "\n" << std::flush;
+      std::cout << "zIndexRect: " << zIndexRect
+                << ", xIndexRect: " << xIndexRect
+                << ", triangleIndex: " << triangleIndex << "\n" << std::flush;
 
     }
 #endif // PHYSICS_DEBUG
 
     return triangleIndex;
-}
+  }
 
-// Return (the index of) the next triangle in the phyDirection d
-int
-phyPlane::getNextTriangle(int index, phyDirection d) {
+  // Return (the index of) the next triangle in the phyDirection d
+  int
+  phyPlane::getNextTriangle(int index, phyDirection d) {
     switch(d) {
     case right: return index + 1; break;
     case left: return index - 1; break;
@@ -428,10 +430,10 @@ phyPlane::getNextTriangle(int index, phyDirection d) {
     case up: return index - 2 * (xNumPoints - 1); break;
     default: return -1;
     }
-}
+  }
 
-int
-phyPlane::getNextTriangle(glm::vec3 x, glm::vec3 direction) {
+  int
+  phyPlane::getNextTriangle(glm::vec3 x, glm::vec3 direction) {
     int i = getTriangleAt(x);
     // vectors from x to each vertices
     glm::vec3 v0(vbo_data[i * 30 + 0] - x.x,
@@ -447,68 +449,68 @@ phyPlane::getNextTriangle(glm::vec3 x, glm::vec3 direction) {
     int nextIndex;
     phyDirection dir;
     if (i % 2 == 0) {
-        // x is in a top-left triangle, the order of the vertices in
-        // the vbo is:
-        //
-        //   0    2
-        //   +---+
-        //   |x /
-        //   | /
-        //   |/
-        //   +
-        //   1
+      // x is in a top-left triangle, the order of the vertices in
+      // the vbo is:
+      //
+      //   0    2
+      //   +---+
+      //   |x /
+      //   | /
+      //   |/
+      //   +
+      //   1
 
-        // TODO: Exit through a corner
-        if (glm::cross(v0, direction).y < 0
-            && glm::cross(direction, v2).y < 0) {
-            // Next exit: between top-left and top-right edge
-            dir = up;
-        } else if (glm::cross(v2, direction).y < 0
-                   && glm::cross(direction, v1).y < 0) {
-            // Next exit: between top-right and bottom-left edge
-            dir = right;
-        } else if (glm::cross(v1, direction).y < 0
-                   && glm::cross(direction, v0).y < 0) {
-            // Next exit: between bottom-left and top-left edge
-            dir = left;
-        }
+      // TODO: Exit through a corner
+      if (glm::cross(v0, direction).y < 0
+          && glm::cross(direction, v2).y < 0) {
+        // Next exit: between top-left and top-right edge
+        dir = up;
+      } else if (glm::cross(v2, direction).y < 0
+                 && glm::cross(direction, v1).y < 0) {
+        // Next exit: between top-right and bottom-left edge
+        dir = right;
+      } else if (glm::cross(v1, direction).y < 0
+                 && glm::cross(direction, v0).y < 0) {
+        // Next exit: between bottom-left and top-left edge
+        dir = left;
+      }
     } else {
-        // x is in a bottom-right triangle, the order of the vertices
-        // in the vbo is:
-        //
-        //       1
-        //       +
-        //      /|
-        //     / |
-        //    / x|
-        //   +---+
-        //   0    2
+      // x is in a bottom-right triangle, the order of the vertices
+      // in the vbo is:
+      //
+      //       1
+      //       +
+      //      /|
+      //     / |
+      //    / x|
+      //   +---+
+      //   0    2
 
-        if (glm::cross(v0, direction).y > 0
-            && glm::cross(direction, v2).y > 0) {
-            // Next exit: between bottom-left and bottom-right edge
-        } else if (glm::cross(v2, direction).y > 0
-                   && glm::cross(direction, v1).y > 0) {
-            // Next exit: between top right and bottom left edge
-            dir = right;
-        } else if (glm::cross(v1, direction).y > 0
-                   && glm::cross(direction, v0).y > 0) {
-            // Next exit: between bottom left and top left edge
-            dir = left;
-        }
+      if (glm::cross(v0, direction).y > 0
+          && glm::cross(direction, v2).y > 0) {
+        // Next exit: between bottom-left and bottom-right edge
+      } else if (glm::cross(v2, direction).y > 0
+                 && glm::cross(direction, v1).y > 0) {
+        // Next exit: between top right and bottom left edge
+        dir = right;
+      } else if (glm::cross(v1, direction).y > 0
+                 && glm::cross(direction, v0).y > 0) {
+        // Next exit: between bottom left and top left edge
+        dir = left;
+      }
     }
 
     return getNextTriangle(i, dir);
-}
+  }
 
-std::vector<int>
-phyPlane::getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd) {
+  std::vector<int>
+  phyPlane::getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd) {
     // TODO
     return std::vector<int>{(int)(xStart + zStart + xEnd + zEnd)};
-}
+  }
 
-bool
-phyPlane::isAbove(glm::vec3 x) {
+  bool
+  phyPlane::isAbove(glm::vec3 x) {
     int index = getTriangleAt(x);
     // first vertex of the triangle
     glm::vec3 v1(vbo_data[index * 3 * 10 + 0],
@@ -524,20 +526,20 @@ phyPlane::isAbove(glm::vec3 x) {
     // float d = -glm::dot(v1, norm);
 
     return glm::dot(x, norm) > glm::dot(v1, norm);
-}
+  }
 
-// reflect the vector @v at the normal of the triangle at position
-// @pos
-glm::vec3
-phyPlane::reflectAt(glm::vec3 pos, glm::vec3 v) {
+  // reflect the vector @v at the normal of the triangle at position
+  // @pos
+  glm::vec3
+  phyPlane::reflectAt(glm::vec3 pos, glm::vec3 v) {
     if (!useBoundingBox) {
-        if(pos.x < xStart  || pos.x > xEnd
-           || pos.z < zStart || pos.z > zEnd) {
-            // the bounding box is diabled, and the sphere has left
-            // the bounding box, don't reflect at all, just 'fall of
-            // the world'
-            return v;
-        }
+      if(pos.x < xStart  || pos.x > xEnd
+         || pos.z < zStart || pos.z > zEnd) {
+        // the bounding box is diabled, and the sphere has left
+        // the bounding box, don't reflect at all, just 'fall of
+        // the world'
+        return v;
+      }
     }
 
     int index = getTriangleAt(pos);
@@ -548,11 +550,12 @@ phyPlane::reflectAt(glm::vec3 pos, glm::vec3 v) {
                    vbo_data[index * 3 * 10 + 3 + 2]);
 
     return v - 2*glm::dot(norm, v) * norm;
-}
+  }
 
-void
-phySphere::render() {
+  void
+  phySphere::render() {
     glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &geo.transform[0][0]);
     geo.bind();
     glDrawElements(GL_TRIANGLES, geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+  }
 }
