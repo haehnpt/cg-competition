@@ -19,6 +19,9 @@ struct phySphere {
     glm::vec3 x; // position
     glm::vec3 v; // velocity
     glm::vec3 a; // acceleration
+    // position of the center of the mesh relative to the center used
+    // for simulation
+    glm::vec3 offset_vec;
 
     float radius;
 
@@ -51,26 +54,25 @@ struct phyPlane {
     unsigned int vbo;
     float *vbo_data;
     unsigned int mVertices;
-    bool useBoundingBox;
-
-    int zNumPoints;
-    int xNumPoints;
 
     float xStart;
     float xEnd;
     float zStart;
     float zEnd;
 
+    int xNumPoints;
+    int zNumPoints;
+
+    bool useBoundingBox;
+
     float xTileWidth;
     float zTileWidth;
 
-    // cheat variable! Radius of the spheres
-    float radius;
-
     int triangleIndex;
 
+
     phyPlane(float xStart, float xEnd, float zStart, float zEnd,
-             float *heightMap, int xNumPoints, int zNumPoints, bool useBoundingBox, float radius);
+             float *heightMap, int xNumPoints, int zNumPoints, bool useBoundingBox);
     ~phyPlane();
 
     int getTriangleAt(glm::vec3 x);

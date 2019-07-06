@@ -151,8 +151,8 @@ main(int, char* argv[]) {
 			  terr.heights,
 			  TERRAIN_RESOLUTION,
 			  TERRAIN_RESOLUTION,
-			  false,
-			  SPHERE_RADIUS);
+			  false);
+
 	// Prepare spheres
 	phySphere * spheres[X_N_SPHERES * Z_N_SPHERES];
 

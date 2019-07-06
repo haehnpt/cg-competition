@@ -41,7 +41,15 @@ phySphere::phySphere(glm::vec3 x,
     a.z = 0;
 
     geo = loadMesh("sphere.obj", false, color);
-    geo.transform = glm::translate(x)
+
+    // Since the collision code does not yet take the radius into
+    // account, we choose the lowest point of the sphere (in
+    // y-direction) as the reference point for the simulation and
+    // simply place the center of the mesh @x.y + @radius.
+    offset_vec = glm::vec3(0.f, radius, 0.f);
+
+    //
+    geo.transform = glm::translate(x + offset_vec)
         * glm::scale(glm::vec3(radius));
 }
 
@@ -117,7 +125,7 @@ phySphere::step(float deltaT) {
         // plane->getTriangleIndex(this);
     }
 
-    geo.transform = glm::translate(x)
+    geo.transform = glm::translate(x + offset_vec)
         * glm::scale(glm::vec3(radius));
 
     return true;
@@ -127,7 +135,7 @@ void
 phySphere::setPosition(glm::vec3 pos) {
     x = pos;
 
-    geo.transform = glm::translate(x)
+    geo.transform = glm::translate(x + offset_vec)
         * glm::scale(glm::vec3(radius));
 }
 
@@ -150,11 +158,10 @@ phySphere::moveToPlaneHeight() {
     // x.y = 1.f;
     x.y = (d - x.x * norm.x - x.z * norm.z) / norm.y;
 
-    geo.transform = glm::translate(x)
+    geo.transform = glm::translate(x + offset_vec)
         * glm::scale(glm::vec3(radius));
 }
 
-// TODO: heightMap as parameter
 phyPlane::phyPlane(float xStart,
                    float xEnd,
                    float zStart,
@@ -162,16 +169,14 @@ phyPlane::phyPlane(float xStart,
                    float *heightMap,
                    int xNumPoints,
                    int zNumPoints,
-                   bool useBoundingBox,
-                   float radius) :
+                   bool useBoundingBox) :
     xStart{xStart},
     xEnd{xEnd},
     zStart{zStart},
     zEnd{zEnd},
     xNumPoints{xNumPoints},
     zNumPoints{zNumPoints},
-    useBoundingBox{useBoundingBox},
-    radius{radius}
+    useBoundingBox{useBoundingBox}
 {
     this->xTileWidth = (xEnd - xStart) / (float)(xNumPoints - 1);
     this->zTileWidth = (zEnd - zStart) / (float)(zNumPoints - 1);
@@ -238,15 +243,15 @@ phyPlane::phyPlane(float xStart,
             //// TOP-LEFT TRIANGLE ////
             // top-left vertex of the square
             vbo_data[indexRectTopLeft + 0] = xStart + x * deltaX;
-            vbo_data[indexRectTopLeft + 1] = heightMap[x * zNumPoints + z] + radius;
+            vbo_data[indexRectTopLeft + 1] = heightMap[x * zNumPoints + z];
             vbo_data[indexRectTopLeft + 2] = zStart + z * deltaZ;
             // bottom-left vertex of the square
             vbo_data[indexRectTopLeft + 10 + 0] = xStart + x * deltaX;
-            vbo_data[indexRectTopLeft + 10 + 1] = heightMap[x * zNumPoints + (z + 1)] + radius;
+            vbo_data[indexRectTopLeft + 10 + 1] = heightMap[x * zNumPoints + (z + 1)];
             vbo_data[indexRectTopLeft + 10 + 2] = zStart + (z + 1) * deltaZ;
             // top-right vertex of the square
             vbo_data[indexRectTopLeft + 20 + 0] = xStart + (x + 1) * deltaX;
-            vbo_data[indexRectTopLeft + 20 + 1] = heightMap[(x + 1) * zNumPoints + z] + radius;
+            vbo_data[indexRectTopLeft + 20 + 1] = heightMap[(x + 1) * zNumPoints + z];
             vbo_data[indexRectTopLeft + 20 + 2] = zStart + z * deltaZ;
             // add the same normal to all three vertices:
             // top-left --> bottom-left
@@ -273,15 +278,15 @@ phyPlane::phyPlane(float xStart,
             //// BOTTOM-RIGHT TRIANGLE ////
             // bottom-left vertex of the square
             vbo_data[indexRectTopLeft + 30 + 0] = xStart + x * deltaX;
-            vbo_data[indexRectTopLeft + 30 + 1] = heightMap[x * zNumPoints + (z + 1)] + radius;
+            vbo_data[indexRectTopLeft + 30 + 1] = heightMap[x * zNumPoints + (z + 1)];
             vbo_data[indexRectTopLeft + 30 + 2] = zStart + (z + 1) * deltaZ;
             // top-right vertex of the square
             vbo_data[indexRectTopLeft + 40 + 0] = xStart + (x + 1) * deltaX;
-            vbo_data[indexRectTopLeft + 40 + 1] = heightMap[(x + 1) * zNumPoints + z] + radius;
+            vbo_data[indexRectTopLeft + 40 + 1] = heightMap[(x + 1) * zNumPoints + z];
             vbo_data[indexRectTopLeft + 40 + 2] = zStart + z * deltaZ;
             // bottom-right vertex of the square
             vbo_data[indexRectTopLeft + 50 + 0] = xStart + (x + 1) * deltaX;
-            vbo_data[indexRectTopLeft + 50 + 1] = heightMap[(x + 1) * zNumPoints + (z + 1)] + radius;
+            vbo_data[indexRectTopLeft + 50 + 1] = heightMap[(x + 1) * zNumPoints + (z + 1)];
             vbo_data[indexRectTopLeft + 50 + 2] = zStart + (z + 1) * deltaZ;
             // add the same normal to all three vertices:
             // bottom-right --> top-right
