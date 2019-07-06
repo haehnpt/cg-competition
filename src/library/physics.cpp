@@ -422,8 +422,10 @@ namespace phy {
     float xInRect = fmod(xInPlane, xTileWidth);
     float zInRect = fmod(zInPlane, zTileWidth);
 
+#ifdef PHYSICS_DEBUG
     // top-right (-1) or bottom left (-0) triangle?
     int oldTriangleIndex = triangleIndex;
+#endif
 
     // two triangles per rectangle
     triangleIndex = 2 * (xIndexRect * (zNumPoints - 1) + zIndexRect);
@@ -470,7 +472,7 @@ namespace phy {
                  vbo_data[i * 30 + 20 + 1] - x.y,
                  vbo_data[i * 30 + 20 + 2] - x.z);
 
-    int nextIndex;
+
     phyDirection dir;
     if (i % 2 == 0) {
       // x is in a top-left triangle, the order of the vertices in
