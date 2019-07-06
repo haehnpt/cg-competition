@@ -65,20 +65,20 @@ namespace phy {
     // the bounding box is only applied to the x and z direction
     if(plane->useBoundingBox) {
       // maybe reflect in x direction
-      if (targetPos.x < plane->xStart) {
-        x.x = plane->xStart + 0.0001f;
+      if (targetPos.x  < plane->xStart + radius) {
+        x.x = plane->xStart + radius + 0.0001f;
         v.x = -v.x;
-      } else if (targetPos.x > plane->xEnd) {
-        x.x = plane->xEnd - 0.0001f;
+      } else if (targetPos.x > plane->xEnd - radius) {
+        x.x = plane->xEnd - radius -0.0001f;
         v.x = -v.x;
       }
 
       // maybe reflect in z direction
-      if (targetPos.z < plane->zStart) {
-        x.z = plane->zStart + 0.0001f;
+      if (targetPos.z < plane->zStart + radius) {
+        x.z = plane->zStart + radius + 0.0001f;
         v.z = -v.z;
-      } else if (targetPos.z > plane->zEnd) {
-        x.z = plane->zEnd - 0.0001f;
+      } else if (targetPos.z > plane->zEnd - radius) {
+        x.z = plane->zEnd - radius - 0.0001f;
         v.z = -v.z;
       }
 
