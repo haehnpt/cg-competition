@@ -60,7 +60,7 @@ namespace phy {
     radius{radius},
     plane{plane}
   {
-    std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << "\n";
+    // std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << ")\n";
     a.x = 0;
     a.y = -4;
     a.z = 0;
