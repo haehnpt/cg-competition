@@ -32,22 +32,6 @@ namespace phy {
     int model_mat_loc;
     int proj_mat_loc;
     int view_mat_loc;
-    int roughness_loc;
-    int ref_index_loc;
-    int diffuse_loc;
-    int specular_loc;
-    int use_oren_nayar_loc;
-    // Add albedo location
-    int albedo_loc;
-
-    // Shader variables
-    float roughness = 0.4f;
-    float refraction_index = 0.4f;
-    // Add variable for albedo
-    float albedo = 1.0f;
-    int use_oren_nayar = 1;
-    glm::vec4 diffuse_color(0.7f, 0.7f, 0.7f, 1.f);
-    glm::vec4 specular_color(1.0f, 1.0f, 1.0f, 1.f);
   }
 
   phySphere::phySphere(glm::vec3 x,
@@ -587,8 +571,8 @@ namespace phy {
 
   void
   initShader() {
-    unsigned int vertexShader = compileShader("shading_models.vert", GL_VERTEX_SHADER);
-    unsigned int fragmentShader = compileShader("shading_models.frag", GL_FRAGMENT_SHADER);
+    unsigned int vertexShader = compileShader("physics.vert", GL_VERTEX_SHADER);
+    unsigned int fragmentShader = compileShader("physics.frag", GL_FRAGMENT_SHADER);
     phyShaderProgram = linkProgram(vertexShader, fragmentShader);
     // after linking the program the shader objects are no longer needed
     glDeleteShader(fragmentShader);
@@ -598,20 +582,6 @@ namespace phy {
     model_mat_loc = glGetUniformLocation(phyShaderProgram, "model_mat");
     proj_mat_loc = glGetUniformLocation(phyShaderProgram, "proj_mat");
     view_mat_loc = glGetUniformLocation(phyShaderProgram, "view_mat");
-    roughness_loc = glGetUniformLocation(phyShaderProgram, "roughness");
-    ref_index_loc = glGetUniformLocation(phyShaderProgram, "refractionIndex");
-    diffuse_loc = glGetUniformLocation(phyShaderProgram, "diffuse");
-    specular_loc = glGetUniformLocation(phyShaderProgram, "specular");
-    use_oren_nayar_loc = glGetUniformLocation(phyShaderProgram, "useOrenNayar");
-    // Add albedo location
-    albedo_loc = glGetUniformLocation(phyShaderProgram, "albedo");
-
-    // Shader variables
-    roughness = 0.4f;
-    refraction_index = 0.4f;
-    // Add variable for albedo
-    albedo = 1.0f;
-    use_oren_nayar = 1;
   }
 
   // Load the phyShaderProgram and set all values that are identical
@@ -623,12 +593,5 @@ namespace phy {
     glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
     glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &cam->view_matrix()[0][0]);
     glUniform3fv(light_dir_loc, 1, &light_dir[0]);
-    glUniform1i(use_oren_nayar_loc, use_oren_nayar);
-    glUniform1f(roughness_loc, roughness);
-    // Uniform albedo
-    glUniform1f(albedo_loc, albedo);
-    glUniform1f(ref_index_loc, refraction_index);
-    glUniform4fv(diffuse_loc, 1, &diffuse_color[0]);
-    glUniform4fv(specular_loc, 1, &specular_color[0]);
   }
 }
