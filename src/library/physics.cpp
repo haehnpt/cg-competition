@@ -62,6 +62,7 @@ namespace phy {
     // next position if there were no obstacles
     glm::vec3 targetPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
 
+    // the bounding box is only applied to the x and z direction
     if(plane->useBoundingBox) {
       // maybe reflect in x direction
       if (targetPos.x < plane->xStart) {
