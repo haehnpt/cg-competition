@@ -88,7 +88,7 @@ main(int, char* argv[]) {
 	glfwSetFramebufferSizeCallback(window, resizeCallback);
 
 	// Instantiate camera and modify it
-	amera cam(window);
+	camera cam(window);
 	cam.set_phi(CAMERA_PHI);
 	cam.set_theta(CAMERA_THETA);
 	cam.set_distance(CAMERA_DISTANCE);
