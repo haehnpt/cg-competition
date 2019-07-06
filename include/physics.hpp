@@ -1,17 +1,19 @@
 #pragma once
 
 #include <mesh.hpp>
+#include <camera.hpp>
 
-// 'direction' in the plane
-enum phyDirection
-{
-    right,
-    up,
-    left,
-    down,
-};
+namespace phy {
+  // 'direction' in the plane
+  enum phyDirection
+    {
+     right,
+     up,
+     left,
+     down,
+    };
 
-struct phySphere {
+  struct phySphere {
     // holds the mesh, etc.
     geometry geo;
 
@@ -19,6 +21,9 @@ struct phySphere {
     glm::vec3 x; // position
     glm::vec3 v; // velocity
     glm::vec3 a; // acceleration
+    // position of the center of the mesh relative to the center used
+    // for simulation
+    glm::vec3 offset_vec;
 
     float radius;
 
@@ -29,13 +34,11 @@ struct phySphere {
     // float aNext[3];
 
     struct phyPlane *plane;
-    int model_mat_loc;
 
     phySphere(glm::vec3 x,
               glm::vec3 v,
               float radius, glm::vec4 color,
-              struct phyPlane *plane,
-              int model_mat_loc);
+              struct phyPlane *plane),
     ~phySphere();
 
     void render();
@@ -43,34 +46,33 @@ struct phySphere {
     bool step(float deltaT);
     void setPosition(glm::vec3 pos);
     void moveToPlaneHeight();
-};
+  };
 
 
-struct phyPlane {
+  struct phyPlane {
     unsigned int vao;
     unsigned int vbo;
     float *vbo_data;
     unsigned int mVertices;
-    bool useBoundingBox;
-
-    int zNumPoints;
-    int xNumPoints;
 
     float xStart;
     float xEnd;
     float zStart;
     float zEnd;
 
+    int xNumPoints;
+    int zNumPoints;
+
+    bool useBoundingBox;
+
     float xTileWidth;
     float zTileWidth;
 
-    // cheat variable! Radius of the spheres
-    float radius;
-
     int triangleIndex;
 
+
     phyPlane(float xStart, float xEnd, float zStart, float zEnd,
-             float *heightMap, int xNumPoints, int zNumPoints, bool useBoundingBox, float radius);
+             float *heightMap, int xNumPoints, int zNumPoints, bool useBoundingBox);
     ~phyPlane();
 
     int getTriangleAt(glm::vec3 x);
@@ -86,4 +88,8 @@ struct phyPlane {
     void bind();
     void release();
     void destroy();
-};
+  };
+
+  void initShader();
+  void useShader(camera *cam, glm::mat4 proj_matrix, glm::vec3 light_dir);
+}
