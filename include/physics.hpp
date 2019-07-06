@@ -34,7 +34,6 @@ namespace phy {
     // float aNext[3];
 
     struct phyPlane *plane;
-    int model_mat_loc;
 
     phySphere(glm::vec3 x,
               glm::vec3 v,
