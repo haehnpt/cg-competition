@@ -209,7 +209,7 @@ main(int, char* argv[]) {
 		glUniform1f(albedo_loc, albedo);
 		glUniform1f(ref_index_loc, refraction_index);
 		glUniform4f(diffuse_loc, diffuse_color.x, diffuse_color.y, diffuse_color.z, diffuse_color.w);
-		glUniform4f(specular_loc, specular_color.x, specular_color.y, specular_color.z, specular_color.w)
+		glUniform4f(specular_loc, specular_color.x, specular_color.y, specular_color.z, specular_color.w);
 		glDrawArrays(GL_TRIANGLES, 0, phyplane.mVertices);
 #endif // USE_PHY_PLANE
 		glUseProgram(phyShaderProgram);
