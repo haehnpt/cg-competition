@@ -141,8 +141,8 @@ main(int, char* argv[]) {
 											   phyplane.zStart + z * dz),
 									 glm::vec3(0.f, 0.f, 0.f),
 									 SPHERE_RADIUS,
-									 glm::vec4(col, 1.f - col, 1.0f, 1.f),
-									 &phyplane);
+									 &phyplane,
+									 glm::vec4(col, 1.f - col, 1.0f, 1.f));
 		}
 	}
 

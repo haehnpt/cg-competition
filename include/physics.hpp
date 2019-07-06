@@ -14,9 +14,6 @@ namespace phy {
     };
 
   struct phySphere {
-    // holds the mesh, etc.
-    geometry geo;
-
     // physics simulation
     glm::vec3 x; // position
     glm::vec3 v; // velocity
@@ -24,8 +21,11 @@ namespace phy {
     // position of the center of the mesh relative to the center used
     // for simulation
     glm::vec3 offset_vec;
-
     float radius;
+    struct phyPlane *plane;
+    glm::vec4 custom_color;
+
+
 
     // index of the triangle over which the sphere was at the last
     // tick
@@ -33,12 +33,11 @@ namespace phy {
     // float xMax[3];
     // float aNext[3];
 
-    struct phyPlane *plane;
-
     phySphere(glm::vec3 x,
               glm::vec3 v,
-              float radius, glm::vec4 color,
-              struct phyPlane *plane),
+              float radius,
+              struct phyPlane *plane,
+              glm::vec4 custom_color = glm::vec4(0.f, 0.f, 0.f, 0.f));
     ~phySphere();
 
     void render();

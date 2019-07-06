@@ -32,34 +32,31 @@ namespace phy {
     int model_mat_loc;
     int proj_mat_loc;
     int view_mat_loc;
+    int custom_color_loc;
+    geometry geo;
   }
 
   phySphere::phySphere(glm::vec3 x,
                        glm::vec3 v,
                        float radius,
-                       glm::vec4 color,
-                       phyPlane *plane) :
+                       phyPlane *plane,
+                       glm::vec4 color) :
     x{x},
     v{v},
     radius{radius},
-    plane{plane}
+    plane{plane},
+    custom_color{color}
   {
     // std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << ")\n";
     a.x = 0;
     a.y = -4;
     a.z = 0;
 
-    geo = loadMesh("sphere.obj", false, color);
-
     // Since the collision code does not yet take the radius into
     // account, we choose the lowest point of the sphere (in
     // y-direction) as the reference point for the simulation and
     // simply place the center of the mesh @x.y + @radius.
     offset_vec = glm::vec3(0.f, radius, 0.f);
-
-    //
-    geo.transform = glm::translate(x + offset_vec)
-      * glm::scale(glm::vec3(radius));
   }
 
   phySphere::~phySphere() {}
@@ -135,18 +132,12 @@ namespace phy {
       // plane->getTriangleIndex(this);
     }
 
-    geo.transform = glm::translate(x + offset_vec)
-      * glm::scale(glm::vec3(radius));
-
     return true;
   }
 
   void
   phySphere::setPosition(glm::vec3 pos) {
     x = pos;
-
-    geo.transform = glm::translate(x + offset_vec)
-      * glm::scale(glm::vec3(radius));
   }
 
   void
@@ -167,9 +158,6 @@ namespace phy {
 
     // x.y = 1.f;
     x.y = (d - x.x * norm.x - x.z * norm.z) / norm.y;
-
-    geo.transform = glm::translate(x + offset_vec)
-      * glm::scale(glm::vec3(radius));
   }
 
   phyPlane::phyPlane(float xStart,
@@ -564,13 +552,21 @@ namespace phy {
 
   void
   phySphere::render() {
+    geo.transform = glm::translate(x + offset_vec)
+      * glm::scale(glm::vec3(radius));
     geo.bind();
+
+    // Set model matrix for this sphere
     glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &geo.transform[0][0]);
+    // Set custom color for this sphere
+    glUniform4fv(custom_color_loc, 1, &custom_color[0]);
     glDrawElements(GL_TRIANGLES, geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
   }
 
   void
   initShader() {
+    geo = loadMesh("sphere.obj", false);
+
     unsigned int vertexShader = compileShader("physics.vert", GL_VERTEX_SHADER);
     unsigned int fragmentShader = compileShader("physics.frag", GL_FRAGMENT_SHADER);
     phyShaderProgram = linkProgram(vertexShader, fragmentShader);
@@ -582,6 +578,7 @@ namespace phy {
     model_mat_loc = glGetUniformLocation(phyShaderProgram, "model_mat");
     proj_mat_loc = glGetUniformLocation(phyShaderProgram, "proj_mat");
     view_mat_loc = glGetUniformLocation(phyShaderProgram, "view_mat");
+    custom_color_loc = glGetUniformLocation(phyShaderProgram, "custom_color");
   }
 
   // Load the phyShaderProgram and set all values that are identical
