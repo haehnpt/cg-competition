@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mesh.hpp>
+#include <camera.hpp>
 
 namespace phy {
   // 'direction' in the plane
@@ -38,8 +39,7 @@ namespace phy {
     phySphere(glm::vec3 x,
               glm::vec3 v,
               float radius, glm::vec4 color,
-              struct phyPlane *plane,
-              int model_mat_loc);
+              struct phyPlane *plane),
     ~phySphere();
 
     void render();
@@ -90,4 +90,7 @@ namespace phy {
     void release();
     void destroy();
   };
+
+  void initShader();
+  void useShader(camera *cam, glm::mat4 proj_matrix, glm::vec3 light_dir);
 }

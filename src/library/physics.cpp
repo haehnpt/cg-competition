@@ -2,6 +2,8 @@
 
 #include <common.hpp>
 #include <mesh.hpp>
+#include <camera.hpp>
+#include <shader.hpp>
 #include <glm/gtx/transform.hpp>
 
 // #include <buffer.hpp>
@@ -24,20 +26,41 @@
 // more information.
 
 namespace phy {
+  namespace {
+    int phyShaderProgram;
+    int light_dir_loc;
+    int model_mat_loc;
+    int proj_mat_loc;
+    int view_mat_loc;
+    int roughness_loc;
+    int ref_index_loc;
+    int diffuse_loc;
+    int specular_loc;
+    int use_oren_nayar_loc;
+    // Add albedo location
+    int albedo_loc;
+
+    // Shader variables
+    float roughness = 0.4f;
+    float refraction_index = 0.4f;
+    // Add variable for albedo
+    float albedo = 1.0f;
+    int use_oren_nayar = 1;
+    glm::vec4 diffuse_color(0.7f, 0.7f, 0.7f, 1.f);
+    glm::vec4 specular_color(1.0f, 1.0f, 1.0f, 1.f);
+  }
 
   phySphere::phySphere(glm::vec3 x,
                        glm::vec3 v,
                        float radius,
                        glm::vec4 color,
-                       phyPlane *plane,
-                       int model_mat_loc) :
+                       phyPlane *plane) :
     x{x},
     v{v},
     radius{radius},
-    plane{plane},
-    model_mat_loc{model_mat_loc}
+    plane{plane}
   {
-    // std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << "\n";
+    std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << "\n";
     a.x = 0;
     a.y = -4;
     a.z = 0;
@@ -555,8 +578,55 @@ namespace phy {
 
   void
   phySphere::render() {
-    glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &geo.transform[0][0]);
     geo.bind();
+    glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &geo.transform[0][0]);
     glDrawElements(GL_TRIANGLES, geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+  }
+
+  void
+  initShader() {
+    unsigned int vertexShader = compileShader("shading_models.vert", GL_VERTEX_SHADER);
+    unsigned int fragmentShader = compileShader("shading_models.frag", GL_FRAGMENT_SHADER);
+    phyShaderProgram = linkProgram(vertexShader, fragmentShader);
+    // after linking the program the shader objects are no longer needed
+    glDeleteShader(fragmentShader);
+    glDeleteShader(vertexShader);
+
+    light_dir_loc = glGetUniformLocation(phyShaderProgram, "light_dir");
+    model_mat_loc = glGetUniformLocation(phyShaderProgram, "model_mat");
+    proj_mat_loc = glGetUniformLocation(phyShaderProgram, "proj_mat");
+    view_mat_loc = glGetUniformLocation(phyShaderProgram, "view_mat");
+    roughness_loc = glGetUniformLocation(phyShaderProgram, "roughness");
+    ref_index_loc = glGetUniformLocation(phyShaderProgram, "refractionIndex");
+    diffuse_loc = glGetUniformLocation(phyShaderProgram, "diffuse");
+    specular_loc = glGetUniformLocation(phyShaderProgram, "specular");
+    use_oren_nayar_loc = glGetUniformLocation(phyShaderProgram, "useOrenNayar");
+    // Add albedo location
+    albedo_loc = glGetUniformLocation(phyShaderProgram, "albedo");
+
+    // Shader variables
+    roughness = 0.4f;
+    refraction_index = 0.4f;
+    // Add variable for albedo
+    albedo = 1.0f;
+    use_oren_nayar = 1;
+  }
+
+  // Load the phyShaderProgram and set all values that are identical
+  // for all spheres. The @model_mat will be set individually by each
+  // sphere in phySphere:render().
+  void
+  useShader(camera *cam, glm::mat4 proj_matrix, glm::vec3 light_dir) {
+    glUseProgram(phyShaderProgram);
+    glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
+    glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &cam->view_matrix()[0][0]);
+    glUniform3fv(light_dir_loc, 1, &light_dir[0]);
+    glUniform1i(use_oren_nayar_loc, use_oren_nayar);
+    glUniform1f(roughness_loc, roughness);
+    // Uniform albedo
+    glUniform1f(albedo_loc, albedo);
+    glUniform1f(ref_index_loc, refraction_index);
+    glUniform4fv(diffuse_loc, 1, &diffuse_color[0]);
+    glUniform4fv(specular_loc, 1, &specular_color[0]);
   }
 }
