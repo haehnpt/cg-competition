@@ -160,6 +160,19 @@ namespace phy {
     x.y = (d - x.x * norm.x - x.z * norm.z) / norm.y;
   }
 
+  void
+  phySphere::render() {
+    geo.transform = glm::translate(x + offset_vec)
+      * glm::scale(glm::vec3(radius));
+    geo.bind();
+
+    // Set model matrix for this sphere
+    glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &geo.transform[0][0]);
+    // Set custom color for this sphere
+    glUniform4fv(custom_color_loc, 1, &custom_color[0]);
+    glDrawElements(GL_TRIANGLES, geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+  }
+
   phyPlane::phyPlane(float xStart,
                      float xEnd,
                      float zStart,
@@ -167,14 +180,17 @@ namespace phy {
                      float *heightMap,
                      int xNumPoints,
                      int zNumPoints,
-                     bool useBoundingBox) :
+                     bool useBoundingBox,
+                     glm::vec4 custom_color) :
     xStart{xStart},
     xEnd{xEnd},
     zStart{zStart},
     zEnd{zEnd},
     xNumPoints{xNumPoints},
     zNumPoints{zNumPoints},
-    useBoundingBox{useBoundingBox}
+    useBoundingBox{useBoundingBox},
+    custom_color{custom_color},
+    model_mat{glm::mat4(1.f)}
   {
     this->xTileWidth = (xEnd - xStart) / (float)(xNumPoints - 1);
     this->zTileWidth = (zEnd - zStart) / (float)(zNumPoints - 1);
@@ -212,16 +228,16 @@ namespace phy {
     // Thus the total number of vertices needed is:
     // (m-2)*(n-2)*6 + 2*(n-2)*3 + 2*(m-2)*3 + 1 + 1 + 2 + 2
     //  = 6*(n*m - n - m + 1)
-    mVertices = 6 * (xNumPoints * zNumPoints - xNumPoints - zNumPoints + 1);
-    vbo_data = new float[mVertices * 10];
+    n_vertices = 6 * (xNumPoints * zNumPoints - xNumPoints - zNumPoints + 1);
+    vbo_data = new float[n_vertices * 10];
     float deltaX = (xEnd - xStart) / (xNumPoints - 1);
     float deltaZ = (zEnd - zStart) / (zNumPoints - 1);
 
     // DEBUG:
     std::cout << "heightMap dimension: " << zNumPoints << "x" << xNumPoints << "\n";
     std::cout << "deltaX = " << deltaX << ", deltaZ  = " << deltaZ << "\n";
-    std::cout << "mVertices = " << mVertices << "\n";
-    std::cout << "vbo_data size: " << mVertices * 10 * sizeof(float) / 1000.f << "K\n";
+    std::cout << "n_vertices = " << n_vertices << "\n";
+    std::cout << "vbo_data size: " << n_vertices * 10 * sizeof(float) / 1000.f << "K\n";
 
     // This for-loop loops over the squares between the data
     // points. (x,z) represents the upper-left vertex of the current
@@ -316,7 +332,7 @@ namespace phy {
 
 
     // DEBUG print
-    // for (int i = 0; i < mVertices; i++) {
+    // for (int i = 0; i < n_vertices; i++) {
     //     std::cout << "====== Vertix " << i << ":\n";
 
     //     for (int j = 0; j < 10; j++) {
@@ -332,7 +348,7 @@ namespace phy {
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, mVertices * 10 * sizeof(float), vbo_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, n_vertices * 10 * sizeof(float), vbo_data, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)(3*sizeof(float)));
@@ -349,23 +365,12 @@ namespace phy {
   }
 
 
-  phyPlane::~phyPlane() {
-    delete[] vbo_data;
-  }
-
-  void
-  phyPlane::bind() {
-    glBindVertexArray(vao);
-  }
-
-  void
-  phyPlane::release() {
-    glBindVertexArray(0);
-  }
+    phyPlane::~phyPlane() {
+      delete[] vbo_data;
+    }
 
   void
   phyPlane::destroy() {
-    release();
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
   }
@@ -551,16 +556,11 @@ namespace phy {
   }
 
   void
-  phySphere::render() {
-    geo.transform = glm::translate(x + offset_vec)
-      * glm::scale(glm::vec3(radius));
-    geo.bind();
-
-    // Set model matrix for this sphere
-    glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &geo.transform[0][0]);
-    // Set custom color for this sphere
+  phyPlane::render() {
+    glBindVertexArray(vao);
+    glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &model_mat[0][0]);
     glUniform4fv(custom_color_loc, 1, &custom_color[0]);
-    glDrawElements(GL_TRIANGLES, geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+    glDrawArrays(GL_TRIANGLES, 0, n_vertices);
   }
 
   void
@@ -582,8 +582,9 @@ namespace phy {
   }
 
   // Load the phyShaderProgram and set all values that are identical
-  // for all spheres. The @model_mat will be set individually by each
-  // sphere in phySphere:render().
+  // for all phy objcets such as planes and spheres. The @model_mat
+  // will be set individually by each phy object in their render()
+  // method.
   void
   useShader(camera *cam, glm::mat4 proj_matrix, glm::vec3 light_dir) {
     glUseProgram(phyShaderProgram);

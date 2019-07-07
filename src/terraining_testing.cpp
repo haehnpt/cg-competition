@@ -42,9 +42,9 @@
 #define SPHERE_RADIUS 0.08f
 #define X_N_SPHERES 25
 #define Z_N_SPHERES 25
-// #define USE_PHY_PLANE
-#define SPHERES_APPEARANCE_FRAME 300
-#define SPHERES_RELASE_FRAME 400
+#define USE_PHY_PLANE
+#define SPHERES_APPEARANCE_FRAME 0
+#define SPHERES_RELASE_FRAME 100
 
 
 // Camera settings
@@ -123,7 +123,8 @@ main(int, char* argv[]) {
 						   terr.heights,
 						   TERRAIN_RESOLUTION,
 						   TERRAIN_RESOLUTION,
-						   false);
+						   false,
+						   glm::vec4(1.f, 0.f, 1.f, 1.f));
 
 	// Prepare spheres
 	phy::phySphere * spheres[X_N_SPHERES * Z_N_SPHERES];
@@ -166,8 +167,12 @@ main(int, char* argv[]) {
 								std::sin(light_phi) * std::sin(light_theta));
 
 			// Render terrain
+#ifdef USE_PHY_PLANE
+			phy::useShader(&cam, proj_matrix, light_dir);
+			phyplane.render();
+#else
 			terr.render(&cam, proj_matrix, light_dir);
-
+#endif
 			// Render spheres
 			if (frame >= SPHERES_APPEARANCE_FRAME) {
 				if (frame >= SPHERES_RELASE_FRAME) {

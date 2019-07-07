@@ -52,7 +52,7 @@ namespace phy {
     unsigned int vao;
     unsigned int vbo;
     float *vbo_data;
-    unsigned int mVertices;
+    unsigned int n_vertices;
 
     float xStart;
     float xEnd;
@@ -69,9 +69,12 @@ namespace phy {
 
     int triangleIndex;
 
+    glm::vec4 custom_color;
+    glm::mat4 model_mat;
 
     phyPlane(float xStart, float xEnd, float zStart, float zEnd,
-             float *heightMap, int xNumPoints, int zNumPoints, bool useBoundingBox);
+             float *heightMap, int xNumPoints, int zNumPoints, bool useBoundingBox,
+             glm::vec4 custom_color = glm::vec4(0.f, 0.f, 0.f, 0.f));
     ~phyPlane();
 
     int getTriangleAt(glm::vec3 x);
@@ -84,8 +87,7 @@ namespace phy {
 
     glm::vec3 reflectAt(glm::vec3 pos, glm::vec3 v);
 
-    void bind();
-    void release();
+    void render();
     void destroy();
   };
 
