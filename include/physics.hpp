@@ -15,12 +15,12 @@ namespace phy {
 
   struct phySphere {
     // physics simulation
-    glm::vec3 x; // position
-    glm::vec3 v; // velocity
-    glm::vec3 a; // acceleration
+    glm::vec4 x; // position
+    glm::vec4 v; // velocity
+    glm::vec4 a; // acceleration
     // position of the center of the mesh relative to the center used
     // for simulation
-    glm::vec3 offset_vec;
+    glm::vec4 offset_vec;
     float radius;
     struct phyPlane *plane;
     glm::vec4 custom_color;
@@ -33,8 +33,8 @@ namespace phy {
     // float xMax[3];
     // float aNext[3];
 
-    phySphere(glm::vec3 x,
-              glm::vec3 v,
+    phySphere(glm::vec4 x,
+              glm::vec4 v,
               float radius,
               struct phyPlane *plane,
               glm::vec4 custom_color = glm::vec4(0.f, 0.f, 0.f, 0.f));
@@ -43,7 +43,7 @@ namespace phy {
     void render();
     // calculates the new position, velocity, acceleration
     bool step(float deltaT);
-    void setPosition(glm::vec3 pos);
+    void setPosition(glm::vec4 pos);
     void moveToPlaneHeight();
   };
 
@@ -71,12 +71,16 @@ namespace phy {
 
     glm::vec4 custom_color;
     glm::mat4 model_mat;
+    glm::mat4 inv_model_mat;
 
     phyPlane(float xStart, float xEnd, float zStart, float zEnd,
              float *heightMap, int xNumPoints, int zNumPoints, bool useBoundingBox,
              glm::vec4 custom_color = glm::vec4(0.f, 0.f, 0.f, 0.f));
     ~phyPlane();
 
+    void set_model_mat(glm::mat4 model_mat);
+
+    int getTriangleAt(glm::vec4 pos);
     int getTriangleAt(glm::vec3 x);
     std::vector<int> getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd);
 
@@ -85,7 +89,7 @@ namespace phy {
     int getNextTriangle(int index, phyDirection direction);
     int getNextTriangle(glm::vec3 position, glm::vec3 direction);
 
-    glm::vec3 reflectAt(glm::vec3 pos, glm::vec3 v);
+    glm::vec4 reflectAt(glm::vec4 pos, glm::vec4 v);
 
     void render();
     void destroy();

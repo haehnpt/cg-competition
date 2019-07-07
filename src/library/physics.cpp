@@ -6,6 +6,14 @@
 #include <shader.hpp>
 #include <glm/gtx/transform.hpp>
 
+// Taking into account (affine) plane transformations requires
+// additional matrix multiplications in each phySphere::step() but is
+// REQUIRED if any affine transformations (other than the identity
+// matrix) will be applied the original plane data. If you never apply
+// any transformations to your planes you can comment this out.
+#define WITH_AFFINE_PLANE_TRANSFORMATIONS
+
+
 // #include <buffer.hpp>
 // #define PHYSICS_DEBUG
 
@@ -36,8 +44,8 @@ namespace phy {
     geometry geo;
   }
 
-  phySphere::phySphere(glm::vec3 x,
-                       glm::vec3 v,
+  phySphere::phySphere(glm::vec4 x,
+                       glm::vec4 v,
                        float radius,
                        phyPlane *plane,
                        glm::vec4 color) :
@@ -45,18 +53,16 @@ namespace phy {
     v{v},
     radius{radius},
     plane{plane},
-    custom_color{color}
+    custom_color{color},
+    a{glm::vec4(0.f, -4.f, 0.f, 0.f)}
   {
     // std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << ")\n";
-    a.x = 0;
-    a.y = -4;
-    a.z = 0;
 
     // Since the collision code does not yet take the radius into
     // account, we choose the lowest point of the sphere (in
     // y-direction) as the reference point for the simulation and
     // simply place the center of the mesh @x.y + @radius.
-    offset_vec = glm::vec3(0.f, radius, 0.f);
+    offset_vec = glm::vec4(0.f, radius, 0.f, 0);
   }
 
   phySphere::~phySphere() {}
@@ -65,6 +71,15 @@ namespace phy {
   phySphere::step(float deltaT) {
     // next position if there were no obstacles
     glm::vec3 targetPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
+
+#ifdef WITH_AFFINE_PLANE_TRANSFORMATIONS
+    // transfer all vectors to the plane's coordinate system, that is
+    // before application of the plane's model_mat
+    targetPos = glm::inverse(plane->model_mat) * glm::vec4(targetPos, 1.f);
+    x = glm::inverse(plane->model_mat) * x;
+    v = glm::inverse(plane->model_mat) * v;
+    a = glm::inverse(plane->model_mat) * a;
+#endif //  WITH_AFFINE_PLANE_TRANSFORMATIONS
 
     // the bounding box is only applied to the x and z direction
     if(plane->useBoundingBox) {
@@ -93,12 +108,14 @@ namespace phy {
         v = v + a * deltaT;
       } else {
         // TODO: x is not the position of the first contact!
+        // FIXME: this crashes the program
+        moveToPlaneHeight();
         v = plane->reflectAt(x, v);
         x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
         // update velocity
         v = v + a * deltaT;
         // lost energy when bouncing
-        v *= 0.80;
+        v *= 0.85;
       }
     } else {
       // ignoring the bounding box
@@ -116,18 +133,26 @@ namespace phy {
           v = v + a * deltaT;
         } else {
           // TODO: x is not the position of the first contact!
+          // FIXME: this crashes the program
+          // moveToPlaneHeight();
           v = plane->reflectAt(x, v);
           x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
           // update velocity
           v = v + a * deltaT;
           // lost energy when bouncing
-          v *= 0.90;
+          v *= 0.85;
         }
       }
 
-      // drag
-      // a = glm::vec3(0, -10.f, 0.f);
-      // a = a - 0.01f * (float)pow(glm::length(v), 2.f) * glm::normalize(v);
+      // transform back from the position relative to the plane to
+      // world
+#ifdef WITH_AFFINE_PLANE_TRANSFORMATIONS
+      x = plane->model_mat * x;
+      v = plane->model_mat * v;
+      a = plane->model_mat * a;
+#endif // WITH_AFFINE_PLANE_TRANSFORMATIONS
+      // drag a = glm::vec3(0, -10.f, 0.f); a = a - 0.01f *
+      // (float)pow(glm::length(v), 2.f) * glm::normalize(v);
 
       // plane->getTriangleIndex(this);
     }
@@ -136,7 +161,7 @@ namespace phy {
   }
 
   void
-  phySphere::setPosition(glm::vec3 pos) {
+  phySphere::setPosition(glm::vec4 pos) {
     x = pos;
   }
 
@@ -162,7 +187,7 @@ namespace phy {
 
   void
   phySphere::render() {
-    geo.transform = glm::translate(x + offset_vec)
+    geo.transform = glm::translate(glm::vec3(x + offset_vec))
       * glm::scale(glm::vec3(radius));
     geo.bind();
 
@@ -190,7 +215,7 @@ namespace phy {
     zNumPoints{zNumPoints},
     useBoundingBox{useBoundingBox},
     custom_color{custom_color},
-    model_mat{glm::mat4(1.f)}
+    model_mat{glm::translate(glm::vec3(3.f, 0.f, 0.f))}
   {
     this->xTileWidth = (xEnd - xStart) / (float)(xNumPoints - 1);
     this->zTileWidth = (zEnd - zStart) / (float)(zNumPoints - 1);
@@ -364,10 +389,9 @@ namespace phy {
     // delete [vbo_data];
   }
 
-
-    phyPlane::~phyPlane() {
-      delete[] vbo_data;
-    }
+  phyPlane::~phyPlane() {
+    delete[] vbo_data;
+  }
 
   void
   phyPlane::destroy() {
@@ -375,7 +399,21 @@ namespace phy {
     glDeleteBuffers(1, &vbo);
   }
 
-  // For the start we assume the sphere has a radius of zero!
+  // TODO: Use pointer
+  void
+  phyPlane::set_model_mat(glm::mat4 model_mat)
+  {
+    this->model_mat = model_mat;
+    this->inv_model_mat = glm::inverse(model_mat);
+  }
+
+  int
+  phyPlane::getTriangleAt(glm::vec4 pos) {
+    return getTriangleAt(glm::vec3(pos.x, pos.y, pos.z));
+  }
+
+  // @pos must coordinates realtive to the plane before any
+  // transformations.
   int
   phyPlane::getTriangleAt(glm::vec3 pos) {
     // printf("isCutting with s coordinates: %02.2f %02.2f %02.2f\n",
@@ -512,9 +550,13 @@ namespace phy {
     return std::vector<int>{(int)(xStart + zStart + xEnd + zEnd)};
   }
 
+
+  // x is the position relative to the plane before any
+  // transformations.
   bool
   phyPlane::isAbove(glm::vec3 x) {
     int index = getTriangleAt(x);
+
     // first vertex of the triangle
     glm::vec3 v1(vbo_data[index * 3 * 10 + 0],
                  vbo_data[index * 3 * 10 + 1],
@@ -531,10 +573,11 @@ namespace phy {
     return glm::dot(x, norm) > glm::dot(v1, norm);
   }
 
+  // v is the velocity relative to the plane BEFORE any plane transformations
   // reflect the vector @v at the normal of the triangle at position
   // @pos
-  glm::vec3
-  phyPlane::reflectAt(glm::vec3 pos, glm::vec3 v) {
+  glm::vec4
+  phyPlane::reflectAt(glm::vec4 pos, glm::vec4 v) {
     if (!useBoundingBox) {
       if(pos.x < xStart  || pos.x > xEnd
          || pos.z < zStart || pos.z > zEnd) {
@@ -548,9 +591,10 @@ namespace phy {
     int index = getTriangleAt(pos);
 
     // normal of the triangle's plane
-    glm::vec3 norm(vbo_data[index * 3 * 10 + 3 + 0],
+    glm::vec4 norm(vbo_data[index * 3 * 10 + 3 + 0],
                    vbo_data[index * 3 * 10 + 3 + 1],
-                   vbo_data[index * 3 * 10 + 3 + 2]);
+                   vbo_data[index * 3 * 10 + 3 + 2],
+                   0);
 
     return v - 2*glm::dot(norm, v) * norm;
   }

@@ -38,6 +38,7 @@
 #define TERRAIN_RESOLUTION 1000
 #endif
 
+
 // Sphere/Physics settings
 #define SPHERE_RADIUS 0.08f
 #define X_N_SPHERES 25
@@ -45,6 +46,10 @@
 #define USE_PHY_PLANE
 #define SPHERES_APPEARANCE_FRAME 0
 #define SPHERES_RELASE_FRAME 100
+
+#define PLANE_TILT_START_FRAME 500
+#define PLANE_TILT_END_FRAME 550
+#define PLANE_TILT_ANGLE_PER_FRAME 0.01
 
 
 // Camera settings
@@ -126,6 +131,13 @@ main(int, char* argv[]) {
 						   false,
 						   glm::vec4(1.f, 0.f, 1.f, 1.f));
 
+	glm::mat4 plane_model_mat(1.f);
+	float plane_angle = 0.f;
+
+	// Test affine transformation for the plane here!
+	phyplane.set_model_mat(glm::rotate(plane_model_mat, plane_angle, glm::vec3(1.f, 0.f, 0.f)));
+
+
 	// Prepare spheres
 	phy::phySphere * spheres[X_N_SPHERES * Z_N_SPHERES];
 
@@ -137,10 +149,11 @@ main(int, char* argv[]) {
 			float col = (float)x * (float)z / X_N_SPHERES / X_N_SPHERES;
 
 			spheres[x * Z_N_SPHERES + z]
-				= new phy::phySphere(glm::vec3(phyplane.xStart + x * dx,
+				= new phy::phySphere(glm::vec4(phyplane.xStart + x * dx,
 											   1.f,
-											   phyplane.zStart + z * dz),
-									 glm::vec3(0.f, 0.f, 0.f),
+											   phyplane.zStart + z * dz,
+											   1.f),
+									 glm::vec4(0.f, 0.f, 0.f, 0.f),
 									 SPHERE_RADIUS,
 									 &phyplane,
 									 glm::vec4(col, 1.f - col, 1.0f, 1.f));
@@ -168,6 +181,12 @@ main(int, char* argv[]) {
 
 			// Render terrain
 #ifdef USE_PHY_PLANE
+			if (frame >= PLANE_TILT_START_FRAME && frame < PLANE_TILT_END_FRAME) {
+				plane_angle += PLANE_TILT_ANGLE_PER_FRAME;
+				phyplane.set_model_mat(glm::rotate(plane_model_mat,
+												   plane_angle,
+												   glm::vec3(1.f, 0.f, 0.f)));
+			}
 			phy::useShader(&cam, proj_matrix, light_dir);
 			phyplane.render();
 #else
@@ -188,7 +207,7 @@ main(int, char* argv[]) {
 			}
 
 			// Rotate camera
-			cam.rotate();
+			// cam.rotate();
 
 			// Before swapping, read the pixels and feed them to "ffmpeg"
 #ifdef RENDER_VIDEO
