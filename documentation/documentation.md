@@ -20,16 +20,16 @@ Die nachfolgende Auflistung zeigt die ursprünglich geplanten Komponenten unsere
 | Komponente|Verantwortlicher|Fertiggestellt|Ins Projekt integriert|
 |:----------|:---------------|:-------------|:---------------------|
 |Physikalische Simulation|Volker|:heavy_check_mark:|:heavy_check_mark:|
-|Shadow Mapping|Volker|:heavy_multiplication_x:|:heavy_multiplication_x:|
+|Shadow Mapping|Volker|:x:|:x:|
 |Prozedurale Geometrie|Patrick|:heavy_check_mark:|:heavy_check_mark:|
 |Displacement Mapping|Patrick|:heavy_check_mark:|:heavy_check_mark:|
-|Datengetriebene Matrialmodelle|Patrick|:yellow_circle:|:heavy_multiplication_x:|
-|Partikelsystem|Volker|:heavy_multiplication_x:|:heavy_multiplication_x:|
-|Bewegungsunschärfe|Sebastian|:heavy_check_mark:|:heavy_multiplication_x:|
-|Fokusunschärfe|Sebastian|:heavy_check_mark:|:heavy_multiplication_x:|
-|HDR-Effekte|Sebastian|:heavy_multiplication_x:|:heavy_multiplication_x:|
-|Volumetrische Einfachstreuung|Sebastian|:heavy_multiplication_x:|:heavy_multiplication_x:|
-|Interaktivität|Alle|:heavy_multiplication_x:|:heavy_multiplication_x:|
+|Datengetriebene Matrialmodelle|Patrick|:x:|:x:|
+|Partikelsystem|Volker|:x:|:x:|
+|Bewegungsunschärfe|Sebastian|:heavy_check_mark:|:x:|
+|Fokusunschärfe|Sebastian|:heavy_check_mark:|:x:|
+|HDR-Effekte|Sebastian|:x:|:x:|
+|Volumetrische Einfachstreuung|Sebastian|:x:|:x:|
+|Interaktivität|Alle|:x:|:x:|
 
 ## Arbeitsschritte und Teilergebnisse
 
