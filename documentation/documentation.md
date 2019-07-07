@@ -35,7 +35,7 @@ class perlin_noise
     void create_gradients();
     float dot_grid_gradient(int index_x, int index_y, float x, float y);
     float lerp(float high, float low, float weight);
-	float fade(float x);
+    float fade(float x);
 
 public:
     // Public constructor & destructor
@@ -44,7 +44,7 @@ public:
 
     // Public member functions
     float get_noise(float x, float y);
-	void clear_gradients();
+    void clear_gradients();
 };
 ```
 
@@ -159,7 +159,8 @@ void main()
 
 Im Fragment-Shader **terrain_shader.frag** werden die Beleuchtungsrechnung vorgenommen sowie höhenabhängig Texturen bzw. Kombinationen von Texturen zugewiesen:
 ```glsl
-void main() {
+void main() 
+{
     float diffuseTerm = cdot(interp_normal, interp_light_dir);
     diffuseTerm = orennayarTerm(diffuseTerm, interp_normal, interp_light_dir);
     diffuseTerm = max(diffuseTerm, 0.1);
