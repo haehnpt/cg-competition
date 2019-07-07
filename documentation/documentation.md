@@ -2,15 +2,24 @@
 
 ## Gruppenmitglieder
 
-- Patrick Hähn
-- Sebastian Kühn
-- Volker Sobek
+- Patrick Hähn [@haehnpt](https://github.com/haehnpt)
+- Sebastian Kühn [@SekanderBast](https://github.com/SekanderBast)
+- Volker Sobek [@IMFTC](https://github.com/IMFTC)
 
 ## Künstlerisches und technisches Konzept
 
-(COPY FROM CONCEPT)
+### Story
 
-## Arbeitsschritte, Komponenten, Teilergebnisse
+"Es erwächst ein Gebirge aus einer flachen Fläche. Dann erscheint eine große
+Anzahl von Kugeln im Himmel. Die Kugeln stürzen herunter und landen auf den Gebirgszügen, wodurch sie wiederum auf- und abspringen, bis ein Ruhezustand eintritt."
+
+## Komponenten
+
+| Komponente                | Verantwortlicher | Fertiggestellt / Ins Projekt integriert |
+|---------------------------|------------------|-----------------------------------------|
+| Physikalische Simulation  | Volker		   |<ul><li>-[x]</li></ul>                   |
+
+## Arbeitsschritte und Teilergebnisse
 
 ### Noise Generation (Perlin Noise)
 
