@@ -91,16 +91,10 @@ float orennayarTerm(float lambert, vec3 n, vec3 l) {
 }
 
 void main() {
-    // Lambertian reflection term
     float diffuseTerm = cdot(interp_normal, interp_light_dir);
-    // define the diffuse part to be Lambertian - unless we choose Oren-Nayer
-    // in this case compute Oren-Nayar reusing the Lambertian term and use that
     diffuseTerm = orennayarTerm(diffuseTerm, interp_normal, interp_light_dir);
-    // lowest possbile value = ambient fake light term
     diffuseTerm = max(diffuseTerm, 0.1);
-    // as specular part we compute the Cook-Torrance term
     float specularTerm = cooktorranceTerm(interp_normal, interp_light_dir);
-    // combine both terms (diffuse+specular) using our material properties (colors)
 
 	vec4 diff;
 	vec4 spec;
