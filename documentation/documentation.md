@@ -1,6 +1,8 @@
 # Computer Animation Competition (Softwaredokumentation)
 
-Die nachfolgende Softwaredokumentation beschreibt ein Projekt, das während der "Computer Animation Competition" des Moduls "Einführung in die Computergraphik und Visualisierung" an der Rheinischen Friedrich-Wilhelms-Universität Bonn im Sommersemester 2019 durchgeführt wurde. Im Rahmen der "Computer Animation Competition" sollen in kleinen Teams kurze Animationen auf der Basis eines zuvor in Übungen erweiterten OpenGL-Frameworks erdacht, konzipiert und erstellt werden unter der Zuhilfenahme von Quellen aus dem Gebiet der Computergraphik.
+## Kontext
+
+Die nachfolgende Softwaredokumentation beschreibt ein Projekt, das während der "Computer Animation Competition" des von Prof. Dr. Hullin gehaltenen Moduls "Einführung in die Computergraphik und Visualisierung" an der Rheinischen Friedrich-Wilhelms-Universität Bonn im Sommersemester 2019 durchgeführt wurde. Im Rahmen der "Computer Animation Competition" sollen in kleinen Teams kurze Animationen auf der Basis eines zuvor in Übungen erweiterten OpenGL-Frameworks erdacht, konzipiert und erstellt werden unter der Zuhilfenahme von Quellen aus dem Gebiet der Computergraphik.
 
 ## Beitragende
 
@@ -10,12 +12,28 @@ Die nachfolgende Softwaredokumentation beschreibt ein Projekt, das während der 
 
 ## Künstlerisches und technisches Konzept
 
-### Story
+### Künstlerisches Konzept
+
+#### Story 
 
 "Es erwächst ein Gebirge aus einer flachen Fläche. Dann erscheint eine große
 Anzahl von Kugeln im Himmel. Die Kugeln stürzen herunter und landen auf den Gebirgszügen, wodurch sie wiederum auf- und abspringen, bis ein Ruhezustand eintritt."
 
-### 
+#### Überlegungen
+
+Die Landschaft soll aus schneebedeckten Bergen, steinigen Hängen und Wiesen im Flachland bestehen. Es werden verschiedene Texturen verwendet.
+
+(PHYSIK)
+
+### Technisches Konzept
+
+Die in der Story benötigte Umgebung, die bergige Landschaft, wird mit Hilfe von pseudo-zufälligem Noise prozedural erzeugt und durch das Anpassen der Geometrie an die Texturen verfeinert.
+
+(PHYSIK)
+
+(KAMERA EFFEKTE)
+
+Die erzeugten Frames werden mit Hilfe eines Converter-Tools zu einem  Video der gewünschten Qualität zusammengefügt.
 
 ## Komponenten
 
@@ -255,11 +273,13 @@ public:
 };
 ```
 
-## Ergebnis
+## Resultat
 
-(INSERT TEXT & VIDEO)
+(FERTIGES RENDERING)
 
 ## Evaluation
+
+_Is gud._
 
 ## Referenzen
 
