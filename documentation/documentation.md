@@ -14,6 +14,8 @@
 
 ### Noise Generation (Perlin Noise)
 
+![](noise.png)
+
 Die Noise Generation ist für die nachfolgende Terrain Generation essenziell. Wir haben uns für *Perlin Noise* [1] entschieden, da diese Methode für unsere Zwecke hinreichend ist und durch Überlagerung von verschiedenen Frequenzen anschauliche Height-Maps generiert werden können. Die Funktionalität wurde in der Klasse **perlin_noise** gekapselt, die ausschließlich innerhalb der nachfolgenden Terrain Generation verwendet wird.
 
 Verantwortlich: Patrick Hähn
@@ -46,9 +48,9 @@ public:
 };
 ```
 
-(INSERT IMAGE)
-
 ### Terrain Generation
+
+![](terrain.png)
 
 Die Generierung der Terrains sowie dessen Visualisierung werden in einer Klasse **terrain** gekapselt, sodass nach deren Instanziierung lediglich die öffentliche Funktion **terrain::render(int)** in der Render-Loop aufgerufen werden muss. Bei der Generierung wird die Klasse *geometry* des Frameworks wiederverwendet, um das Terrain zu repräsentieren. Die Klasse bietet desweiteren eine Funktion **terrain::get_normal_at_pos(float,float)**, die für die physikalischen Berechnungen benötigt wird. Die Generierung des Terrains basiert auf der obigen eigenen Implementierung von **perlin_noise** und wurde inspiriert durch *Red Blob Games* [2]. Für das Terrain werden die unten aufgeführten Shader **terrain_shader.vert** und **terrain_shader.frag** verwendet.
 
@@ -189,9 +191,6 @@ void main() {
 	frag_color = vec4(vec3(clamp(diff * diffuseTerm + spec * specularTerm, 0.0, 1.0)), 1);
 }
 ```
-Das fertige Terrain:
-
-![](terrain.png)
 
 ### Physikalische Simulation
 
@@ -202,6 +201,8 @@ Das fertige Terrain:
 (SEBASTIAN)
 
 ### Video Rendering
+
+![](rendering.gif)
 
 Das Rendering des Videos wurde mit Hilfe des unter *GNU-General-Public*-Lizenz veröffentlichten Tools *ffmpeg* [3] realisiert. Dazu wurde eine Wrapper-Klasse **ffmpeg_wrapper** erstellt, die den Workflow kapselt, sodass lediglich nach jedem Durchlauf der Renderloop der aktuelle Framebuffer mit der Funktion **ffmpeg_wrapper::save_frame()** an *ffmpeg* übergeben werden muss.
 
@@ -227,8 +228,6 @@ public:
 	bool is_finished();
 };
 ```
-
-(INSERT GIF)
 
 ## Ergebnis
 
