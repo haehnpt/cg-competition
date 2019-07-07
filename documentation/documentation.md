@@ -18,16 +18,16 @@ Anzahl von Kugeln im Himmel. Die Kugeln stürzen herunter und landen auf den Geb
 | Komponente|Verantwortlicher|Fertiggestellt|Ins Projekt integriert|
 |:----------|:---------------|:-------------|:---------------------|
 |Physikalische Simulation|Volker|:heavy_check_mark:|:heavy_check_mark:|
-|Shadow Mapping|Volker|:cross_mark:|:cross_mark:|
-|Datengetriebene MatrialModelle|Patrick|:cross_mark:|:cross_mark:|
+|Shadow Mapping|Volker|:heavy_multiplication_x:|:heavy_multiplication_x:|
+|Datengetriebene MatrialModelle|Patrick|:heavy_multiplication_x:|:heavy_multiplication_x:|
 |Prozedurale Geometrie|Patrick|:heavy_check_mark:|:heavy_check_mark:|
 |Displacement Mapping|Patrick|:heavy_check_mark:|:heavy_check_mark:|
-|Partikelsystem|Volker|:cross_mark:|:cross_mark:|
-|Bewegungsunschärfe|Sebastian|:heavy_check_mark:|:cross_mark:|
-|Fokusunschärfe|Sebastian|:heavy_check_mark:|:cross_mark:|
-|HDR-Effekte|Sebastian|:cross_mark:|:cross_mark:|
-|Vol. Einfachstreuung|Sebastian|:cross_mark:|:cross_mark:|
-|Interaktivität|Alle|:cross_mark:|:cross_mark:|
+|Partikelsystem|Volker|:heavy_multiplication_x:|:heavy_multiplication_x:|
+|Bewegungsunschärfe|Sebastian|:heavy_check_mark:|:heavy_multiplication_x:|
+|Fokusunschärfe|Sebastian|:heavy_check_mark:|:heavy_multiplication_x:|
+|HDR-Effekte|Sebastian|:heavy_multiplication_x:|:heavy_multiplication_x:|
+|Vol. Einfachstreuung|Sebastian|:heavy_multiplication_x:|:heavy_multiplication_x:|
+|Interaktivität|Alle|:heavy_multiplication_x:|:heavy_multiplication_x:|
 
 ## Arbeitsschritte und Teilergebnisse
 
