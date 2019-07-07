@@ -52,7 +52,7 @@ public:
 
 ![](terrain.png)
 
-Die Generierung der Terrains sowie dessen Visualisierung werden in einer Klasse **terrain** gekapselt, sodass nach deren Instanziierung lediglich die öffentliche Funktion **terrain::render(int)** in der Render-Loop aufgerufen werden muss. Bei der Generierung wird die Klasse *geometry* des Frameworks wiederverwendet, um das Terrain zu repräsentieren. Die Klasse bietet desweiteren eine Funktion **terrain::get_normal_at_pos(float,float)**, die für die physikalischen Berechnungen benötigt wird. Die Generierung des Terrains basiert auf der obigen eigenen Implementierung von **perlin_noise** und wurde inspiriert durch *Red Blob Games* [2]. Für das Terrain werden die unten aufgeführten Shader **terrain_shader.vert** und **terrain_shader.frag** verwendet.
+Die Generierung der Terrains sowie dessen Visualisierung werden in einer Klasse **terrain** gekapselt, sodass nach deren Instanziierung lediglich die öffentliche Funktion **terrain::render()** in der Render-Loop aufgerufen werden muss. Bei der Generierung wird die Klasse *geometry* des Frameworks wiederverwendet, um das Terrain zu repräsentieren. Die Klasse bietet desweiteren eine Funktion **terrain::get_normal_at_pos()**, die für die physikalischen Berechnungen benötigt wird. Die Generierung des Terrains basiert auf der obigen eigenen Implementierung von **perlin_noise** und wurde inspiriert durch *Red Blob Games* [2]. Für das Terrain werden die unten aufgeführten Shader **terrain_shader.vert** und **terrain_shader.frag** verwendet.
 
 Verantwortlich: Patrick Hähn
 
