@@ -15,9 +15,19 @@ Anzahl von Kugeln im Himmel. Die Kugeln stürzen herunter und landen auf den Geb
 
 ## Komponenten
 
-| Komponente                | Verantwortlicher | Fertiggestellt / Ins Projekt integriert |
-|---------------------------|------------------|-----------------------------------------|
-| Physikalische Simulation  | Volker		   |<ul><li>-[x]</li></ul>                   |
+| Komponente|Verantwortlicher|Fertiggestellt|Ins Projekt integriert|
+|:----------|:---------------|:-------------|:---------------------|
+|Physikalische Simulation|Volker|:heavy_check_mark:|:heavy_check_mark:|
+|Shadow Mapping|Volker|:cross_mark:|:cross_mark:|
+|Datengetriebene MatrialModelle|Patrick|:cross_mark:|:cross_mark:|
+|Prozedurale Geometrie|Patrick|:heavy_check_mark:|:heavy_check_mark:|
+|Displacement Mapping|Patrick|:heavy_check_mark:|:heavy_check_mark:|
+|Partikelsystem|Volker|:cross_mark:|:cross_mark:|
+|Bewegungsunschärfe|Sebastian|:heavy_check_mark:|:cross_mark:|
+|Fokusunschärfe|Sebastian|:heavy_check_mark:|:cross_mark:|
+|HDR-Effekte|Sebastian|:cross_mark:|:cross_mark:|
+|Vol. Einfachstreuung|Sebastian|:cross_mark:|:cross_mark:|
+|Interaktivität|Alle|:cross_mark:|:cross_mark:|
 
 ## Arbeitsschritte und Teilergebnisse
 
