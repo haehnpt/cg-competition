@@ -1,6 +1,8 @@
 # Computer Animation Competition (Softwaredokumentation)
 
-## Gruppenmitglieder
+Die nachfolgende Softwaredokumentation beschreibt ein Projekt, das während der "Computer Animation Competition" des Moduls "Einführung in die Computergraphik und Visualisierung" an der Rheinischen Friedrich-Wilhelms-Universität Bonn im Sommersemester 2019 durchgeführt wurde. Im Rahmen der "Computer Animation Competition" sollen in kleinen Teams kurze Animationen auf der Basis eines zuvor in Übungen erweiterten OpenGL-Frameworks erdacht, konzipiert und erstellt werden unter der Zuhilfenahme von Quellen aus dem Gebiet der Computergraphik.
+
+## Beitragende
 
 - Patrick Hähn [@haehnpt](https://github.com/haehnpt)
 - Sebastian Kühn [@SekanderBast](https://github.com/SekanderBast)
@@ -12,6 +14,8 @@
 
 "Es erwächst ein Gebirge aus einer flachen Fläche. Dann erscheint eine große
 Anzahl von Kugeln im Himmel. Die Kugeln stürzen herunter und landen auf den Gebirgszügen, wodurch sie wiederum auf- und abspringen, bis ein Ruhezustand eintritt."
+
+### 
 
 ## Komponenten
 
@@ -254,6 +258,8 @@ public:
 ## Ergebnis
 
 (INSERT TEXT & VIDEO)
+
+## Evaluation
 
 ## Referenzen
 
