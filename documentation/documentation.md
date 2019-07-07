@@ -15,18 +15,20 @@ Anzahl von Kugeln im Himmel. Die Kugeln stürzen herunter und landen auf den Geb
 
 ## Komponenten
 
+Die nachfolgende Auflistung zeigt die ursprünglich geplanten Komponenten unseres Projektes sortiert in absteigender Priorität der Implementierung.
+
 | Komponente|Verantwortlicher|Fertiggestellt|Ins Projekt integriert|
 |:----------|:---------------|:-------------|:---------------------|
 |Physikalische Simulation|Volker|:heavy_check_mark:|:heavy_check_mark:|
 |Shadow Mapping|Volker|:heavy_multiplication_x:|:heavy_multiplication_x:|
-|Datengetriebene MatrialModelle|Patrick|:heavy_multiplication_x:|:heavy_multiplication_x:|
 |Prozedurale Geometrie|Patrick|:heavy_check_mark:|:heavy_check_mark:|
 |Displacement Mapping|Patrick|:heavy_check_mark:|:heavy_check_mark:|
+|Datengetriebene Matrialmodelle|Patrick|:yellow_circle:|:heavy_multiplication_x:|
 |Partikelsystem|Volker|:heavy_multiplication_x:|:heavy_multiplication_x:|
 |Bewegungsunschärfe|Sebastian|:heavy_check_mark:|:heavy_multiplication_x:|
 |Fokusunschärfe|Sebastian|:heavy_check_mark:|:heavy_multiplication_x:|
 |HDR-Effekte|Sebastian|:heavy_multiplication_x:|:heavy_multiplication_x:|
-|Vol. Einfachstreuung|Sebastian|:heavy_multiplication_x:|:heavy_multiplication_x:|
+|Volumetrische Einfachstreuung|Sebastian|:heavy_multiplication_x:|:heavy_multiplication_x:|
 |Interaktivität|Alle|:heavy_multiplication_x:|:heavy_multiplication_x:|
 
 ## Arbeitsschritte und Teilergebnisse
