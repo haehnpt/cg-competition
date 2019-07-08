@@ -64,90 +64,107 @@ namespace phy {
 
   bool
   phySphere::step(float deltaT) {
-    // next position if there were no obstacles
-    glm::vec3 targetPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
+    if (plane) {
+      // next position if there were no obstacles
+      glm::vec3 targetPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
 
-    // transfer all vectors to the plane's coordinate system, that is
-    // before application of the plane's model_mat
-    targetPos = glm::inverse(plane->model_mat) * glm::vec4(targetPos, 1.f);
-    x = glm::inverse(plane->model_mat) * x;
-    v = glm::inverse(plane->model_mat) * v;
-    a = glm::inverse(plane->model_mat) * a;
+      // transfer all vectors to the plane's coordinate system, that is
+      // before application of the plane's model_mat
+      targetPos = glm::inverse(plane->model_mat) * glm::vec4(targetPos, 1.f);
+      x = glm::inverse(plane->model_mat) * x;
+      v = glm::inverse(plane->model_mat) * v;
+      a = glm::inverse(plane->model_mat) * a;
 
-    bool touched_plane = false;
+      bool touched_plane = false;
 
-    // the bounding box is only applied to the x and z direction
-    if(plane->useBoundingBox) {
-      // maybe reflect in x direction
-      if (targetPos.x  < plane->xStart + radius) {
-        x.x = plane->xStart + radius + 0.0001f;
-        v.x = -v.x;
-      } else if (targetPos.x > plane->xEnd - radius) {
-        x.x = plane->xEnd - radius -0.0001f;
-        v.x = -v.x;
-      }
+      // the bounding box is only applied to the x and z direction
+      if(plane->useBoundingBox) {
+        // maybe reflect in x direction
+        if (targetPos.x  < plane->xStart + radius) {
+          x.x = plane->xStart + radius + 0.0001f;
+          v.x = -v.x;
+        } else if (targetPos.x > plane->xEnd - radius) {
+          x.x = plane->xEnd - radius -0.0001f;
+          v.x = -v.x;
+        }
 
-      // maybe reflect in z direction
-      if (targetPos.z < plane->zStart + radius) {
-        x.z = plane->zStart + radius + 0.0001f;
-        v.z = -v.z;
-      } else if (targetPos.z > plane->zEnd - radius) {
-        x.z = plane->zEnd - radius - 0.0001f;
-        v.z = -v.z;
-      }
+        // maybe reflect in z direction
+        if (targetPos.z < plane->zStart + radius) {
+          x.z = plane->zStart + radius + 0.0001f;
+          v.z = -v.z;
+        } else if (targetPos.z > plane->zEnd - radius) {
+          x.z = plane->zEnd - radius - 0.0001f;
+          v.z = -v.z;
+        }
 
-      // the sphere is now back in the  plane area
-      if (plane->isAbove(x)) {
-      } else {
-        // TODO: x is not the position of the first contact!
-        // FIXME: this crashes the program
-        plane->reflect(this);
-        touched_plane = true;
-      }
-    } else {
-      // ignoring the bounding box
-      if(targetPos.x < plane->xStart || targetPos.x > plane->xEnd
-         || targetPos.z < plane->zStart || targetPos.z > plane->zEnd) {
-        // EMPTY
-      } else {
-        // inside bounding box, reflect
-        if (plane->isAbove(targetPos)) {
-          // EMPTY
+        // the sphere is now back in the  plane area
+        if (plane->isAbove(x)) {
         } else {
           // TODO: x is not the position of the first contact!
           // FIXME: this crashes the program
           plane->reflect(this);
           touched_plane = true;
         }
+      } else {
+        // ignoring the bounding box
+        if(targetPos.x < plane->xStart || targetPos.x > plane->xEnd
+           || targetPos.z < plane->zStart || targetPos.z > plane->zEnd) {
+          // EMPTY
+        } else {
+          // inside bounding box, reflect
+          if (plane->isAbove(targetPos)) {
+            // EMPTY
+          } else {
+            // TODO: x is not the position of the first contact!
+            // FIXME: this crashes the program
+            plane->reflect(this);
+            touched_plane = true;
+          }
+        }
+
+        // transform back from the position relative to the plane to
+        // world
+        x = plane->model_mat * x;
+        v = plane->model_mat * v;
+        a = plane->model_mat * a;
+
+        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+        // update velocity
+        v = v + a * deltaT;
+
+        // drag a = glm::vec3(0, -10.f, 0.f); a = a - 0.01f *
+        // (float)pow(glm::length(v), 2.f) * glm::normalize(v);
+
+        // plane->getTriangleIndex(this);
+
+        // Once a sphere is on the ground, it will be reflected each
+        // step, since it will get below the plane each time. In this
+        // case, reducing the velocity would look like friction, which
+        // we don't want to simulate. Therefore only reduce the speed
+        // when the sphere touches the plane for the first time.
+        if (touched_plane && !touched_plane_last_step) {
+          v = v * 0.8f;
+        }
+
+        touched_plane_last_step = touched_plane;
+
+        // FIXME: Remove hard-coded number!  This partially fixes the
+        // phantom edge bounces for our special case (only rotating
+        // around the x-axis): The lowest point the plane can reach is
+        // determined by the size in z direction.
+        if (x.y < -plane->zEnd) {
+          plane = nullptr;
+        }
+
       }
-
-      // transform back from the position relative to the plane to
-      // world
-      x = plane->model_mat * x;
-      v = plane->model_mat * v;
-      a = plane->model_mat * a;
-
+    } else {
+      // plane == nullptr
+      //
+      // No more interaction with a plane
       x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-      // update velocity
       v = v + a * deltaT;
-
-      // drag a = glm::vec3(0, -10.f, 0.f); a = a - 0.01f *
-      // (float)pow(glm::length(v), 2.f) * glm::normalize(v);
-
-      // plane->getTriangleIndex(this);
-
-      // Once a sphere is on the ground, it will be reflected each
-      // step, since it will get below the plane each time. In this
-      // case, reducing the velocity would look like friction, which
-      // we don't want to simulate. Therefore only reduce the speed
-      // when the sphere touches the plane for the first time.
-      if (touched_plane && !touched_plane_last_step) {
-        v = v * 0.8f;
-      }
-
-    touched_plane_last_step = touched_plane;
-
     }
+
 
     return true;
   }
