@@ -49,7 +49,6 @@ void MotionBlur::render()
   glGetFloatv(GL_COLOR_CLEAR_VALUE, &(current_clear_color[0]));
   glGetIntegerv(GL_CURRENT_PROGRAM, &current_shader);
   {
-
     // glReadBuffer(GL_BACK);//needs reset
     glActiveTexture(GL_TEXTURE0);//needs reset
     glBindTexture(GL_TEXTURE_2D, this->textures[0]);
