@@ -50,10 +50,10 @@
 #define SPHERES_RELASE_FRAME 20
 
 #define PLANE_TILT_START 0
-#define PLANE_TILT_START_FRAME 0
+#define PLANE_TILT_START_FRAME 200
 #define PLANE_TILT_END_FRAME 10000000
 #define PLANE_TILT_INTERVAL 200
-#define PLANE_TILT_ANGULAR_VELOCITY 0.4f, 0.f, 0.f
+#define PLANE_TILT_ANGULAR_VELOCITY -0.4f, 0.f, 0.f
 
 
 // Camera settings
@@ -189,7 +189,7 @@ main(int, char* argv[]) {
 #ifdef USE_PHY_PLANE
 			if (frame == PLANE_TILT_START_FRAME) {
 				phyplane.set_angular_velocity(&ang_vel);
-			} else if (frame % PLANE_TILT_INTERVAL == 0) {
+			} else if (frame % (PLANE_TILT_START_FRAME + PLANE_TILT_INTERVAL) == 0) {
 				ang_vel *= -1;
 			} else if (frame == PLANE_TILT_END_FRAME) {
 				phyplane.set_angular_velocity(nullptr);
