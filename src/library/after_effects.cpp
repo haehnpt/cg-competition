@@ -50,7 +50,7 @@ void MotionBlur::render()
   glGetIntegerv(GL_CURRENT_PROGRAM, &current_shader);
   {
 
-    glReadBuffer(GL_BACK);//needs reset
+    // glReadBuffer(GL_BACK);//needs reset
     glActiveTexture(GL_TEXTURE0);//needs reset
     glBindTexture(GL_TEXTURE_2D, this->textures[0]);
     glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, this->width, this->height);
@@ -126,11 +126,17 @@ void DepthBlur::focus(float focus)
 void DepthBlur::render()
 {
   int current_texture;
+  int current_texture0;
+  int current_texture1;
   int current_active_texture;
   float current_clear_color[4];
   int current_shader;
   glGetIntegerv(GL_TEXTURE_BINDING_2D, &current_texture);
   glGetIntegerv(GL_ACTIVE_TEXTURE, &current_active_texture);
+  glActiveTexture(GL_TEXTURE0);
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, &current_texture0);
+  glActiveTexture(GL_TEXTURE1);
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, &current_texture1);
   glGetFloatv(GL_COLOR_CLEAR_VALUE, &(current_clear_color[0]));
   glGetIntegerv(GL_CURRENT_PROGRAM, &current_shader);
   {
@@ -160,6 +166,10 @@ void DepthBlur::render()
 
     glEnable(GL_DEPTH_TEST);
   }
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, current_texture0);
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, current_texture1);
   glUseProgram(current_shader);
   glClearColor(current_clear_color[0], current_clear_color[1], current_clear_color[2], current_clear_color[3]);
   glActiveTexture(current_active_texture);
