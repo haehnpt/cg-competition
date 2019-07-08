@@ -4,6 +4,8 @@
 #include "config.hpp"
 #include "common.hpp"
 
+#define FFMPEG_FILE_NAME "Vorschauvideo.mp4"
+
 class ffmpeg_wrapper
 {
     // Private member properties
