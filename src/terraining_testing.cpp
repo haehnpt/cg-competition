@@ -10,7 +10,7 @@
 #include <string>
 
 // Global settings
-//#define DEBUG
+#define DEBUG
 #define x64
 // #define RENDER_VIDEO
 #define DO_FULLSCREEN
@@ -36,7 +36,7 @@
 #if defined(x64) && !defined(DEBUG)
 	#define TERRAIN_RESOLUTION 1000
 #else
-#define TERRAIN_RESOLUTION 1000
+#define TERRAIN_RESOLUTION 100
 #endif
 
 // Sphere/Physics settings

@@ -81,7 +81,7 @@ void MotionBlur::render()
 }
 
 
-DepthBlur::DepthBlur(int width, int height, float near, float far, float blur, float focus)
+DepthBlur::DepthBlur(int width, int height, float near_v, float far_v, float blur, float focus)
 {
   this->width  = width;
   this->height = height;
@@ -98,8 +98,8 @@ DepthBlur::DepthBlur(int width, int height, float near, float far, float blur, f
     this->focus_loc   = glGetUniformLocation(this->shader, "focus");
     glUniform1f(this->blur_loc, blur);
     glUniform1f(this->focus_loc, focus);
-    glUniform1f(glGetUniformLocation(this->shader, "near"), near);
-    glUniform1f(glGetUniformLocation(this->shader, "far"), far);
+    glUniform1f(glGetUniformLocation(this->shader, "near"), near_v);
+    glUniform1f(glGetUniformLocation(this->shader, "far"), far_v);
 
     this->texture = genTexture(width, height);
     this->depth   = genTexture(width, height);
