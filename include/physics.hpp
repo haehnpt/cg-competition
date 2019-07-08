@@ -24,6 +24,7 @@ namespace phy {
     float radius;
     struct phyPlane *plane;
     glm::vec4 custom_color;
+    bool touched_plane_last_step = false;
 
 
 

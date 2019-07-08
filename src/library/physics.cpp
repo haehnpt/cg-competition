@@ -84,6 +84,8 @@ namespace phy {
     a = glm::inverse(plane->model_mat) * a;
 #endif //  WITH_AFFINE_PLANE_TRANSFORMATIONS
 
+    bool touched_plane = false;
+
     // the bounding box is only applied to the x and z direction
     if(plane->useBoundingBox) {
       // maybe reflect in x direction
@@ -110,6 +112,7 @@ namespace phy {
         // TODO: x is not the position of the first contact!
         // FIXME: this crashes the program
         plane->reflect(this);
+        touched_plane = true;
       }
     } else {
       // ignoring the bounding box
@@ -124,6 +127,7 @@ namespace phy {
           // TODO: x is not the position of the first contact!
           // FIXME: this crashes the program
           plane->reflect(this);
+          touched_plane = true;
         }
       }
 
@@ -143,6 +147,18 @@ namespace phy {
       // (float)pow(glm::length(v), 2.f) * glm::normalize(v);
 
       // plane->getTriangleIndex(this);
+
+      // Once a sphere is on the ground, it will be reflected each
+      // step, since it will get below the plane each time. In this
+      // case, reducing the velocity would look like friction, which
+      // we don't want to simulate. Therefore only reduce the speed
+      // when the sphere touches the plane for the first time.
+      if (touched_plane && !touched_plane_last_step) {
+        v = v * 0.8f;
+      }
+
+    touched_plane_last_step = touched_plane;
+
     }
 
     return true;
@@ -625,15 +641,9 @@ namespace phy {
     // contact. This is a very quick but also very poor (if the
     // incoming angle was not steep) approximation of the point of
     // first contact of the sphere with the plane.
-    s->x.y = vbo_data[index * 3 * 10 + 0 + 1] + 0.001; // FIXME: hard-coded constant 0.001
-
-    // FIXME: This is currently needed when the plane is tilted about
-    // 90 degrees, otherwise the spheres 'stick' to the plane.
-    // s->x.z += 0.02;
+    s->x.y = vbo_data[index * 3 * 10 + 0 + 1];
 
     s->v = s->v - 2*glm::dot(norm, s->v) * norm;
-    // energy loss
-    s->v *= 0.60;
   }
 
   void
