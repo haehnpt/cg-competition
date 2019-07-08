@@ -47,8 +47,8 @@ Die nachfolgende Auflistung zeigt die ursprünglich geplanten Komponenten unsere
 |Displacement Mapping|Patrick|:heavy_check_mark:|:heavy_check_mark:|
 |Datengetriebene Matrialmodelle|Patrick|:x:|:x:|
 |Partikelsystem|Volker|:x:|:x:|
-|Bewegungsunschärfe|Sebastian|:heavy_check_mark:|:x:|
-|Fokusunschärfe|Sebastian|:heavy_check_mark:|:x:|
+|Bewegungsunschärfe|Sebastian|:heavy_check_mark:|:heavy_check_mark:|
+|Fokusunschärfe|Sebastian|:heavy_check_mark:|:heavy_check_mark:|
 |HDR-Effekte|Sebastian|:x:|:x:|
 |Volumetrische Einfachstreuung|Sebastian|:x:|:x:|
 |Interaktivität|Alle|:x:|:x:|
