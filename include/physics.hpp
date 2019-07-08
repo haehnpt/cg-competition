@@ -82,7 +82,7 @@ namespace phy {
 
     // Update state, currently only roatation according to
     // angular_velocity.
-    void step();
+    void step(float deltaT);
 
     void set_angular_velocity(glm::vec3 *angular_velocity);
 
@@ -97,7 +97,7 @@ namespace phy {
     int getNextTriangle(int index, phyDirection direction);
     int getNextTriangle(glm::vec3 position, glm::vec3 direction);
 
-    glm::vec4 reflectAt(glm::vec4 pos, glm::vec4 v);
+    void reflect(phySphere *sphere);
 
     void render();
     void destroy();

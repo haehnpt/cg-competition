@@ -12,12 +12,12 @@
 //#define DEBUG
 #define x64
 // #define RENDER_VIDEO
-// #define DO_FULLSCREEN
+#define DO_FULLSCREEN
 
 // Render size
 #define RENDER_WIDTH 1920
 #define RENDER_HEIGHT 1080
-#define RENDER_FRAMES 1800
+#define RENDER_FRAMES 600
 
 // Window size
 #define WINDOW_WIDTH 1920
@@ -40,16 +40,20 @@
 
 
 // Sphere/Physics settings
-#define SPHERE_RADIUS 0.08f
-#define X_N_SPHERES 25
-#define Z_N_SPHERES 25
+#define SECONDS_PER_FRAME (1.f / 60.f)
+#define SPHERE_RADIUS 0.04f
+#define X_N_SPHERES 100
+#define Z_N_SPHERES 100
 #define USE_PHY_PLANE
+#define SPHERES_DROP_HEIGHT 1.f
 #define SPHERES_APPEARANCE_FRAME 0
 #define SPHERES_RELASE_FRAME 20
 
-#define PLANE_TILT_START_FRAME 300
-#define PLANE_TILT_END_FRAME 600
-#define PLANE_TILT_ANGULAR_VELOCITY 0.002f, 0.f, 0.f
+#define PLANE_TILT_START 0
+#define PLANE_TILT_START_FRAME 0
+#define PLANE_TILT_END_FRAME 10000000
+#define PLANE_TILT_INTERVAL 200
+#define PLANE_TILT_ANGULAR_VELOCITY 0.4f, 0.f, 0.f
 
 
 // Camera settings
@@ -131,7 +135,7 @@ main(int, char* argv[]) {
 						   TERRAIN_RESOLUTION,
 						   false,
 						   nullptr,
-						   glm::vec4(1.f, 0.f, 1.f, 1.f));
+						   glm::vec4(0.9f, 0.9f, 0.9f, 1.f));
 
 	glm::mat4 plane_model_mat(1.f);
 	float plane_angle = 0.f;
@@ -152,7 +156,7 @@ main(int, char* argv[]) {
 
 			spheres[x * Z_N_SPHERES + z]
 				= new phy::phySphere(glm::vec4(phyplane.xStart + x * dx,
-											   1.f,
+											   SPHERES_DROP_HEIGHT,
 											   phyplane.zStart + z * dz,
 											   1.f),
 									 glm::vec4(0.f, 0.f, 0.f, 0.f),
@@ -183,16 +187,16 @@ main(int, char* argv[]) {
 
 			// Render terrain
 #ifdef USE_PHY_PLANE
-			switch(frame) {
-			case PLANE_TILT_START_FRAME:
+			if (frame == PLANE_TILT_START_FRAME) {
 				phyplane.set_angular_velocity(&ang_vel);
-				break;;
-			case PLANE_TILT_END_FRAME:
+			} else if (frame % PLANE_TILT_INTERVAL == 0) {
+				ang_vel *= -1;
+			} else if (frame == PLANE_TILT_END_FRAME) {
 				phyplane.set_angular_velocity(nullptr);
-				break;;
 			}
+
 			phy::useShader(&cam, proj_matrix, light_dir);
-			phyplane.step();
+			phyplane.step(SECONDS_PER_FRAME);
 			phyplane.render();
 #else
 			terr.render(&cam, proj_matrix, light_dir);
@@ -201,7 +205,7 @@ main(int, char* argv[]) {
 			if (frame >= SPHERES_APPEARANCE_FRAME) {
 				if (frame >= SPHERES_RELASE_FRAME) {
 					for (int i = 0; i < X_N_SPHERES * Z_N_SPHERES; i++) {
-						spheres[i]->step(0.015);
+						spheres[i]->step(SECONDS_PER_FRAME);
 					}
 				}
 				// render all spheres

@@ -106,54 +106,39 @@ namespace phy {
 
       // the sphere is now back in the  plane area
       if (plane->isAbove(x)) {
-        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-        // update velocity
-        v = v + a * deltaT;
       } else {
         // TODO: x is not the position of the first contact!
         // FIXME: this crashes the program
-        moveToPlaneHeight();
-        v = plane->reflectAt(x, v);
-        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-        // update velocity
-        v = v + a * deltaT;
-        // lost energy when bouncing
-        v *= 0.85;
+        plane->reflect(this);
       }
     } else {
       // ignoring the bounding box
       if(targetPos.x < plane->xStart || targetPos.x > plane->xEnd
          || targetPos.z < plane->zStart || targetPos.z > plane->zEnd) {
-        // outside of the plane
-        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-        // update velocity
-        v = v + a * deltaT;
+        // EMPTY
       } else {
         // inside bounding box, reflect
         if (plane->isAbove(targetPos)) {
-          x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-          // update velocity
-          v = v + a * deltaT;
+          // EMPTY
         } else {
           // TODO: x is not the position of the first contact!
           // FIXME: this crashes the program
-          // moveToPlaneHeight();
-          v = plane->reflectAt(x, v);
-          x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-          // update velocity
-          v = v + a * deltaT;
-          // lost energy when bouncing
-          v *= 0.85;
+          plane->reflect(this);
         }
       }
 
+#ifdef WITH_AFFINE_PLANE_TRANSFORMATIONS
       // transform back from the position relative to the plane to
       // world
-#ifdef WITH_AFFINE_PLANE_TRANSFORMATIONS
       x = plane->model_mat * x;
       v = plane->model_mat * v;
       a = plane->model_mat * a;
 #endif // WITH_AFFINE_PLANE_TRANSFORMATIONS
+
+      x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+      // update velocity
+      v = v + a * deltaT;
+
       // drag a = glm::vec3(0, -10.f, 0.f); a = a - 0.01f *
       // (float)pow(glm::length(v), 2.f) * glm::normalize(v);
 
@@ -418,9 +403,9 @@ namespace phy {
   }
 
   void
-  phyPlane::step() {
+  phyPlane::step(float deltaT) {
     if (angular_velocity) {
-      model_mat = glm::rotate(model_mat, glm::length(*angular_velocity),
+      model_mat = glm::rotate(model_mat, deltaT * glm::length(*angular_velocity),
                               glm::normalize(*angular_velocity));
     }
   }
@@ -594,19 +579,19 @@ namespace phy {
   // v is the velocity relative to the plane BEFORE any plane transformations
   // reflect the vector @v at the normal of the triangle at position
   // @pos
-  glm::vec4
-  phyPlane::reflectAt(glm::vec4 pos, glm::vec4 v) {
+  void
+  phyPlane::reflect(phySphere *s) {
     if (!useBoundingBox) {
-      if(pos.x < xStart  || pos.x > xEnd
-         || pos.z < zStart || pos.z > zEnd) {
+      if(s->x.x < xStart  || s->x.x > xEnd
+         || s->x.z < zStart || s->x.z > zEnd) {
         // the bounding box is diabled, and the sphere has left
         // the bounding box, don't reflect at all, just 'fall of
         // the world'
-        return v;
+        return;
       }
     }
 
-    int index = getTriangleAt(pos);
+    int index = getTriangleAt(s->x);
 
     // normal of the triangle's plane
     glm::vec4 norm(vbo_data[index * 3 * 10 + 3 + 0],
@@ -614,7 +599,41 @@ namespace phy {
                    vbo_data[index * 3 * 10 + 3 + 2],
                    0);
 
-    return v - 2*glm::dot(norm, v) * norm;
+    // std::cout << "pos: " << glm::to_string(pos) << "\n";
+    // std::cout << "vec3(pos): " << glm::to_string(glm::vec3(pos)) << "\n";
+
+    if (angular_velocity) {
+      // std::cout << "*angular_velocity: " << glm::to_string(*angular_velocity) << "\n";
+
+      // velocity of the plane in direction of its normal. The plane is
+      // considered to have infinity weight, so we can substract this
+      // speed from @v.
+      glm::vec4 v_plane = glm::dot(glm::cross(*angular_velocity, glm::vec3(s->x)),
+                                   glm::vec3(norm)) * norm;
+      s->v -= v_plane;
+
+      // std::cout << "v: " << glm::to_string(s->v)
+      //           << ", v += v_plane: " << glm::to_string(s->v += v_plane) << "\n";
+    }
+
+    // More accurate version, but this is also only correct if the
+    // triangle above which the sphere entered the plane is identical
+    // to the triangle above which the sphere is now.
+    // s->moveToPlaneHeight();
+
+    // Move the sphere APPROXIMATELY to the point of first
+    // contact. This is a very quick but also very poor (if the
+    // incoming angle was not steep) approximation of the point of
+    // first contact of the sphere with the plane.
+    s->x.y = vbo_data[index * 3 * 10 + 0 + 1] + 0.001; // FIXME: hard-coded constant 0.001
+
+    // FIXME: This is currently needed when the plane is tilted about
+    // 90 degrees, otherwise the spheres 'stick' to the plane.
+    // s->x.z += 0.02;
+
+    s->v = s->v - 2*glm::dot(norm, s->v) * norm;
+    // energy loss
+    s->v *= 0.60;
   }
 
   void
