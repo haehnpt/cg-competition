@@ -9,14 +9,6 @@
 // For glm::to_string
 #include "glm/gtx/string_cast.hpp"
 
-// Taking into account (affine) plane transformations requires
-// additional matrix multiplications in each phySphere::step() but is
-// REQUIRED if any affine transformations (other than the identity
-// matrix) will be applied the original plane data. If you never apply
-// any transformations to your planes you can comment this out.
-#define WITH_AFFINE_PLANE_TRANSFORMATIONS
-
-
 // #include <buffer.hpp>
 // #define PHYSICS_DEBUG
 
@@ -75,14 +67,12 @@ namespace phy {
     // next position if there were no obstacles
     glm::vec3 targetPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
 
-#ifdef WITH_AFFINE_PLANE_TRANSFORMATIONS
     // transfer all vectors to the plane's coordinate system, that is
     // before application of the plane's model_mat
     targetPos = glm::inverse(plane->model_mat) * glm::vec4(targetPos, 1.f);
     x = glm::inverse(plane->model_mat) * x;
     v = glm::inverse(plane->model_mat) * v;
     a = glm::inverse(plane->model_mat) * a;
-#endif //  WITH_AFFINE_PLANE_TRANSFORMATIONS
 
     bool touched_plane = false;
 
@@ -131,13 +121,11 @@ namespace phy {
         }
       }
 
-#ifdef WITH_AFFINE_PLANE_TRANSFORMATIONS
       // transform back from the position relative to the plane to
       // world
       x = plane->model_mat * x;
       v = plane->model_mat * v;
       a = plane->model_mat * a;
-#endif // WITH_AFFINE_PLANE_TRANSFORMATIONS
 
       x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
       // update velocity
