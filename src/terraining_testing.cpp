@@ -45,11 +45,11 @@
 #define Z_N_SPHERES 25
 #define USE_PHY_PLANE
 #define SPHERES_APPEARANCE_FRAME 0
-#define SPHERES_RELASE_FRAME 100
+#define SPHERES_RELASE_FRAME 20
 
-#define PLANE_TILT_START_FRAME 500
-#define PLANE_TILT_END_FRAME 550
-#define PLANE_TILT_ANGLE_PER_FRAME 0.01
+#define PLANE_TILT_START_FRAME 300
+#define PLANE_TILT_END_FRAME 600
+#define PLANE_TILT_ANGULAR_VELOCITY 0.002f, 0.f, 0.f
 
 
 // Camera settings
@@ -120,6 +120,7 @@ main(int, char* argv[]) {
 						   GRASS,
 						   SNOW);
 
+	glm::vec3 ang_vel(PLANE_TILT_ANGULAR_VELOCITY);
 	// Prepare physics plane
 	phy::phyPlane phyplane(-TERRAIN_SIZE / 2.f,
 						   TERRAIN_SIZE / 2.f,
@@ -129,6 +130,7 @@ main(int, char* argv[]) {
 						   TERRAIN_RESOLUTION,
 						   TERRAIN_RESOLUTION,
 						   false,
+						   nullptr,
 						   glm::vec4(1.f, 0.f, 1.f, 1.f));
 
 	glm::mat4 plane_model_mat(1.f);
@@ -181,13 +183,16 @@ main(int, char* argv[]) {
 
 			// Render terrain
 #ifdef USE_PHY_PLANE
-			if (frame >= PLANE_TILT_START_FRAME && frame < PLANE_TILT_END_FRAME) {
-				plane_angle += PLANE_TILT_ANGLE_PER_FRAME;
-				phyplane.set_model_mat(glm::rotate(plane_model_mat,
-												   plane_angle,
-												   glm::vec3(1.f, 0.f, 0.f)));
+			switch(frame) {
+			case PLANE_TILT_START_FRAME:
+				phyplane.set_angular_velocity(&ang_vel);
+				break;;
+			case PLANE_TILT_END_FRAME:
+				phyplane.set_angular_velocity(nullptr);
+				break;;
 			}
 			phy::useShader(&cam, proj_matrix, light_dir);
+			phyplane.step();
 			phyplane.render();
 #else
 			terr.render(&cam, proj_matrix, light_dir);

@@ -6,6 +6,9 @@
 #include <shader.hpp>
 #include <glm/gtx/transform.hpp>
 
+// For glm::to_string
+#include "glm/gtx/string_cast.hpp"
+
 // Taking into account (affine) plane transformations requires
 // additional matrix multiplications in each phySphere::step() but is
 // REQUIRED if any affine transformations (other than the identity
@@ -206,6 +209,7 @@ namespace phy {
                      int xNumPoints,
                      int zNumPoints,
                      bool useBoundingBox,
+                     glm::vec3 *angular_velocity,
                      glm::vec4 custom_color) :
     xStart{xStart},
     xEnd{xEnd},
@@ -215,7 +219,8 @@ namespace phy {
     zNumPoints{zNumPoints},
     useBoundingBox{useBoundingBox},
     custom_color{custom_color},
-    model_mat{glm::translate(glm::vec3(3.f, 0.f, 0.f))}
+    model_mat{glm::mat4(1.f)},
+    angular_velocity{angular_velocity}
   {
     this->xTileWidth = (xEnd - xStart) / (float)(xNumPoints - 1);
     this->zTileWidth = (zEnd - zStart) / (float)(zNumPoints - 1);
@@ -405,6 +410,19 @@ namespace phy {
   {
     this->model_mat = model_mat;
     this->inv_model_mat = glm::inverse(model_mat);
+  }
+
+  void
+  phyPlane::set_angular_velocity(glm::vec3 *angular_velocity) {
+    this->angular_velocity = angular_velocity;
+  }
+
+  void
+  phyPlane::step() {
+    if (angular_velocity) {
+      model_mat = glm::rotate(model_mat, glm::length(*angular_velocity),
+                              glm::normalize(*angular_velocity));
+    }
   }
 
   int
