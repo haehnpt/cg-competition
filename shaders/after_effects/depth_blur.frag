@@ -11,7 +11,7 @@ uniform float far;
 uniform float blur;
 uniform float focus;
 
-uniform int fidelity = 32;
+uniform int fidelity = 64;
 uniform vec2 distribution[] = vec2[](
   vec2(-0.613392, 0.617481),
   vec2(0.170019, -0.040254),

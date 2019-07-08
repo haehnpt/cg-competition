@@ -218,9 +218,9 @@ void terrain::render(camera * cam, glm::mat4 proj_matrix, glm::vec3 light_dir)
 	glUniform1f(this->frame_loc, this->current_frame);
 	glUniform1f(this->max_frame_loc, this->frames);
 
-	glUniform1i(stone_loc, 0);
-	glUniform1i(grass_loc, 1);
-	glUniform1i(snow_loc, 2);
+	glUniform1i(stone_loc, 10);
+	glUniform1i(grass_loc, 11);
+	glUniform1i(snow_loc, 12);
 
 	glUniformMatrix4fv(terr_model_loc, 1, GL_FALSE, &this->terra.transform[0][0]);
 	this->terra.bind();
@@ -275,19 +275,19 @@ void terrain::load_textures(std::string stone, std::string grass, std::string sn
 	// Stone texture
 	float* image_tex_data = terrain::load_texture_data(std::string(DATA_ROOT) + stone, &image_width, &image_height);
 	unsigned int image_tex1 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
-	glBindTextureUnit(0, image_tex1);
+	glBindTextureUnit(10, image_tex1);
 	delete[] image_tex_data;
 
 	// Grass texture
 	image_tex_data = terrain::load_texture_data(std::string(DATA_ROOT) + grass, &image_width, &image_height);
 	unsigned int image_tex2 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
-	glBindTextureUnit(1, image_tex2);
+	glBindTextureUnit(11, image_tex2);
 	delete[] image_tex_data;
 
 	// Snow texture
 	image_tex_data = terrain::load_texture_data(std::string(DATA_ROOT) + snow, &image_width, &image_height);
 	unsigned int image_tex3 = terrain::create_texture_rgba32f(image_width, image_height, image_tex_data);
-	glBindTextureUnit(2, image_tex3);
+	glBindTextureUnit(12, image_tex3);
 	delete[] image_tex_data;
 
 	// Set properties

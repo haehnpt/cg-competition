@@ -5,6 +5,7 @@
 #include "terrain.hpp"
 #include "ffmpeg_wrapper.hpp"
 #include "physics.hpp"
+#include "after_effects.hpp"
 
 #include <string>
 
@@ -12,7 +13,7 @@
 //#define DEBUG
 #define x64
 // #define RENDER_VIDEO
-// #define DO_FULLSCREEN
+#define DO_FULLSCREEN
 
 // Render size
 #define RENDER_WIDTH 1920
@@ -92,6 +93,10 @@ main(int, char* argv[]) {
 	cam.set_phi(CAMERA_PHI);
 	cam.set_theta(CAMERA_THETA);
 	cam.set_distance(CAMERA_DISTANCE);
+
+  // Instantiate after effects
+  DepthBlur depth_blur = DepthBlur(WINDOW_WIDTH, WINDOW_HEIGHT, NEAR_VALUE, FAR_VALUE, 0.01, 0.2);
+  MotionBlur motion_blur = MotionBlur(WINDOW_WIDTH, WINDOW_HEIGHT, 5);
 
 	// Projection matrix
 	proj_matrix = glm::perspective(FOV, 1.f, NEAR_VALUE, FAR_VALUE);
@@ -181,6 +186,9 @@ main(int, char* argv[]) {
 					spheres[i]->render();
 				}
 			}
+
+      depth_blur.render();
+      motion_blur.render();
 
 			// Rotate camera
 			cam.rotate();
