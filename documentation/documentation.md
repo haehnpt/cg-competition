@@ -49,7 +49,7 @@ Die nachfolgende Auflistung zeigt die ursprünglich geplanten Komponenten unsere
 |Partikelsystem|Volker|:x:|:x:|
 |Bewegungsunschärfe|Sebastian|:heavy_check_mark:|:heavy_check_mark:|
 |Fokusunschärfe|Sebastian|:heavy_check_mark:|:heavy_check_mark:|
-|HDR-Effekte|Sebastian|:x:|:x:|
+|HDR-Effekte|Sebastian|:heavy_check_mark:|:heavy_check_mark:|
 |Volumetrische Einfachstreuung|Sebastian|:x:|:x:|
 |Interaktivität|Alle|:x:|:x:|
 
