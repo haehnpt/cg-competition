@@ -32,7 +32,7 @@ main(int, char* argv[]) {
 
     camera cam(window);
 
-    DepthBlur depth_blur = DepthBlur(WINDOW_WIDTH, WINDOW_HEIGHT, NEAR, FAR);
+    DepthBlur depth_blur = DepthBlur(WINDOW_WIDTH, WINDOW_HEIGHT, NEAR, FAR, 0.05, 0.2);
     MotionBlur motion_blur = MotionBlur(WINDOW_WIDTH, WINDOW_HEIGHT, 5);
 
     // load and compile shaders and link program
