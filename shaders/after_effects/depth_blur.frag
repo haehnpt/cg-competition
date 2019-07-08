@@ -8,6 +8,9 @@ uniform sampler2D depth;
 uniform float near;
 uniform float far;
 
+uniform float blur;
+uniform float focus;
+
 uniform int fidelity = 32;
 uniform vec2 distribution[] = vec2[](
   vec2(-0.613392, 0.617481),
@@ -79,11 +82,11 @@ uniform vec2 distribution[] = vec2[](
 vec2 position;
 
 void main() {
-    float z = (2.0 * near) / (far + near - texture2D(depth, interp_uv).x * (far - near));
+    float z = (2.0 * near) / (far + near - texture2D(depth, interp_uv).x * (far - near)) - focus;
 
     //float d = 0.01;
 
-    float d = 0.03 * (z - 0.3) * (z - 0.3);
+    float d = blur * z * z;
 
     frag_color = texture2D(tex, interp_uv);
     int n = 1;
