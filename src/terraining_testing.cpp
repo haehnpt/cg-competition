@@ -18,8 +18,8 @@
 // Render size
 #define RENDER_WIDTH 1920
 #define RENDER_HEIGHT 1080
-#define RENDER_FRAMES 1800
-#define RENDER_FILENAME "Vorschauvideo.mp4"
+#define RENDER_FRAMES 1920
+#define RENDER_FILENAME "vorschau.mp4"
 
 // Window size
 #define WINDOW_WIDTH 1920
@@ -93,7 +93,7 @@
 
 
 // Whether to render with effects
-//#define ENABLE_EFFECTS
+#define ENABLE_EFFECTS
 
 // Miscellaneous
 #ifndef M_PI
@@ -181,7 +181,7 @@ main(int, char* argv[]) {
 
 	for (int x = 0; x < X_N_SPHERES; x++ ) {
 		for (int z = 0; z < Z_N_SPHERES; z++ ) {
-			float col = (float)x * (float)z / X_N_SPHERES / X_N_SPHERES;
+			//float col = (float)x * (float)z / X_N_SPHERES / X_N_SPHERES;
 
 			spheres[x * Z_N_SPHERES + z]
 				= new phy::phySphere(glm::vec4(phyplane.xStart + x * dx,
@@ -191,7 +191,7 @@ main(int, char* argv[]) {
 									 glm::vec4(0.f, 0.f, 0.f, 0.f),
 									 SPHERE_RADIUS,
 									 &phyplane,
-									 glm::vec4(col, 1.f - col, 1.0f, 1.f));
+									 glm::vec4(sin(x * M_PI / X_N_SPHERES), cos(z * M_PI / X_N_SPHERES) / 2.f + 0.5f, exp(x * z / X_N_SPHERES / Z_N_SPHERES) / 2.718282f, 1.f));
 		}
 	}
 
