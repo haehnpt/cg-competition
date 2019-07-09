@@ -16,8 +16,8 @@ Die nachfolgende Softwaredokumentation beschreibt ein Projekt, das während der 
 
 #### Story 
 
-"Es erwächst ein Gebirge aus einer flachen Fläche. Dann erscheint eine große
-Anzahl von Kugeln im Himmel. Die Kugeln stürzen herunter und landen auf den Gebirgszügen, wodurch sie wiederum auf- und abspringen, bis ein Ruhezustand eintritt."
+"Es erwächst ein Gebirge aus einer flachen Fläche. Dann erscheint über einen Zeitraum verteilt eine große
+Anzahl von Kugeln im Himmel. Die Kugeln stürzen herunter und landen auf den Gebirgszügen, wodurch sie wiederum auf- und abspringen. Die Landschaft kippt in verschiedene Richtungen und sorgt somit für ein stärkeres Herumspringen der Kugeln. Nach einer gewissen Zeit tritt ein Ruhezustand ein - daraufhin stürzt die Landschaft nach unten ab, wobei die restliche Kugeln hinfort geschleudert werden."
 
 #### Überlegungen
 
@@ -154,6 +154,8 @@ public:
 	// Public member functions
 	glm::vec3 * get_normal_at_pos(float x, float z);
 	void render(camera * cam, glm::mat4 proj_matrix, glm::vec3 light_dir);
+	void set_model_mat(glm::mat4 model_mat);
+
 
 	// Public member proterties (physics needs access)
 	float * heights;
@@ -161,6 +163,7 @@ public:
 
 	// Public static functions
 	static void create_terrain_shaders();
+
 };
 ```
 
@@ -275,7 +278,103 @@ public:
 
 ## Resultat
 
-(FERTIGES RENDERING)
+![](rendering.gif)
+
+(IN HTML DOKUMENTATION GIF DURCH VIDEO ERSETZEN)
+
+Mit den unten aufgeführten Einstellungen wurde das obige Resultat erreicht.
+
+```cpp
+// Global settings
+//#define DEBUG
+#define x64
+#define RENDER_VIDEO
+#define DO_FULLSCREEN
+
+// Render size
+#define RENDER_WIDTH 1920
+#define RENDER_HEIGHT 1080
+#define RENDER_FRAMES 1920
+#define RENDER_FILENAME "vorschau.mp4"
+
+// Window size
+#define WINDOW_WIDTH 1920
+#define WINDOW_HEIGHT 1080
+
+// Visual settings
+#define FOV 45.0f
+#define NEAR_VALUE 0.1f
+#define FAR_VALUE 100.0f
+#define BACKGROUND_COLOR 0.2f, 0.2f, 0.2f, 1.0f
+
+// Terrain settings
+#define TERRAIN_SIZE 8.0f
+#define TERRAIN_FRAMES 360
+#if defined(x64) && !defined(DEBUG)
+#define TERRAIN_RESOLUTION 1000
+#else
+#define TERRAIN_RESOLUTION 100
+#endif
+
+// Camera settings
+#define CAMERA_PHI 0.25f
+#define CAMERA_THETA -0.15f
+#define CAMERA_DISTANCE 10.0f
+
+// Light settings
+#define LIGHT_PHI 0.0f
+#define LIGHT_THETA 0.3f
+
+// Texture settings
+#if defined(DEBUG)
+#define GRASS "grass.jpg"
+#define STONE "mountain.jpg"
+#define SNOW "snow.jpg"
+#else
+#define GRASS "grass_large.jpg"
+#define STONE "mountain_large.jpg"
+#define SNOW "snow_large.jpg"
+#endif
+
+// Physics settings
+#define SECONDS_PER_FRAME (1.f / 60.f)
+#define SPHERE_RADIUS 0.04f
+#define X_N_SPHERES 50
+#define Z_N_SPHERES 50
+// #define RENDER_PHY_PLANE
+#define SPHERES_DROP_HEIGHT 1.f
+#define SPHERES_APPEARANCE_FRAME 560
+#define SPHERES_RELEASE_FRAME 760
+
+// Tilting and Dropping
+#define ENABLE_PLANE_TILT_AND_DROP
+
+// First Round of Tilts
+#define PLANE_TILT_ANGULAR_VELOCITY 0.4f, 0.f, 0.f
+#define PLANE_TILT_START_FRAME 920
+#define PLANE_TILT_INTERVAL 80
+#define PLANE_TILT_END_FRAME (920 + 4 * 80)
+
+// Second Round of Tilts
+#define PLANE_TILT_VERTICALLY_START_FRAME 1600
+#define PLANE_TILT_VERTICALLY_INTERVAL 100
+#define PLANE_TILT_VERTICALLY_PAUSE_UNTIL 1800
+#define PLANE_TILT_VERTICALLY_END_FRAME 1900
+
+// Drop
+#define PLANE_DROP_START_FRAME PLANE_TILT_VERTICALLY_START_FRAME
+#define PLANE_DROP_INITIAL_VELOCITY 0.f, -0.001f, 0.f
+#define PLANE_DROP_FACTOR 1.05f
+#define PLANE_DROP_END_FRAME_PREVENT_UNEXPECTED_BEHAVIOUR 2500
+
+// Whether to render with effects
+#define ENABLE_EFFECTS
+
+// Miscellaneous
+#ifndef M_PI
+#define M_PI 3.14159265359
+#endif
+```
 
 ## Evaluation
 
