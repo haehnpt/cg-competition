@@ -71,6 +71,8 @@ public:
 	// Public member functions
 	glm::vec3 * get_normal_at_pos(float x, float z);
 	void render(camera * cam, glm::mat4 proj_matrix, glm::vec3 light_dir);
+	void set_model_mat(glm::mat4 model_mat);
+
 
 	// Public member proterties (physics needs access)
 	float * heights;
@@ -78,4 +80,12 @@ public:
 
 	// Public static functions
 	static void create_terrain_shaders();
+
 };
+
+
+// Local Variables:
+// indent-tabs-mode: t
+// tab-width: 4
+// c-file-style: "cc-mode"
+// End:

@@ -88,6 +88,7 @@ namespace phy {
     void set_angular_velocity(glm::vec3 *angular_velocity);
 
     void set_model_mat(glm::mat4 model_mat);
+    glm::mat4 get_model_mat();
 
     int getTriangleAt(glm::vec4 pos);
     int getTriangleAt(glm::vec3 x);

@@ -418,6 +418,11 @@ namespace phy {
     this->inv_model_mat = glm::inverse(model_mat);
   }
 
+  glm::mat4
+  phyPlane::get_model_mat() {
+    return model_mat;
+  }
+
   void
   phyPlane::set_angular_velocity(glm::vec3 *angular_velocity) {
     this->angular_velocity = angular_velocity;

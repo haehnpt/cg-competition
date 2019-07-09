@@ -42,9 +42,9 @@
 // Sphere/Physics settings
 #define SECONDS_PER_FRAME (1.f / 60.f)
 #define SPHERE_RADIUS 0.04f
-#define X_N_SPHERES 100
-#define Z_N_SPHERES 100
-#define USE_PHY_PLANE
+#define X_N_SPHERES 50
+#define Z_N_SPHERES 50
+// #define RENDER_PHY_PLANE
 #define SPHERES_DROP_HEIGHT 1.f
 #define SPHERES_APPEARANCE_FRAME 0
 #define SPHERES_RELASE_FRAME 20
@@ -142,6 +142,7 @@ main(int, char* argv[]) {
 
 	// Test affine transformation for the plane here!
 	phyplane.set_model_mat(glm::rotate(plane_model_mat, plane_angle, glm::vec3(1.f, 0.f, 0.f)));
+	terr.set_model_mat(phyplane.get_model_mat());
 
 
 	// Prepare spheres
@@ -186,7 +187,6 @@ main(int, char* argv[]) {
 								std::sin(light_phi) * std::sin(light_theta));
 
 			// Render terrain
-#ifdef USE_PHY_PLANE
 			if (frame == PLANE_TILT_START_FRAME) {
 				phyplane.set_angular_velocity(&ang_vel);
 			} else if (frame % (PLANE_TILT_START_FRAME + PLANE_TILT_INTERVAL) == 0) {
@@ -197,8 +197,11 @@ main(int, char* argv[]) {
 
 			phy::useShader(&cam, proj_matrix, light_dir);
 			phyplane.step(SECONDS_PER_FRAME);
+
+#ifdef RENDER_PHY_PLANE
 			phyplane.render();
 #else
+			terr.set_model_mat(phyplane.get_model_mat());
 			terr.render(&cam, proj_matrix, light_dir);
 #endif
 			// Render spheres
