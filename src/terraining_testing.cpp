@@ -89,6 +89,7 @@
 #define PLANE_DROP_START_FRAME PLANE_TILT_VERTICALLY_START_FRAME
 #define PLANE_DROP_INITIAL_VELOCITY 0.f, -0.001f, 0.f
 #define PLANE_DROP_FACTOR 1.05f
+#define PLANE_DROP_END_FRAME_PREVENT_UNEXPECTED_BEHAVIOUR 2200
 
 
 
@@ -137,9 +138,6 @@ main(int, char* argv[]) {
 	float light_phi = LIGHT_PHI;
 	float light_theta = LIGHT_THETA;
 
-	///////////////////////// Physics /////////////////////////
-	phy::initShader();
-
 	// Prepare terrain
 	terrain terr = terrain(TERRAIN_SIZE,
 						   TERRAIN_RESOLUTION,
@@ -148,6 +146,9 @@ main(int, char* argv[]) {
 						   STONE,
 						   GRASS,
 						   SNOW);
+
+	///////////////////////// Physics /////////////////////////
+	phy::initShader();
 
 	glm::vec3 ang_vel(PLANE_TILT_ANGULAR_VELOCITY);
 	glm::vec3 vertical_velocity(PLANE_DROP_INITIAL_VELOCITY);
@@ -168,7 +169,7 @@ main(int, char* argv[]) {
 	glm::mat4 plane_model_mat(1.f);
 	float plane_angle = 0.f;
 
-	// Test affine transformation for the plane here!
+	// Set model matrices
 	phyplane.set_model_mat(glm::rotate(plane_model_mat, plane_angle, glm::vec3(1.f, 0.f, 0.f)));
 	terr.set_model_mat(phyplane.get_model_mat());
 
@@ -257,7 +258,10 @@ main(int, char* argv[]) {
 		if (frame == PLANE_DROP_START_FRAME) {
 			phyplane.set_vertical_velocity(&vertical_velocity);
 		}
-		else if (frame > PLANE_DROP_START_FRAME) {
+		else if (frame == PLANE_DROP_END_FRAME_PREVENT_UNEXPECTED_BEHAVIOUR) {
+			phyplane.set_vertical_velocity(nullptr);
+		}
+		else if (frame > PLANE_DROP_START_FRAME && frame < PLANE_DROP_END_FRAME_PREVENT_UNEXPECTED_BEHAVIOUR) {
 			vertical_velocity *= PLANE_DROP_FACTOR;
 		}
 
