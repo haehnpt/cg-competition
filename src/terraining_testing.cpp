@@ -34,7 +34,7 @@
 #define TERRAIN_SIZE 8.0f
 #define TERRAIN_FRAMES 360
 #if defined(x64) && !defined(DEBUG)
-	#define TERRAIN_RESOLUTION 3000
+	#define TERRAIN_RESOLUTION 1000
 #else
 #define TERRAIN_RESOLUTION 300
 #endif
