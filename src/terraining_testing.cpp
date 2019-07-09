@@ -10,9 +10,9 @@
 #include <string>
 
 // Global settings
-//#define DEBUG
+#define DEBUG
 #define x64
-#define RENDER_VIDEO
+//#define RENDER_VIDEO
 #define DO_FULLSCREEN
 
 // Render size
@@ -72,14 +72,19 @@
 
 // Controls if and how the plane rotates
 #define ENABLE_PLANE_TILT
-#define PLANE_TILT_ANGULAR_VELOCITY -0.4f, 0.f, 0.f
+#define PLANE_TILT_ANGULAR_VELOCITY 0.4f, 0.f, 0.f
 #define PLANE_TILT_START_FRAME 620
 #define PLANE_TILT_INTERVAL 80
 #define PLANE_TILT_END_FRAME (620 + 4 * 80)
 
+#define PLANE_TILT_VERTICALLY_START_FRAME 1300
+#define PLANE_TILT_VERTICALLY_INTERVAL 100
+#define PLANE_TILT_VERTICALLY_PAUSE_UNTIL 1500
+#define PLANE_TILT_VERTICALLY_END_FRAME 1600
+
 
 // Whether to render with effects
-#define ENABLE_EFFECTS
+//#define ENABLE_EFFECTS
 
 // Miscellaneous
 #ifndef M_PI
@@ -203,8 +208,24 @@ main(int, char* argv[]) {
 			phyplane.set_angular_velocity(&ang_vel);
 		} else if (frame == PLANE_TILT_END_FRAME) {
 			phyplane.set_angular_velocity(nullptr);
-		} else if ((frame - PLANE_TILT_START_FRAME) % PLANE_TILT_INTERVAL == 0) {
+		} else if ((frame - PLANE_TILT_START_FRAME) % PLANE_TILT_INTERVAL == 0 && frame < PLANE_TILT_END_FRAME) {
 			// Switch tilt direction
+			ang_vel *= -1;
+		}
+		else if (frame == PLANE_TILT_VERTICALLY_START_FRAME) {
+			ang_vel *= -2;
+			phyplane.set_angular_velocity(&ang_vel);
+		}
+		else if (frame == PLANE_TILT_VERTICALLY_END_FRAME) {
+			phyplane.set_angular_velocity(nullptr);
+		}
+		else if (frame == PLANE_TILT_VERTICALLY_PAUSE_UNTIL) {
+			// Switch tilt direction
+			phyplane.set_angular_velocity(&ang_vel);
+		}
+		else if ((frame - PLANE_TILT_VERTICALLY_START_FRAME) % PLANE_TILT_VERTICALLY_INTERVAL == 0 && frame > PLANE_TILT_VERTICALLY_START_FRAME) {
+			// Switch tilt direction
+			phyplane.set_angular_velocity(nullptr);
 			ang_vel *= -1;
 		}
 
