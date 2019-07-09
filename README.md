@@ -8,3 +8,5 @@ Alle relevanten Informationen finden sich hier:
 [Softwaredokumentation](documentation/documentation.md)
 
 [Vorschauvideo](https://haehn.me/uni/cg)
+
+![](documentation/rendering.gif)
