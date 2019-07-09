@@ -1,10 +1,8 @@
-﻿# cg-competition
-Repository für die "Computer Animation Challenge" der Vorlesung "Computergraphik" an der Universität Bonn (SS 2019)
+﻿# Computer Animation Competition
+Repository für die "Computer Animation Competition" der Vorlesung "Computergraphik" an der Universität Bonn (SS 2019)
 
-## Gif "Vorschauvideo"
+## Softwaredokumentation
 
-![](ffmpeg/Vorschauvideo.gif)
+Alle relevanten Informationen finden sich hier:
 
-## Image of Terrain
-
-![](terrain_preview.png)
+[Softwaredokumentation](documentation/documentation.md)
