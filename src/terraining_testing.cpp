@@ -46,14 +46,14 @@
 #define Z_N_SPHERES 50
 // #define RENDER_PHY_PLANE
 #define SPHERES_DROP_HEIGHT 1.f
-#define SPHERES_APPEARANCE_FRAME 0
-#define SPHERES_RELASE_FRAME 20
+#define SPHERES_APPEARANCE_FRAME 400
+#define SPHERES_RELASE_FRAME 420
 
 #define PLANE_TILT_START 0
-#define PLANE_TILT_START_FRAME 0
-#define PLANE_TILT_END_FRAME 10000000
+#define PLANE_TILT_START_FRAME 550
+#define PLANE_TILT_END_FRAME 650
 #define PLANE_TILT_INTERVAL 100
-#define PLANE_TILT_ANGULAR_VELOCITY 0.4f, 0.f, 0.f
+#define PLANE_TILT_ANGULAR_VELOCITY -0.4f, 0.f, 0.f
 
 
 // Camera settings
@@ -189,7 +189,7 @@ main(int, char* argv[]) {
 			// Render terrain
 			if (frame == PLANE_TILT_START_FRAME) {
 				phyplane.set_angular_velocity(&ang_vel);
-			} else if (frame % (PLANE_TILT_START_FRAME + PLANE_TILT_INTERVAL) == 0) {
+			} else if ((frame - PLANE_TILT_START_FRAME) % PLANE_TILT_INTERVAL == 0) {
 				ang_vel *= -1;
 			} else if (frame == PLANE_TILT_END_FRAME) {
 				phyplane.set_angular_velocity(nullptr);
