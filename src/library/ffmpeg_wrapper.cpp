@@ -1,6 +1,6 @@
 #include "ffmpeg_wrapper.hpp"
 
-ffmpeg_wrapper::ffmpeg_wrapper(int width, int height, int frames)
+ffmpeg_wrapper::ffmpeg_wrapper(int width, int height, int frames, char * render_filename)
 {
 	this->width = width;
 	this->height = height;
@@ -10,11 +10,11 @@ ffmpeg_wrapper::ffmpeg_wrapper(int width, int height, int frames)
 	std::string cmd = "ffmpeg -r 60 -f rawvideo -pix_fmt rgba -s "
 	  + std::to_string(width) + "x" + std::to_string(height) + " -i - "
 	  + "-threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip "
-	  + FFMPEG_ROOT + std::string(FFMPEG_FILE_NAME);
+	  + FFMPEG_ROOT + std::string(render_filename);
         ffmpeg = popen(cmd.c_str(), "w");
 #else
 	std::string cmd = std::string("\"") + FFMPEG_ROOT + std::string("ffmpeg.exe\" -r 60 -f rawvideo -pix_fmt rgba -s " + std::to_string(width) + "x" + std::to_string(height) + " -i - "
-		"-threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip ") + FFMPEG_ROOT + std::string(FFMPEG_FILE_NAME);
+		"-threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip ") + FFMPEG_ROOT + std::string(render_filename);
 	ffmpeg = _popen(cmd.c_str(), "wb");
 #endif	// __linux__
 
