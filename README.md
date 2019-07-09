@@ -7,4 +7,4 @@ Alle relevanten Informationen finden sich hier:
 
 [Softwaredokumentation](documentation/documentation.md)
 
-[Vorschauvideo](haehn.me/uni/cg)
+[Vorschauvideo](https://haehn.me/uni/cg)
