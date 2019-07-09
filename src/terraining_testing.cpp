@@ -222,11 +222,18 @@ main(int, char* argv[]) {
 			phyplane.set_angular_velocity(&ang_vel);
 		} else if (frame == PLANE_TILT_END_FRAME) {
 			phyplane.set_angular_velocity(nullptr);
-		} else if ((frame - PLANE_TILT_START_FRAME) % PLANE_TILT_INTERVAL == 0 && frame < PLANE_TILT_END_FRAME) {
-			// Switch tilt direction
+		} else if (frame == PLANE_TILT_START_FRAME + PLANE_TILT_INTERVAL / 2) {
+			ang_vel *= -1;
+			std::cout << "first tilt change at frame " << frame << "\n";
+			// The the first tilt only take (PLANE_TILT_INTERVAL / 2)
+			// frames make tilting symmetric
+		} else if ((frame - (PLANE_TILT_START_FRAME + PLANE_TILT_INTERVAL / 2))
+				   % PLANE_TILT_INTERVAL == 0
+				   && (frame < PLANE_TILT_END_FRAME)) {
+			// All but the first tilt take PLANE_TILT_INTERVAL frames
 			ang_vel *= -1;
 		}
-		
+
 		// Second Round of Tilting
 		if (frame == PLANE_TILT_VERTICALLY_START_FRAME) {
 			ang_vel *= -2;
@@ -239,7 +246,7 @@ main(int, char* argv[]) {
 			// Switch tilt direction
 			phyplane.set_angular_velocity(&ang_vel);
 		}
-		else if ((frame - PLANE_TILT_VERTICALLY_START_FRAME) % PLANE_TILT_VERTICALLY_INTERVAL == 0 && 
+		else if ((frame - PLANE_TILT_VERTICALLY_START_FRAME) % PLANE_TILT_VERTICALLY_INTERVAL == 0 &&
 			frame > PLANE_TILT_VERTICALLY_START_FRAME && frame < PLANE_TILT_VERTICALLY_END_FRAME) {
 			// Switch tilt direction
 			phyplane.set_angular_velocity(nullptr);
