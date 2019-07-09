@@ -18,7 +18,7 @@
 // Render size
 #define RENDER_WIDTH 1920
 #define RENDER_HEIGHT 1080
-#define RENDER_FRAMES 1920
+#define RENDER_FRAMES 1620
 #define RENDER_FILENAME "vorschau.mp4"
 
 // Window size
@@ -91,10 +91,8 @@
 #define PLANE_DROP_FACTOR 1.05f
 #define PLANE_DROP_END_FRAME_PREVENT_UNEXPECTED_BEHAVIOUR 2200
 
-
-
 // Whether to render with effects
-// #define ENABLE_EFFECTS
+#define ENABLE_EFFECTS
 
 // Miscellaneous
 #ifndef M_PI
@@ -193,7 +191,7 @@ main(int, char* argv[]) {
 									 SPHERE_RADIUS,
 									 &phyplane,
 									 glm::vec4(sin(x * M_PI / X_N_SPHERES), cos(z * M_PI / X_N_SPHERES) / 2.f + 0.5f, exp(x * z / X_N_SPHERES / Z_N_SPHERES) / 2.718282f, 1.f),
-									 SPHERES_APPEARANCE_FRAME + (phy::gauss_rand(60, 60) - 60));
+									 SPHERES_APPEARANCE_FRAME + phy::gauss_rand(0, 60));
 		}
 	}
 
