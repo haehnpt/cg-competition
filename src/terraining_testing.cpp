@@ -12,7 +12,7 @@
 // Global settings
 //#define DEBUG
 #define x64
-#define RENDER_VIDEO
+// #define RENDER_VIDEO
 #define DO_FULLSCREEN
 
 // Render size
@@ -34,31 +34,10 @@
 #define TERRAIN_SIZE 8.0f
 #define TERRAIN_FRAMES 360
 #if defined(x64) && !defined(DEBUG)
-	#define TERRAIN_RESOLUTION 1000
+#define TERRAIN_RESOLUTION 200
 #else
-#define TERRAIN_RESOLUTION 300
+#define TERRAIN_RESOLUTION 20
 #endif
-
-
-// Sphere/Physics settings
-#define SECONDS_PER_FRAME (1.f / 60.f)
-#define SPHERE_RADIUS 0.04f
-#define X_N_SPHERES 50
-#define Z_N_SPHERES 50
-// #define RENDER_PHY_PLANE
-#define SPHERES_DROP_HEIGHT 1.f
-#define SPHERES_APPEARANCE_FRAME 400
-#define SPHERES_RELASE_FRAME 420
-
-// Not used yet
-// #define PLANE_TILT_START 0
-// #define PLANE_TILT_START_FRAME 550
-// #define PLANE_TILT_END_FRAME 650
-// #define PLANE_TILT_INTERVAL 100
-
-// Set but not used yet
-#define PLANE_TILT_ANGULAR_VELOCITY -0.4f, 0.f, 0.f
-
 
 // Camera settings
 #define CAMERA_PHI 0.25f
@@ -80,7 +59,29 @@
 #define SNOW "snow_large.jpg"
 #endif
 
+// Physics settings
+#define SECONDS_PER_FRAME (1.f / 60.f)
+#define SPHERE_RADIUS 0.04f
+#define X_N_SPHERES 50
+#define Z_N_SPHERES 50
+// #define RENDER_PHY_PLANE
+#define SPHERES_DROP_HEIGHT 1.f
+#define SPHERES_APPEARANCE_FRAME 400
+#define SPHERES_RELASE_FRAME 420
 
+// Controls if and how the plane rotates
+// #define ENABLE_PLANE_TILT
+#define PLANE_TILT_ANGULAR_VELOCITY -0.4f, 0.f, 0.f
+#define PLANE_TILT_START 0
+#define PLANE_TILT_START_FRAME 620
+#define PLANE_TILT_INTERVAL 80
+#define PLANE_TILT_END_FRAME (620 + 4 * 80)
+
+
+// Whether to render with effects
+#define RENDER_EFFECTS
+
+// Miscellaneous
 #ifndef M_PI
 #define M_PI 3.14159265359
 #endif
@@ -97,7 +98,7 @@ main(int, char* argv[]) {
 	GLFWwindow* window = initOpenGL(0, 0, argv[0]);
 #else
 	GLFWwindow * window = initOpenGL(WINDOW_WIDTH, WINDOW_HEIGHT, argv[0]);
-#endif
+#endif // DO_FULLSCREEN
 	glfwSetFramebufferSizeCallback(window, resizeCallback);
 
 	// Instantiate camera and modify it
@@ -106,9 +107,11 @@ main(int, char* argv[]) {
 	cam.set_theta(CAMERA_THETA);
 	cam.set_distance(CAMERA_DISTANCE);
 
-   // Instantiate after effects
-   DepthBlur depth_blur = DepthBlur(WINDOW_WIDTH, WINDOW_HEIGHT, NEAR_VALUE, FAR_VALUE, 0.01, 0.2);
-   MotionBlur motion_blur = MotionBlur(WINDOW_WIDTH, WINDOW_HEIGHT, 3);
+#ifdef RENDER_EFFECTS
+	// Instantiate after effects
+	DepthBlur depth_blur = DepthBlur(WINDOW_WIDTH, WINDOW_HEIGHT, NEAR_VALUE, FAR_VALUE, 0.01, 0.2);
+	MotionBlur motion_blur = MotionBlur(WINDOW_WIDTH, WINDOW_HEIGHT, 3);
+#endif // RENDER_EFFECTS
 
 	// Projection matrix
 	proj_matrix = glm::perspective(FOV, 1.f, NEAR_VALUE, FAR_VALUE);
@@ -178,62 +181,87 @@ main(int, char* argv[]) {
 	// "ffmpeg" command and preparation
 #ifdef RENDER_VIDEO
 	ffmpeg_wrapper fw(RENDER_WIDTH, RENDER_HEIGHT, RENDER_FRAMES);
-#endif
+#endif // RENDER_VIDEO
 
 	int frame = 0;
 	// rendering loop
 	while (glfwWindowShouldClose(window) == false)
-	{
-		// Poll and set background color
-		glfwPollEvents();
-		glClearColor(BACKGROUND_COLOR);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		{
+			// Poll and set background color
+			glfwPollEvents();
+			glClearColor(BACKGROUND_COLOR);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Light direction
-		glm::vec3 light_dir(std::cos(light_phi) * std::sin(light_theta),
-							std::cos(light_theta),
-							std::sin(light_phi) * std::sin(light_theta));
+			// Light direction
+			glm::vec3 light_dir(std::cos(light_phi) * std::sin(light_theta),
+								std::cos(light_theta),
+								std::sin(light_phi) * std::sin(light_theta));
 
-		// Render terrain
-		terr.render(&cam, proj_matrix, light_dir);
+#ifdef ENABLE_PLANE_TILT
+			// Check for special frames which introduce changes to the state
+			if (frame == PLANE_TILT_START_FRAME) {
+				phyplane.set_angular_velocity(&ang_vel);
+			} else if (frame == PLANE_TILT_END_FRAME) {
+				phyplane.set_angular_velocity(nullptr);
+			} else if ((frame - PLANE_TILT_START_FRAME) % PLANE_TILT_INTERVAL == 0) {
+				// Switch tilt direction
+				ang_vel *= -1;
+			}
 
-		// Render spheres
-		if (frame >= SPHERES_APPEARANCE_FRAME) {
-			if (frame >= SPHERES_RELASE_FRAME) {
+			// Apply plane transformations
+			phyplane.step(SECONDS_PER_FRAME);
+			// Copy transformations to the terrain
+			terr.set_model_mat(phyplane.get_model_mat());
+#endif // ENABLE_PLANE_TILT
+
+			// Render terrain
+#ifdef RENDER_PHY_PLANE
+			phy::useShader(&cam, proj_matrix, light_dir);
+			phyplane.render();
+#else
+			terr.render(&cam, proj_matrix, light_dir);
+#endif // RENDER_PHY_PLANE
+
+			phy::useShader(&cam, proj_matrix, light_dir);
+			// Render spheres
+			if (frame >= SPHERES_APPEARANCE_FRAME) {
+				if (frame >= SPHERES_RELASE_FRAME) {
+					for (int i = 0; i < X_N_SPHERES * Z_N_SPHERES; i++) {
+						spheres[i]->step(0.015);
+					}
+				}
+				// render all spheres
+				phy::useShader(&cam, proj_matrix, light_dir);
 				for (int i = 0; i < X_N_SPHERES * Z_N_SPHERES; i++) {
-					spheres[i]->step(0.015);
+					spheres[i]->render();
 				}
 			}
-			// render all spheres
-			phy::useShader(&cam, proj_matrix, light_dir);
-			for (int i = 0; i < X_N_SPHERES * Z_N_SPHERES; i++) {
-				spheres[i]->render();
-			}
+
+#ifdef RENDER_EFFECTS
+			depth_blur.render();
+			motion_blur.render();
+#endif // RENDER_EFFECTS
+
+			// Rotate camera
+			cam.rotate();
+
+			// Before swapping, read the pixels and feed them to "ffmpeg"
+#ifdef RENDER_VIDEO
+			fw.save_frame();
+#endif // RENDER_VIDEO
+
+			// render UI
+			glfwSwapBuffers(window);
+
+			// Check for stop
+#ifdef RENDER_VIDEO
+			if (fw.is_finished())
+				{
+					break;
+				}
+#endif // RENDER_VIDEO
+			frame++;
 		}
-
-    depth_blur.render();
-    motion_blur.render();
-
-		// Rotate camera
-		cam.rotate();
-
-		// Before swapping, read the pixels and feed them to "ffmpeg"
-#ifdef RENDER_VIDEO
-		fw.save_frame();
-#endif
-
-		// render UI
-		glfwSwapBuffers(window);
-
-		// Check for stop
-#ifdef RENDER_VIDEO
-		if (fw.is_finished())
-			{
-				break;
-			}
-#endif
-		frame++;
-	}
 
 	glfwTerminate();
 }
