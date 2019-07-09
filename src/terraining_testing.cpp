@@ -18,7 +18,7 @@
 // Render size
 #define RENDER_WIDTH 1920
 #define RENDER_HEIGHT 1080
-#define RENDER_FRAMES 1620
+#define RENDER_FRAMES 1920
 #define RENDER_FILENAME "vorschau.mp4"
 
 // Window size
@@ -67,29 +67,29 @@
 #define Z_N_SPHERES 50
 // #define RENDER_PHY_PLANE
 #define SPHERES_DROP_HEIGHT 1.f
-#define SPHERES_APPEARANCE_FRAME 400
-#define SPHERES_RELASE_FRAME 460
+#define SPHERES_APPEARANCE_FRAME 560
+#define SPHERES_RELEASE_FRAME 760
 
 // Tilting and Dropping
 #define ENABLE_PLANE_TILT_AND_DROP
 
 // First Round of Tilts
 #define PLANE_TILT_ANGULAR_VELOCITY 0.4f, 0.f, 0.f
-#define PLANE_TILT_START_FRAME 620
+#define PLANE_TILT_START_FRAME 920
 #define PLANE_TILT_INTERVAL 80
-#define PLANE_TILT_END_FRAME (620 + 4 * 80)
+#define PLANE_TILT_END_FRAME (920 + 4 * 80)
 
 // Second Round of Tilts
-#define PLANE_TILT_VERTICALLY_START_FRAME 1300
+#define PLANE_TILT_VERTICALLY_START_FRAME 1600
 #define PLANE_TILT_VERTICALLY_INTERVAL 100
-#define PLANE_TILT_VERTICALLY_PAUSE_UNTIL 1500
-#define PLANE_TILT_VERTICALLY_END_FRAME 1600
+#define PLANE_TILT_VERTICALLY_PAUSE_UNTIL 1800
+#define PLANE_TILT_VERTICALLY_END_FRAME 1900
 
 // Drop
 #define PLANE_DROP_START_FRAME PLANE_TILT_VERTICALLY_START_FRAME
 #define PLANE_DROP_INITIAL_VELOCITY 0.f, -0.001f, 0.f
 #define PLANE_DROP_FACTOR 1.05f
-#define PLANE_DROP_END_FRAME_PREVENT_UNEXPECTED_BEHAVIOUR 2200
+#define PLANE_DROP_END_FRAME_PREVENT_UNEXPECTED_BEHAVIOUR 2500
 
 // Whether to render with effects
 #define ENABLE_EFFECTS
@@ -181,7 +181,7 @@ main(int, char* argv[]) {
 	for (int x = 0; x < X_N_SPHERES; x++ ) {
 		for (int z = 0; z < Z_N_SPHERES; z++ ) {
 			//float col = (float)x * (float)z / X_N_SPHERES / X_N_SPHERES;
-
+			printf("%f\n", phy::gauss_rand(0, 200));
 			spheres[x * Z_N_SPHERES + z]
 				= new phy::phySphere(glm::vec4(phyplane.xStart + x * dx,
 											   SPHERES_DROP_HEIGHT,
@@ -280,18 +280,16 @@ main(int, char* argv[]) {
 
 		phy::useShader(&cam, proj_matrix, light_dir);
 		// Render spheres
-		if (frame >= SPHERES_APPEARANCE_FRAME) {
-			if (frame >= SPHERES_RELASE_FRAME) {
-				for (int i = 0; i < X_N_SPHERES * Z_N_SPHERES; i++) {
-					spheres[i]->step(0.015);
-				}
-			}
-			// render all spheres
-			phy::useShader(&cam, proj_matrix, light_dir);
+		if (frame >= SPHERES_RELEASE_FRAME) {
 			for (int i = 0; i < X_N_SPHERES * Z_N_SPHERES; i++) {
-				if (frame > spheres[i]->visibility_frame) {
-					spheres[i]->render();
-				}
+				spheres[i]->step(0.015);
+			}
+		}
+		// render all spheres
+		phy::useShader(&cam, proj_matrix, light_dir);
+		for (int i = 0; i < X_N_SPHERES * Z_N_SPHERES; i++) {
+			if (frame > spheres[i]->visibility_frame) {
+				spheres[i]->render();
 			}
 		}
 
