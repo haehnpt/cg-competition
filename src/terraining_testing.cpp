@@ -78,7 +78,7 @@
 
 
 // Whether to render with effects
-#define RENDER_EFFECTS
+#define ENABLE_EFFECTS
 
 // Miscellaneous
 #ifndef M_PI
@@ -106,11 +106,11 @@ main(int, char* argv[]) {
 	cam.set_theta(CAMERA_THETA);
 	cam.set_distance(CAMERA_DISTANCE);
 
-#ifdef RENDER_EFFECTS
+#ifdef ENABLE_EFFECTS
 	// Instantiate after effects
 	DepthBlur depth_blur = DepthBlur(WINDOW_WIDTH, WINDOW_HEIGHT, NEAR_VALUE, FAR_VALUE, 0.01, 0.2);
 	MotionBlur motion_blur = MotionBlur(WINDOW_WIDTH, WINDOW_HEIGHT, 3);
-#endif // RENDER_EFFECTS
+#endif // ENABLE_EFFECTS
 
 	// Projection matrix
 	proj_matrix = glm::perspective(FOV, 1.f, NEAR_VALUE, FAR_VALUE);
@@ -236,10 +236,10 @@ main(int, char* argv[]) {
 				}
 			}
 
-#ifdef RENDER_EFFECTS
+#ifdef ENABLE_EFFECTS
 			depth_blur.render();
 			motion_blur.render();
-#endif // RENDER_EFFECTS
+#endif // ENABLE_EFFECTS
 
 			// Rotate camera
 			cam.rotate();
