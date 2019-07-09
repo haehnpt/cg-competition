@@ -70,17 +70,26 @@
 #define SPHERES_APPEARANCE_FRAME 400
 #define SPHERES_RELASE_FRAME 420
 
-// Controls if and how the plane rotates
-#define ENABLE_PLANE_TILT
+// Tilting and Dropping
+#define ENABLE_PLANE_TILT_AND_DROP
+
+// First Round of Tilts
 #define PLANE_TILT_ANGULAR_VELOCITY 0.4f, 0.f, 0.f
 #define PLANE_TILT_START_FRAME 620
 #define PLANE_TILT_INTERVAL 80
 #define PLANE_TILT_END_FRAME (620 + 4 * 80)
 
+// Second Round of Tilts
 #define PLANE_TILT_VERTICALLY_START_FRAME 1300
 #define PLANE_TILT_VERTICALLY_INTERVAL 100
 #define PLANE_TILT_VERTICALLY_PAUSE_UNTIL 1500
 #define PLANE_TILT_VERTICALLY_END_FRAME 1600
+
+// Drop
+#define PLANE_DROP_START_FRAME 1700
+#define PLANE_DROP_INITIAL_VELOCITY 0.f, -0.05f, 0.f
+#define PLANE_DROP_FACTOR 1.05f
+
 
 
 // Whether to render with effects
@@ -141,6 +150,8 @@ main(int, char* argv[]) {
 						   SNOW);
 
 	glm::vec3 ang_vel(PLANE_TILT_ANGULAR_VELOCITY);
+	glm::vec3 vertical_velocity(PLANE_DROP_INITIAL_VELOCITY);
+
 	// Prepare physics plane
 	phy::phyPlane phyplane(-TERRAIN_SIZE / 2.f,
 						   TERRAIN_SIZE / 2.f,
@@ -150,6 +161,7 @@ main(int, char* argv[]) {
 						   TERRAIN_RESOLUTION,
 						   TERRAIN_RESOLUTION,
 						   false,
+						   nullptr,
 						   nullptr,
 						   glm::vec4(0.9f, 0.9f, 0.9f, 1.f));
 
@@ -202,8 +214,9 @@ main(int, char* argv[]) {
 							std::cos(light_theta),
 							std::sin(light_phi) * std::sin(light_theta));
 
-        #ifdef ENABLE_PLANE_TILT
-		// Check for special frames which introduce changes to the state
+        #ifdef ENABLE_PLANE_TILT_AND_DROP
+
+		// First Round of Tilting
 		if (frame == PLANE_TILT_START_FRAME) {
 			phyplane.set_angular_velocity(&ang_vel);
 		} else if (frame == PLANE_TILT_END_FRAME) {
@@ -212,7 +225,9 @@ main(int, char* argv[]) {
 			// Switch tilt direction
 			ang_vel *= -1;
 		}
-		else if (frame == PLANE_TILT_VERTICALLY_START_FRAME) {
+		
+		// Second Round of Tilting
+		if (frame == PLANE_TILT_VERTICALLY_START_FRAME) {
 			ang_vel *= -2;
 			phyplane.set_angular_velocity(&ang_vel);
 		}
@@ -223,17 +238,27 @@ main(int, char* argv[]) {
 			// Switch tilt direction
 			phyplane.set_angular_velocity(&ang_vel);
 		}
-		else if ((frame - PLANE_TILT_VERTICALLY_START_FRAME) % PLANE_TILT_VERTICALLY_INTERVAL == 0 && frame > PLANE_TILT_VERTICALLY_START_FRAME) {
+		else if ((frame - PLANE_TILT_VERTICALLY_START_FRAME) % PLANE_TILT_VERTICALLY_INTERVAL == 0 && 
+			frame > PLANE_TILT_VERTICALLY_START_FRAME && frame < PLANE_TILT_VERTICALLY_END_FRAME) {
 			// Switch tilt direction
 			phyplane.set_angular_velocity(nullptr);
 			ang_vel *= -1;
+		}
+
+		// Dropping
+		if (frame == PLANE_DROP_START_FRAME) {
+			phyplane.set_vertical_velocity(&vertical_velocity);
+		}
+		else if (frame > PLANE_DROP_START_FRAME) {
+			vertical_velocity *= PLANE_DROP_FACTOR;
 		}
 
 		// Apply plane transformations
 		phyplane.step(SECONDS_PER_FRAME);
 		// Copy transformations to the terrain
 		terr.set_model_mat(phyplane.get_model_mat());
-        #endif // ENABLE_PLANE_TILT
+
+        #endif // ENABLE_PLANE_TILT_AND_DROP
 
 		// Render terrain
         #ifdef RENDER_PHY_PLANE

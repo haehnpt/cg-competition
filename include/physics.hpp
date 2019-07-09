@@ -75,10 +75,11 @@ namespace phy {
     glm::mat4 inv_model_mat;
 
     glm::vec3 *angular_velocity;
+	glm::vec3 *vertical_velocity;
 
     phyPlane(float xStart, float xEnd, float zStart, float zEnd,
              float *heightMap, int xNumPoints, int zNumPoints, bool useBoundingBox,
-             glm::vec3 *angular_velocity, glm::vec4 custom_color = glm::vec4(0.f, 0.f, 0.f, 0.f));
+             glm::vec3 *angular_velocity, glm::vec3 *vertical_velocity, glm::vec4 custom_color = glm::vec4(0.f, 0.f, 0.f, 0.f));
     ~phyPlane();
 
     // Update state, currently only roatation according to
@@ -86,6 +87,7 @@ namespace phy {
     void step(float deltaT);
 
     void set_angular_velocity(glm::vec3 *angular_velocity);
+	void set_vertical_velocity(glm::vec3 *vertical_velocity);
 
     void set_model_mat(glm::mat4 model_mat);
     glm::mat4 get_model_mat();
