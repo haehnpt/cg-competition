@@ -6,6 +6,9 @@
 #include <shader.hpp>
 #include <glm/gtx/transform.hpp>
 
+// For glm::to_string
+#include "glm/gtx/string_cast.hpp"
+
 // #include <buffer.hpp>
 // #define PHYSICS_DEBUG
 
@@ -36,8 +39,8 @@ namespace phy {
     geometry geo;
   }
 
-  phySphere::phySphere(glm::vec3 x,
-                       glm::vec3 v,
+  phySphere::phySphere(glm::vec4 x,
+                       glm::vec4 v,
                        float radius,
                        phyPlane *plane,
                        glm::vec4 color) :
@@ -45,98 +48,129 @@ namespace phy {
     v{v},
     radius{radius},
     plane{plane},
-    custom_color{color}
+    custom_color{color},
+    a{glm::vec4(0.f, -4.f, 0.f, 0.f)}
   {
     // std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << ")\n";
-    a.x = 0;
-    a.y = -4;
-    a.z = 0;
 
     // Since the collision code does not yet take the radius into
     // account, we choose the lowest point of the sphere (in
     // y-direction) as the reference point for the simulation and
     // simply place the center of the mesh @x.y + @radius.
-    offset_vec = glm::vec3(0.f, radius, 0.f);
+    offset_vec = glm::vec4(0.f, radius, 0.f, 0);
   }
 
   phySphere::~phySphere() {}
 
   bool
   phySphere::step(float deltaT) {
-    // next position if there were no obstacles
-    glm::vec3 targetPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
+    if (plane) {
+      // next position if there were no obstacles
+      glm::vec3 targetPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
 
-    // the bounding box is only applied to the x and z direction
-    if(plane->useBoundingBox) {
-      // maybe reflect in x direction
-      if (targetPos.x  < plane->xStart + radius) {
-        x.x = plane->xStart + radius + 0.0001f;
-        v.x = -v.x;
-      } else if (targetPos.x > plane->xEnd - radius) {
-        x.x = plane->xEnd - radius -0.0001f;
-        v.x = -v.x;
-      }
+      // transfer all vectors to the plane's coordinate system, that is
+      // before application of the plane's model_mat
+      targetPos = glm::inverse(plane->model_mat) * glm::vec4(targetPos, 1.f);
+      x = glm::inverse(plane->model_mat) * x;
+      v = glm::inverse(plane->model_mat) * v;
+      a = glm::inverse(plane->model_mat) * a;
 
-      // maybe reflect in z direction
-      if (targetPos.z < plane->zStart + radius) {
-        x.z = plane->zStart + radius + 0.0001f;
-        v.z = -v.z;
-      } else if (targetPos.z > plane->zEnd - radius) {
-        x.z = plane->zEnd - radius - 0.0001f;
-        v.z = -v.z;
-      }
+      bool touched_plane = false;
 
-      // the sphere is now back in the  plane area
-      if (plane->isAbove(x)) {
-        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-        // update velocity
-        v = v + a * deltaT;
-      } else {
-        // TODO: x is not the position of the first contact!
-        v = plane->reflectAt(x, v);
-        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-        // update velocity
-        v = v + a * deltaT;
-        // lost energy when bouncing
-        v *= 0.80;
-      }
-    } else {
-      // ignoring the bounding box
-      if(targetPos.x < plane->xStart || targetPos.x > plane->xEnd
-         || targetPos.z < plane->zStart || targetPos.z > plane->zEnd) {
-        // outside of the plane
-        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-        // update velocity
-        v = v + a * deltaT;
-      } else {
-        // inside bounding box, reflect
-        if (plane->isAbove(targetPos)) {
-          x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-          // update velocity
-          v = v + a * deltaT;
+      // the bounding box is only applied to the x and z direction
+      if(plane->useBoundingBox) {
+        // maybe reflect in x direction
+        if (targetPos.x  < plane->xStart + radius) {
+          x.x = plane->xStart + radius + 0.0001f;
+          v.x = -v.x;
+        } else if (targetPos.x > plane->xEnd - radius) {
+          x.x = plane->xEnd - radius -0.0001f;
+          v.x = -v.x;
+        }
+
+        // maybe reflect in z direction
+        if (targetPos.z < plane->zStart + radius) {
+          x.z = plane->zStart + radius + 0.0001f;
+          v.z = -v.z;
+        } else if (targetPos.z > plane->zEnd - radius) {
+          x.z = plane->zEnd - radius - 0.0001f;
+          v.z = -v.z;
+        }
+
+        // the sphere is now back in the  plane area
+        if (plane->isAbove(x)) {
         } else {
           // TODO: x is not the position of the first contact!
-          v = plane->reflectAt(x, v);
-          x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
-          // update velocity
-          v = v + a * deltaT;
-          // lost energy when bouncing
-          v *= 0.90;
+          // FIXME: this crashes the program
+          plane->reflect(this);
+          touched_plane = true;
         }
+      } else {
+        // ignoring the bounding box
+        if(targetPos.x < plane->xStart || targetPos.x > plane->xEnd
+           || targetPos.z < plane->zStart || targetPos.z > plane->zEnd) {
+          // EMPTY
+        } else {
+          // inside bounding box, reflect
+          if (plane->isAbove(targetPos)) {
+            // EMPTY
+          } else {
+            // TODO: x is not the position of the first contact!
+            // FIXME: this crashes the program
+            plane->reflect(this);
+            touched_plane = true;
+          }
+        }
+
+        // transform back from the position relative to the plane to
+        // world
+        x = plane->model_mat * x;
+        v = plane->model_mat * v;
+        a = plane->model_mat * a;
+
+        x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+        // update velocity
+        v = v + a * deltaT;
+
+        // drag a = glm::vec3(0, -10.f, 0.f); a = a - 0.01f *
+        // (float)pow(glm::length(v), 2.f) * glm::normalize(v);
+
+        // plane->getTriangleIndex(this);
+
+        // Once a sphere is on the ground, it will be reflected each
+        // step, since it will get below the plane each time. In this
+        // case, reducing the velocity would look like friction, which
+        // we don't want to simulate. Therefore only reduce the speed
+        // when the sphere touches the plane for the first time.
+        if (touched_plane && !touched_plane_last_step) {
+          v = v * 0.8f;
+        }
+
+        touched_plane_last_step = touched_plane;
+
+        // FIXME: Remove hard-coded number!  This partially fixes the
+        // phantom edge bounces for our special case (only rotating
+        // around the x-axis): The lowest point the plane can reach is
+        // determined by the size in z direction.
+        if (x.y < -plane->zEnd) {
+          plane = nullptr;
+        }
+
       }
-
-      // drag
-      // a = glm::vec3(0, -10.f, 0.f);
-      // a = a - 0.01f * (float)pow(glm::length(v), 2.f) * glm::normalize(v);
-
-      // plane->getTriangleIndex(this);
+    } else {
+      // plane == nullptr
+      //
+      // No more interaction with a plane
+      x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
+      v = v + a * deltaT;
     }
+
 
     return true;
   }
 
   void
-  phySphere::setPosition(glm::vec3 pos) {
+  phySphere::setPosition(glm::vec4 pos) {
     x = pos;
   }
 
@@ -160,6 +194,19 @@ namespace phy {
     x.y = (d - x.x * norm.x - x.z * norm.z) / norm.y;
   }
 
+  void
+  phySphere::render() {
+    geo.transform = glm::translate(glm::vec3(x + offset_vec))
+      * glm::scale(glm::vec3(radius));
+    geo.bind();
+
+    // Set model matrix for this sphere
+    glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &geo.transform[0][0]);
+    // Set custom color for this sphere
+    glUniform4fv(custom_color_loc, 1, &custom_color[0]);
+    glDrawElements(GL_TRIANGLES, geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+  }
+
   phyPlane::phyPlane(float xStart,
                      float xEnd,
                      float zStart,
@@ -167,14 +214,19 @@ namespace phy {
                      float *heightMap,
                      int xNumPoints,
                      int zNumPoints,
-                     bool useBoundingBox) :
+                     bool useBoundingBox,
+                     glm::vec3 *angular_velocity,
+                     glm::vec4 custom_color) :
     xStart{xStart},
     xEnd{xEnd},
     zStart{zStart},
     zEnd{zEnd},
     xNumPoints{xNumPoints},
     zNumPoints{zNumPoints},
-    useBoundingBox{useBoundingBox}
+    useBoundingBox{useBoundingBox},
+    custom_color{custom_color},
+    model_mat{glm::mat4(1.f)},
+    angular_velocity{angular_velocity}
   {
     this->xTileWidth = (xEnd - xStart) / (float)(xNumPoints - 1);
     this->zTileWidth = (zEnd - zStart) / (float)(zNumPoints - 1);
@@ -212,16 +264,16 @@ namespace phy {
     // Thus the total number of vertices needed is:
     // (m-2)*(n-2)*6 + 2*(n-2)*3 + 2*(m-2)*3 + 1 + 1 + 2 + 2
     //  = 6*(n*m - n - m + 1)
-    mVertices = 6 * (xNumPoints * zNumPoints - xNumPoints - zNumPoints + 1);
-    vbo_data = new float[mVertices * 10];
+    n_vertices = 6 * (xNumPoints * zNumPoints - xNumPoints - zNumPoints + 1);
+    vbo_data = new float[n_vertices * 10];
     float deltaX = (xEnd - xStart) / (xNumPoints - 1);
     float deltaZ = (zEnd - zStart) / (zNumPoints - 1);
 
     // DEBUG:
     std::cout << "heightMap dimension: " << zNumPoints << "x" << xNumPoints << "\n";
     std::cout << "deltaX = " << deltaX << ", deltaZ  = " << deltaZ << "\n";
-    std::cout << "mVertices = " << mVertices << "\n";
-    std::cout << "vbo_data size: " << mVertices * 10 * sizeof(float) / 1000.f << "K\n";
+    std::cout << "n_vertices = " << n_vertices << "\n";
+    std::cout << "vbo_data size: " << n_vertices * 10 * sizeof(float) / 1000.f << "K\n";
 
     // This for-loop loops over the squares between the data
     // points. (x,z) represents the upper-left vertex of the current
@@ -316,7 +368,7 @@ namespace phy {
 
 
     // DEBUG print
-    // for (int i = 0; i < mVertices; i++) {
+    // for (int i = 0; i < n_vertices; i++) {
     //     std::cout << "====== Vertix " << i << ":\n";
 
     //     for (int j = 0; j < 10; j++) {
@@ -332,7 +384,7 @@ namespace phy {
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, mVertices * 10 * sizeof(float), vbo_data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, n_vertices * 10 * sizeof(float), vbo_data, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)(3*sizeof(float)));
@@ -348,29 +400,49 @@ namespace phy {
     // delete [vbo_data];
   }
 
-
   phyPlane::~phyPlane() {
     delete[] vbo_data;
   }
 
   void
-  phyPlane::bind() {
-    glBindVertexArray(vao);
-  }
-
-  void
-  phyPlane::release() {
-    glBindVertexArray(0);
-  }
-
-  void
   phyPlane::destroy() {
-    release();
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
   }
 
-  // For the start we assume the sphere has a radius of zero!
+  // TODO: Use pointer
+  void
+  phyPlane::set_model_mat(glm::mat4 model_mat)
+  {
+    this->model_mat = model_mat;
+    this->inv_model_mat = glm::inverse(model_mat);
+  }
+
+  glm::mat4
+  phyPlane::get_model_mat() {
+    return model_mat;
+  }
+
+  void
+  phyPlane::set_angular_velocity(glm::vec3 *angular_velocity) {
+    this->angular_velocity = angular_velocity;
+  }
+
+  void
+  phyPlane::step(float deltaT) {
+    if (angular_velocity) {
+      model_mat = glm::rotate(model_mat, deltaT * glm::length(*angular_velocity),
+                              glm::normalize(*angular_velocity));
+    }
+  }
+
+  int
+  phyPlane::getTriangleAt(glm::vec4 pos) {
+    return getTriangleAt(glm::vec3(pos.x, pos.y, pos.z));
+  }
+
+  // @pos must coordinates realtive to the plane before any
+  // transformations.
   int
   phyPlane::getTriangleAt(glm::vec3 pos) {
     // printf("isCutting with s coordinates: %02.2f %02.2f %02.2f\n",
@@ -507,9 +579,13 @@ namespace phy {
     return std::vector<int>{(int)(xStart + zStart + xEnd + zEnd)};
   }
 
+
+  // x is the position relative to the plane before any
+  // transformations.
   bool
   phyPlane::isAbove(glm::vec3 x) {
     int index = getTriangleAt(x);
+
     // first vertex of the triangle
     glm::vec3 v1(vbo_data[index * 3 * 10 + 0],
                  vbo_data[index * 3 * 10 + 1],
@@ -526,41 +602,66 @@ namespace phy {
     return glm::dot(x, norm) > glm::dot(v1, norm);
   }
 
+  // v is the velocity relative to the plane BEFORE any plane transformations
   // reflect the vector @v at the normal of the triangle at position
   // @pos
-  glm::vec3
-  phyPlane::reflectAt(glm::vec3 pos, glm::vec3 v) {
+  void
+  phyPlane::reflect(phySphere *s) {
     if (!useBoundingBox) {
-      if(pos.x < xStart  || pos.x > xEnd
-         || pos.z < zStart || pos.z > zEnd) {
+      if(s->x.x < xStart  || s->x.x > xEnd
+         || s->x.z < zStart || s->x.z > zEnd) {
         // the bounding box is diabled, and the sphere has left
         // the bounding box, don't reflect at all, just 'fall of
         // the world'
-        return v;
+        return;
       }
     }
 
-    int index = getTriangleAt(pos);
+    int index = getTriangleAt(s->x);
 
     // normal of the triangle's plane
-    glm::vec3 norm(vbo_data[index * 3 * 10 + 3 + 0],
+    glm::vec4 norm(vbo_data[index * 3 * 10 + 3 + 0],
                    vbo_data[index * 3 * 10 + 3 + 1],
-                   vbo_data[index * 3 * 10 + 3 + 2]);
+                   vbo_data[index * 3 * 10 + 3 + 2],
+                   0);
 
-    return v - 2*glm::dot(norm, v) * norm;
+    // std::cout << "pos: " << glm::to_string(pos) << "\n";
+    // std::cout << "vec3(pos): " << glm::to_string(glm::vec3(pos)) << "\n";
+
+    if (angular_velocity) {
+      // std::cout << "*angular_velocity: " << glm::to_string(*angular_velocity) << "\n";
+
+      // velocity of the plane in direction of its normal. The plane is
+      // considered to have infinity weight, so we can substract this
+      // speed from @v.
+      glm::vec4 v_plane = glm::dot(glm::cross(*angular_velocity, glm::vec3(s->x)),
+                                   glm::vec3(norm)) * norm;
+      s->v -= v_plane;
+
+      // std::cout << "v: " << glm::to_string(s->v)
+      //           << ", v += v_plane: " << glm::to_string(s->v += v_plane) << "\n";
+    }
+
+    // More accurate version, but this is also only correct if the
+    // triangle above which the sphere entered the plane is identical
+    // to the triangle above which the sphere is now.
+    // s->moveToPlaneHeight();
+
+    // Move the sphere APPROXIMATELY to the point of first
+    // contact. This is a very quick but also very poor (if the
+    // incoming angle was not steep) approximation of the point of
+    // first contact of the sphere with the plane.
+    s->x.y = vbo_data[index * 3 * 10 + 0 + 1];
+
+    s->v = s->v - 2*glm::dot(norm, s->v) * norm;
   }
 
   void
-  phySphere::render() {
-    geo.transform = glm::translate(x + offset_vec)
-      * glm::scale(glm::vec3(radius));
-    geo.bind();
-
-    // Set model matrix for this sphere
-    glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &geo.transform[0][0]);
-    // Set custom color for this sphere
+  phyPlane::render() {
+    glBindVertexArray(vao);
+    glUniformMatrix4fv(model_mat_loc, 1, GL_FALSE, &model_mat[0][0]);
     glUniform4fv(custom_color_loc, 1, &custom_color[0]);
-    glDrawElements(GL_TRIANGLES, geo.vertex_count, GL_UNSIGNED_INT, (void*) 0);
+    glDrawArrays(GL_TRIANGLES, 0, n_vertices);
   }
 
   void
@@ -582,8 +683,9 @@ namespace phy {
   }
 
   // Load the phyShaderProgram and set all values that are identical
-  // for all spheres. The @model_mat will be set individually by each
-  // sphere in phySphere:render().
+  // for all phy objcets such as planes and spheres. The @model_mat
+  // will be set individually by each phy object in their render()
+  // method.
   void
   useShader(camera *cam, glm::mat4 proj_matrix, glm::vec3 light_dir) {
     glUseProgram(phyShaderProgram);

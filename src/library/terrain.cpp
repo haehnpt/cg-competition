@@ -362,3 +362,7 @@ void terrain::create_terrain_shaders()
 	albedo_loc = glGetUniformLocation(terrainShaderProgram, "albedo");
 
 }
+
+void terrain::set_model_mat(glm::mat4 mm) {
+  terra.transform = mm;
+}
