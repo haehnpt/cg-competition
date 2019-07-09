@@ -72,7 +72,6 @@
 // Controls if and how the plane rotates
 // #define ENABLE_PLANE_TILT
 #define PLANE_TILT_ANGULAR_VELOCITY -0.4f, 0.f, 0.f
-#define PLANE_TILT_START 0
 #define PLANE_TILT_START_FRAME 620
 #define PLANE_TILT_INTERVAL 80
 #define PLANE_TILT_END_FRAME (620 + 4 * 80)
