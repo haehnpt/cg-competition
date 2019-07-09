@@ -43,12 +43,14 @@ namespace phy {
                        glm::vec4 v,
                        float radius,
                        phyPlane *plane,
-                       glm::vec4 color) :
+                       glm::vec4 color,
+					   int visibility_frame) :
     x{x},
     v{v},
     radius{radius},
     plane{plane},
     custom_color{color},
+	visibility_frame{visibility_frame},
     a{glm::vec4(0.f, -4.f, 0.f, 0.f)}
   {
     // std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << ")\n";
@@ -716,5 +718,14 @@ namespace phy {
     glUniformMatrix4fv(proj_mat_loc, 1, GL_FALSE, &proj_matrix[0][0]);
     glUniformMatrix4fv(view_mat_loc, 1, GL_FALSE, &cam->view_matrix()[0][0]);
     glUniform3fv(light_dir_loc, 1, &light_dir[0]);
+  }
+
+  // Box-Muller Transform for gaussian random values
+  float 
+  gauss_rand(float mean, float dev) {
+	  float x = 1.0 - rand() / (float)RAND_MAX;
+	  float y = 1.0 - rand() / (float)RAND_MAX;
+	  float rsn = sqrt(-2.f * log(x)) * sin(2.f * 3.14159f * y);
+	  return mean + dev * rsn;
   }
 }

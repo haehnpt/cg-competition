@@ -68,7 +68,7 @@
 // #define RENDER_PHY_PLANE
 #define SPHERES_DROP_HEIGHT 1.f
 #define SPHERES_APPEARANCE_FRAME 400
-#define SPHERES_RELASE_FRAME 420
+#define SPHERES_RELASE_FRAME 460
 
 // Tilting and Dropping
 #define ENABLE_PLANE_TILT_AND_DROP
@@ -191,7 +191,8 @@ main(int, char* argv[]) {
 									 glm::vec4(0.f, 0.f, 0.f, 0.f),
 									 SPHERE_RADIUS,
 									 &phyplane,
-									 glm::vec4(sin(x * M_PI / X_N_SPHERES), cos(z * M_PI / X_N_SPHERES) / 2.f + 0.5f, exp(x * z / X_N_SPHERES / Z_N_SPHERES) / 2.718282f, 1.f));
+									 glm::vec4(sin(x * M_PI / X_N_SPHERES), cos(z * M_PI / X_N_SPHERES) / 2.f + 0.5f, exp(x * z / X_N_SPHERES / Z_N_SPHERES) / 2.718282f, 1.f),
+									 SPHERES_APPEARANCE_FRAME + (phy::gauss_rand(60, 60) - 60));
 		}
 	}
 
@@ -279,7 +280,9 @@ main(int, char* argv[]) {
 			// render all spheres
 			phy::useShader(&cam, proj_matrix, light_dir);
 			for (int i = 0; i < X_N_SPHERES * Z_N_SPHERES; i++) {
-				spheres[i]->render();
+				if (frame > spheres[i]->visibility_frame) {
+					spheres[i]->render();
+				}
 			}
 		}
 

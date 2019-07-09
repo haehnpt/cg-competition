@@ -22,6 +22,7 @@ namespace phy {
     // for simulation
     glm::vec4 offset_vec;
     float radius;
+	int visibility_frame;
     struct phyPlane *plane;
     glm::vec4 custom_color;
     bool touched_plane_last_step = false;
@@ -38,7 +39,8 @@ namespace phy {
               glm::vec4 v,
               float radius,
               struct phyPlane *plane,
-              glm::vec4 custom_color = glm::vec4(0.f, 0.f, 0.f, 0.f));
+              glm::vec4 custom_color,
+		      int visibility_frame);
     ~phySphere();
 
     void render();
@@ -109,4 +111,5 @@ namespace phy {
 
   void initShader();
   void useShader(camera *cam, glm::mat4 proj_matrix, glm::vec3 light_dir);
+  float gauss_rand(float mean, float dev);
 }
