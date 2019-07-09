@@ -45,7 +45,7 @@ Die nachfolgende Auflistung zeigt die ursprünglich geplanten Komponenten unsere
 |Shadow Mapping|Volker|:x:|:x:|
 |Prozedurale Geometrie|Patrick|:heavy_check_mark:|:heavy_check_mark:|
 |Displacement Mapping|Patrick|:heavy_check_mark:|:heavy_check_mark:|
-|Datengetriebene Matrialmodelle|Patrick|:x:|:x:|
+|Datengetriebene Materialmodelle|Patrick|:x:|:x:|
 |Partikelsystem|Volker|:x:|:x:|
 |Bewegungsunschärfe|Sebastian|:heavy_check_mark:|:heavy_check_mark:|
 |Fokusunschärfe|Sebastian|:heavy_check_mark:|:heavy_check_mark:|
