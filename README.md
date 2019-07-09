@@ -6,3 +6,5 @@ Repository für die "Computer Animation Competition" der Vorlesung "Computergrap
 Alle relevanten Informationen finden sich hier:
 
 [Softwaredokumentation](documentation/documentation.md)
+
+[Vorschauvideo](haehn.me/uni/cg)
