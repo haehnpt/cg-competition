@@ -148,11 +148,23 @@ namespace phy {
 
         touched_plane_last_step = touched_plane;
 
-        // FIXME: Remove hard-coded number!  This partially fixes the
-        // phantom edge bounces for our special case (only rotating
-        // around the x-axis): The lowest point the plane can reach is
-        // determined by the size in z direction.
-        if (x.y < -plane->zEnd) {
+        // This is a workaround to prevent the 'shooting stars' effect
+        // for our special case (only rotating around the x-axis),
+        // where spheres that had already fallen off the plane would
+        // suddenly re-appear with high velocity around the edges of
+        // the plane. Properly fixing this appears to be rather
+        // difficult (I might be wrong), because it requires to
+        // properly check for collisions with the plane in the area of
+        // the tilted contour.
+        //
+        // The lowest point the plane can reach is determined by the
+        // size in z direction. Once the sphere is below that, we can
+        // safely disable interaction with the plane. Also, since for
+        // now we only tilt the plane, we know for sure that once the
+        // sphere is outside the original bounding box in the
+        // x-z-plane it won't return.
+        if (x.y < -plane->zEnd || x.x < plane->xStart || x.x > plane->xEnd
+            || x.z < plane->zStart || x.z > plane->zEnd) {
           plane = nullptr;
         }
 
