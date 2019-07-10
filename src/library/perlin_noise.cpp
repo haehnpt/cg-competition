@@ -1,12 +1,6 @@
 #include "perlin_noise.hpp"
 
-/*
-Get a new instance of perlin noise with the specified parameters
-- gradients_count : number of gradients on the grid in one dimension
-- grid_distance : distance between nodes on the grid
-- offset : height offset
-- scaling : scaling of heights
-*/
+// Create a new instance of perlin_noise
 perlin_noise::perlin_noise(int gradients_count, float grid_distance, float offset, float scaling)
 {
     this->gradients_count = gradients_count;
@@ -16,23 +10,19 @@ perlin_noise::perlin_noise(int gradients_count, float grid_distance, float offse
     create_gradients();
 }
 
+// Clear up
 perlin_noise::~perlin_noise()
 {
 	
 }
 
-/*
-Fade weight values (=> smoother)
-*/
+// Fade the weight values
 float perlin_noise::fade(float x)
 {
 	return (3 - 2 * x) * x * x;
 }
 
-/*
-Create pseudo-random gradients which are used in
-the process of generating perlin noise
-*/
+// Create pseudo-random gradients
 void perlin_noise::create_gradients()
 {
     srand(time(0));
@@ -55,9 +45,7 @@ void perlin_noise::create_gradients()
     }
 }
 
-/*
-Dot product of gradient and position
-*/
+// Get the dot product of the gradient and the grid position
 float perlin_noise::dot_grid_gradient(int index_x, int index_y, float x, float y)
 {
 	if (index_x >= gradients_count || index_y >= gradients_count)
@@ -67,19 +55,13 @@ float perlin_noise::dot_grid_gradient(int index_x, int index_y, float x, float y
     return (dx * gradients[index_x][index_y][0] + dy * gradients[index_x][index_y][1]);
 }
 
-/*
-Linear interpolation
-*/
+// Perform linear interpolation
 float perlin_noise::lerp(float high, float low, float weight)
 {
     return (1.0 - weight) * high + weight * low;
 }
 
-/*
-Get perlin noise at the location (x,y)
-- x : x coordinate
-- y : y coordinate
-*/
+// Get noise at a position (x,y)
 float perlin_noise::get_noise(float x, float y)
 {
     max_distance = (gradients_count - 1) / 2.0 * gradient_grid_distance;
@@ -108,9 +90,7 @@ float perlin_noise::get_noise(float x, float y)
     return offset + scaling * lerp(i1,i2,sy);
 }
 
-/*
-* Free the memory of the gradients
-*/
+// Clear the memory occupied by the gradients
 void perlin_noise::clear_gradients()
 {
 	for (int i = 0; i < this->gradients_count; i++)
