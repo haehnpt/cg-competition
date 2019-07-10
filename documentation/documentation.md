@@ -387,6 +387,7 @@ Leider konnten wir, wie man im Abschnitt "Komponenten" sehen kann, nicht alle Ko
 
 Insgesamt können wir aufgrund der nachfolgenden Punkte ein positives Fazit zu diesem Projekt ziehen:
 
+- Gelungenes Ergebnis: Das gerenderte Video
 - Tiefere Einarbeitung in OpenGL
 - Anwendung der theoretischen Inhalte des Moduls
 - Freie, kreative Arbeit
@@ -395,5 +396,6 @@ Insgesamt können wir aufgrund der nachfolgenden Punkte ein positives Fazit zu d
 ## Referenzen
 
 - [1] "Perlin Noise", Wikipedia, https://en.wikipedia.org/wiki/Perlin_noise, abgerufen: 05.07.2019
-- [2] "Making maps with noise functions", Red Blob Games, https://www.redblobgames.com/maps/terrain-from-noise/, abgerufen: 05.07.2019
+- [2] "Making maps with noise functions", Red Blob Games, https://www.redblobgames.com/maps/terrain-from-noise/, abgerufen: 04.07.2019
 - [3] "FFMPEG Video Converter", FFMPEG, https://ffmpeg.org/, abgerufen: 05.07.2019
+- [4] "MERL BRDF Database", Mitsubishi Electric Research Laboratories, https://www.merl.com/brdf/, abgerufen: 03.07.2019
