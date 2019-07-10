@@ -123,7 +123,7 @@ main(int, char* argv[]) {
 	// Instantiate after effects
 	DepthBlur depth_blur = DepthBlur(WINDOW_WIDTH, WINDOW_HEIGHT, NEAR_VALUE, FAR_VALUE, 0.01, 0.2);
 	MotionBlur motion_blur = MotionBlur(WINDOW_WIDTH, WINDOW_HEIGHT, 3);
-    #endif // ENABLE_EFFECTS
+#endif // ENABLE_EFFECTS
 
 	// Projection matrix
 	proj_matrix = glm::perspective(FOV, 1.f, NEAR_VALUE, FAR_VALUE);
