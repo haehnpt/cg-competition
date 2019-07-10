@@ -1,16 +1,15 @@
 #include <physics.hpp>
 
-#include <common.hpp>
-#include <mesh.hpp>
-#include <camera.hpp>
-#include <shader.hpp>
-#include <glm/gtx/transform.hpp>
+// Author: Volker Sobek <vsobek@uni-bonn.de>
 
-// For glm::to_string
-#include "glm/gtx/string_cast.hpp"
-
-// #include <buffer.hpp>
-// #define PHYSICS_DEBUG
+// physics.cpp and physics.hpp provide a tiny 'just-get-it-working'
+// and thus VERY ERROR-PRONE and VERY INCOMPLETE collection of
+// functions and structs tailored to the very narrow needs of this
+// project.
+//
+// It is used to simulate friction-less physical interaction between
+// planes defined by a 2D height map, and spheres, simulated as
+// infinitesimal small mass points but rendered as spheres.
 
 // WARNING ABOUT NON-DETERMINISM
 //
@@ -78,6 +77,9 @@ namespace phy {
       // to keep track of this.
       bool touched_plane = false;
 
+      // FIXME: useBoundingBox is obsolete, with the introduction of
+      // affine plane transformations it no longer makes sense!
+      //
       // The bounding box is only applied to the x and z direction.
       if(plane->useBoundingBox) {
         // maybe reflect in x direction
@@ -151,9 +153,9 @@ namespace phy {
 
         touched_plane_last_step = touched_plane;
 
-        // FIXME: This library is very rudimentary. I.e. this check
-        // does not take the plane's model matrix into account.  It
-        // only checks what's needed and easy to check for our very
+        // FIXME: This code is rudimentary as it can get. I.e. this
+        // check does not take the plane's model matrix into account.
+        // It only checks what's needed and easy to check for our very
         // simple use case.
         //
         // The lowest point the plane can reach is determined by its
@@ -171,12 +173,10 @@ namespace phy {
 
       }
     } else {
-
       // no more interaction with a plane, free fall
       x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
       v = v + a * deltaT;
     }
-
 
     return true;
   }
@@ -399,6 +399,7 @@ namespace phy {
   }
 
   phyPlane::~phyPlane() {
+    destroy();
     delete[] vbo_data;
   }
 
@@ -474,11 +475,6 @@ namespace phy {
     float xInRect = fmod(xInPlane, xTileWidth);
     float zInRect = fmod(zInPlane, zTileWidth);
 
-#ifdef PHYSICS_DEBUG
-    // top-right (-1) or bottom left (-0) triangle?
-    int oldTriangleIndex = triangleIndex;
-#endif
-
     // two triangles per rectangle
     triangleIndex = 2 * (xIndexRect * (zNumPoints - 1) + zIndexRect);
     // if the sphere is in the 'upper'-left triangle it's one less
@@ -486,19 +482,10 @@ namespace phy {
       triangleIndex++;
     }
 
-#ifdef PHYSICS_DEBUG
-    if (triangleIndex != oldTriangleIndex) {
-      std::cout << "zIndexRect: " << zIndexRect
-                << ", xIndexRect: " << xIndexRect
-                << ", triangleIndex: " << triangleIndex << "\n" << std::flush;
-
-    }
-#endif // PHYSICS_DEBUG
-
     return triangleIndex;
   }
 
-  // Return (the index of) the next triangle in the phyDirection @d
+  // Return the index of the next triangle in the phyDirection @d
   int
   phyPlane::getNextTriangle(int index, phyDirection d) {
     switch(d) {

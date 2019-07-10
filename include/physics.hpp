@@ -1,7 +1,11 @@
 #pragma once
 
+#include <common.hpp>
 #include <mesh.hpp>
 #include <camera.hpp>
+#include <shader.hpp>
+#include <glm/gtx/transform.hpp>
+#include "glm/gtx/string_cast.hpp"
 
 namespace phy {
   // 'direction' in the plane
@@ -13,6 +17,7 @@ namespace phy {
      down,
     };
 
+  // TODO: Use class!
   struct phySphere {
     // physics simulation
     glm::vec4 x; // position
@@ -51,6 +56,7 @@ namespace phy {
   };
 
 
+  // TODO: Use class!
   struct phyPlane {
     unsigned int vao;
     unsigned int vbo;
