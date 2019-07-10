@@ -1,5 +1,5 @@
 ﻿# Computer Animation Competition
-Repository für die "Computer Animation Competition" der Vorlesung "Computergraphik" an der Universität Bonn (SS 2019)
+Repository für die "Computer Animation Competition" des Moduls "Einführung in die Computergrafik und Visualisierung" an der Rheinischen Friedrich-Wilhelms-Universität Bonn im Sommersemester 2019
 
 ## Softwaredokumentation
 
