@@ -26,6 +26,10 @@
 // See https://isocpp.org/wiki/faq/newbie#floating-point-arith2 for
 // more information.
 
+// This is our gravity (in negative y-direction)
+#define PHY_DEFAULT_ACCELERATION 0.f, -4.f, 0.f, 0.f
+
+
 namespace phy {
   namespace {
     int phyShaderProgram;
@@ -49,7 +53,7 @@ namespace phy {
     plane{plane},
     custom_color{color},
     visibility_frame{visibility_frame},
-    a{glm::vec4(0.f, -4.f, 0.f, 0.f)}
+    a{glm::vec4(PHY_DEFAULT_ACCELERATION)}
   {
     // Since the collision code does not yet take the radius into
     // account, we choose the lowest point of the sphere (in
