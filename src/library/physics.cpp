@@ -16,14 +16,13 @@
 //
 // Notice that a floating point operation in a program can yield
 // different results each time the program runs. This may become
-// obvious when running the test_physics program, where the simulation
-// can take different paths due to different results of the floating
-// point operations which accumulate over time. As a result, when
-// running two instances of the same program side by side, they start
-// out identical might differ more and more over time. This is *not*
-// caused by using operations involving the system time to measure the
-// passed time; the test_physics program simply advances the time
-// value used for calculations by a fixed value each frame.
+// obvious when running simulation using the structs/classes defined
+// in this file. When running two instances of the same program side
+// by side, they start out identical but can differ more and more over
+// time. This is *not* caused by using operations involving the system
+// time to measure the passed time; the functions herein simply
+// advance the time value used for calculations by a fixed amount each
+// frame.
 //
 // See https://isocpp.org/wiki/faq/newbie#floating-point-arith2 for
 // more information.
@@ -50,11 +49,9 @@ namespace phy {
     radius{radius},
     plane{plane},
     custom_color{color},
-	visibility_frame{visibility_frame},
+    visibility_frame{visibility_frame},
     a{glm::vec4(0.f, -4.f, 0.f, 0.f)}
   {
-    // std::cout << "phySphere with pos = (" << x.x << ", " << x.y << ", " << x.z << ")\n";
-
     // Since the collision code does not yet take the radius into
     // account, we choose the lowest point of the sphere (in
     // y-direction) as the reference point for the simulation and
@@ -67,19 +64,21 @@ namespace phy {
   bool
   phySphere::step(float deltaT) {
     if (plane) {
-      // next position if there were no obstacles
+      // Next position if there were no obstacles.
       glm::vec3 targetPos = x + v * deltaT + 0.5f * a * deltaT * deltaT;
 
-      // transfer all vectors to the plane's coordinate system, that is
-      // before application of the plane's model_mat
+      // Transfer all vectors to the plane's coordinate system, that
+      // is before application of the plane's model_mat.
       targetPos = glm::inverse(plane->model_mat) * glm::vec4(targetPos, 1.f);
       x = glm::inverse(plane->model_mat) * x;
       v = glm::inverse(plane->model_mat) * v;
       a = glm::inverse(plane->model_mat) * a;
 
+      // In order to distinguish between bouncing and sliding, we have
+      // to keep track of this.
       bool touched_plane = false;
 
-      // the bounding box is only applied to the x and z direction
+      // The bounding box is only applied to the x and z direction.
       if(plane->useBoundingBox) {
         // maybe reflect in x direction
         if (targetPos.x  < plane->xStart + radius) {
@@ -103,12 +102,11 @@ namespace phy {
         if (plane->isAbove(x)) {
         } else {
           // TODO: x is not the position of the first contact!
-          // FIXME: this crashes the program
           plane->reflect(this);
           touched_plane = true;
         }
       } else {
-        // ignoring the bounding box
+        // ignoring the bounding box.
         if(targetPos.x < plane->xStart || targetPos.x > plane->xEnd
            || targetPos.z < plane->zStart || targetPos.z > plane->zEnd) {
           // EMPTY
@@ -118,7 +116,6 @@ namespace phy {
             // EMPTY
           } else {
             // TODO: x is not the position of the first contact!
-            // FIXME: this crashes the program
             plane->reflect(this);
             touched_plane = true;
           }
@@ -134,10 +131,10 @@ namespace phy {
         // update velocity
         v = v + a * deltaT;
 
+
+        // Not used for now
         // drag a = glm::vec3(0, -10.f, 0.f); a = a - 0.01f *
         // (float)pow(glm::length(v), 2.f) * glm::normalize(v);
-
-        // plane->getTriangleIndex(this);
 
         // Once a sphere is on the ground, it will be reflected each
         // step, since it will get below the plane each time. In this
@@ -145,26 +142,28 @@ namespace phy {
         // we don't want to simulate. Therefore only reduce the speed
         // when the sphere touches the plane for the first time.
         if (touched_plane && !touched_plane_last_step) {
+          // TODO: What's the correct physics here? Depending on the
+          // model it might be correct to only reduce the velocity in
+          // direction of the plane's normal, since we don't use
+          // friction. I haven't looked further into that yet.
           v = v * 0.8f;
         }
 
         touched_plane_last_step = touched_plane;
 
-        // This is a workaround to prevent the 'shooting stars' effect
-        // for our special case (only rotating around the x-axis),
-        // where spheres that had already fallen off the plane would
-        // suddenly re-appear with high velocity around the edges of
-        // the plane. Properly fixing this appears to be rather
-        // difficult (I might be wrong), because it requires to
-        // properly check for collisions with the plane in the area of
-        // the tilted contour.
+        // FIXME: This library is very rudimentary. I.e. this check
+        // does not take the plane's model matrix into account.  It
+        // only checks what's needed and easy to check for our very
+        // simple use case.
         //
-        // The lowest point the plane can reach is determined by the
+        // The lowest point the plane can reach is determined by its
         // size in z direction. Once the sphere is below that, we can
         // safely disable interaction with the plane. Also, since for
         // now we only tilt the plane, we know for sure that once the
         // sphere is outside the original bounding box in the
-        // x-z-plane it won't return.
+        // (x,z)-plane it won't return. Even though in our program the
+        // plane only rotates around the x and y axis, this is still
+        // nothing more than a rough approximation.
         if (x.y < -plane->zEnd || x.x < plane->xStart || x.x > plane->xEnd
             || x.z < plane->zStart || x.z > plane->zEnd) {
           plane = nullptr;
@@ -172,9 +171,8 @@ namespace phy {
 
       }
     } else {
-      // plane == nullptr
-      //
-      // No more interaction with a plane
+
+      // no more interaction with a plane, free fall
       x = x + v * deltaT + (0.5f * deltaT * deltaT) * a;
       v = v + a * deltaT;
     }
@@ -242,7 +240,7 @@ namespace phy {
     custom_color{custom_color},
     model_mat{glm::mat4(1.f)},
     angular_velocity{angular_velocity},
-	vertical_velocity{ vertical_velocity }
+    vertical_velocity{ vertical_velocity }
   {
     this->xTileWidth = (xEnd - xStart) / (float)(xNumPoints - 1);
     this->zTileWidth = (zEnd - zStart) / (float)(zNumPoints - 1);
@@ -382,22 +380,11 @@ namespace phy {
       }
     }
 
-
-    // DEBUG print
-    // for (int i = 0; i < n_vertices; i++) {
-    //     std::cout << "====== Vertix " << i << ":\n";
-
-    //     for (int j = 0; j < 10; j++) {
-    //         std::cout << vbo_data[i * 10 + j] << " ";
-    //         std::cout << ((j == 2 || j == 5) ? "\n" : " ");
-    //     }
-
-    //     std::cout << "\n\n";
-    // }
-
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
+    // Notice that the vbo_data is not deleted, as it will be co-used
+    // by the collision detection methods.
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, n_vertices * 10 * sizeof(float), vbo_data, GL_STATIC_DRAW);
@@ -409,11 +396,6 @@ namespace phy {
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
-
-    // We don't delete vbo_data, as we will use it for collision
-    // detection!
-    //
-    // delete [vbo_data];
   }
 
   phyPlane::~phyPlane() {
@@ -426,7 +408,7 @@ namespace phy {
     glDeleteBuffers(1, &vbo);
   }
 
-  // TODO: Use pointer
+  // TODO: use pointer
   void
   phyPlane::set_model_mat(glm::mat4 model_mat)
   {
@@ -516,7 +498,7 @@ namespace phy {
     return triangleIndex;
   }
 
-  // Return (the index of) the next triangle in the phyDirection d
+  // Return (the index of) the next triangle in the phyDirection @d
   int
   phyPlane::getNextTriangle(int index, phyDirection d) {
     switch(d) {
@@ -721,7 +703,7 @@ namespace phy {
   }
 
   // Box-Muller Transform for gaussian random values
-  float 
+  float
   gauss_rand(float mean, float dev) {
 	  float x = 1.0 - rand() / (float)RAND_MAX;
 	  float y = 1.0 - rand() / (float)RAND_MAX;
