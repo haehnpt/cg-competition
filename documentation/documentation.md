@@ -378,12 +378,12 @@ Mit den unten aufgeführten Einstellungen wurde das obige Resultat erreicht.
 
 Die implementierten Komponenten greifen sehr gut ineinander - die physikalische Simulation, das Terrain und die Kamera Effekte harmonieren, sodass die gesamte Szenerie des gerenderten Videos stimmig wirkt. Die Herausforderungen, die wir zu Projektbeginn lokalisiert hatten, haben wir beinahe alle erfüllt:
 
-- :heavy_check_mark: Verwirklichung einer physikalisch annähernd realistische Simulation des Bewegungsverhaltens der Kugeln ~verschiedenen Materials~ in der Landschaft
+- :heavy_check_mark: Verwirklichung einer physikalisch annähernd realistischen Simulation des Bewegungsverhaltens der Kugeln ~verschiedenen Materials~ in der Landschaft
 - :x: Volumetrische Streuung an den Staubpartikeln
 - :heavy_check_mark: Glaubwürdige Generierung einer bergigen Landschaft
 - :heavy_check_mark: Konsequente und harmonierende Komposition der Kamerabewegung(en) und Effekte
 
-Leider konnten wir, wie man im Abschnitt "Komponenten" sehen kann, nicht alle Komponenten umsetzen, die ursprünglich geplant waren. Einerseits waren diese zeitlich nicht umsetzbar, so die "Volumetrische Einfachstreuung", andererseits hätte die Integration in das Projekt keinen großen Mehrwert erzeugt ("Datengetriebene Materialmodelle", die BRDF-Modelle der MERL Datenbank waren fast ausschließlich Kunststoffe und Metalle). 
+Leider konnten wir, wie man im Abschnitt "Komponenten" sehen kann, nicht alle Komponenten umsetzen, die ursprünglich geplant waren. Einerseits waren diese zeitlich nicht umsetzbar, so die "Volumetrische Einfachstreuung", andererseits ist die Integration ins Projekt / Komponentenentwicklung  gescheitert("Datengetriebene Materialmodelle" - die BRDF-Modelle der MERL Datenbank waren fast ausschließlich Kunststoffe und Metalle). 
 
 Insgesamt können wir aufgrund der nachfolgenden Punkte ein positives Fazit zu diesem Projekt ziehen:
 
