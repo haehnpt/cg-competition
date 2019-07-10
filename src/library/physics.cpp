@@ -384,8 +384,8 @@ namespace phy {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    // Notice that the vbo_data is not deleted, as it will be co-used
-    // by the collision detection methods.
+    // Notice that the vbo_data is not deleted, as it will be used by
+    // the collision detection methods.
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, n_vertices * 10 * sizeof(float), vbo_data, GL_STATIC_DRAW);
@@ -441,11 +441,15 @@ namespace phy {
     }
 	if (vertical_velocity) {
 		glm::mat4 T = glm::identity<glm::mat4>();
-		T[3] = glm::vec4(vertical_velocity->x, vertical_velocity->y, vertical_velocity->z, 1.0);
+		T[3] = glm::vec4(vertical_velocity->x,
+                                 vertical_velocity->y,
+                                 vertical_velocity->z, 1.0);
 		model_mat = T * model_mat;
 	}
   }
 
+  // @pos must coordinates realtive to the plane before any
+  // transformations.
   int
   phyPlane::getTriangleAt(glm::vec4 pos) {
     return getTriangleAt(glm::vec3(pos.x, pos.y, pos.z));
@@ -455,8 +459,12 @@ namespace phy {
   // transformations.
   int
   phyPlane::getTriangleAt(glm::vec3 pos) {
-    // printf("isCutting with s coordinates: %02.2f %02.2f %02.2f\n",
-    //        s->x[0], s->x[1], s->x[2]);
+    // coordinates in the plane:
+    //  +----→ x
+    //  |
+    //  |
+    //  ↓
+    //  z
 
     // position of the sphere's center relative to the plane
     float xInPlane = pos.x - xStart;
@@ -486,6 +494,9 @@ namespace phy {
     return triangleIndex;
   }
 
+
+  // UNUSED
+  //
   // Return the index of the next triangle in the phyDirection @d
   int
   phyPlane::getNextTriangle(int index, phyDirection d) {
