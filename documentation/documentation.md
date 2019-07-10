@@ -241,7 +241,22 @@ void main()
 
 ### Physikalische Simulation
 
-(VOLKER)
+Der Code der zur physikalische Simulation verwendet wurde befindet sich in *src/library/physics.cpp*, die Headerdatei ist entsprechend *include/physics.hpp*.
+
+Die Simulation basiert auf den beiden Klassen *phy::phySphere*, sowie *phy::phyPlane*. Die Simulation verwendet folgenden vereinfachende Annahmen:
+
+- Es gibt keinerlei Reibung (somit auch kein Luftwiderstand)
+- Die Spheren wechselwirken *nicht* untereinander
+
+Ausgangspunkt für eine Plane ist eine 2D-Höhenkarte, die dem Konstruktor übergeben wird, der auf Basis dieser Daten einen vbo mit Vertices und Normalen berechnet.
+
+Jede Sphere ist einer Plane zugeordnet (in unserem Programm kommt nur eine Plane zum Einsatz), mit der sie physikalisch interagiert. Für jeden Frame werden *phyPlane::step(float deltaT)* und *phySphere::step(float deltaT)* für die Ebene und jede Sphere aufgerufen um den neuen Zustand zu berechnen. Die Berechnung des Resultates der Kollision basiert auf dem elastischen Stoß, wobei die Geschwindigkeit der Sphere, als auch die Geschwindigkeit der Plane (in Richtung ihrer Normalen) bei der Berechnung berücksichtigt werden müssen. Die Simulation des Energieverlustes wird durch eine einfache Reduzierung der Geschwindigkeit nach dem Stoß um einen festen Faktor erzielt.
+
+Der ursprüngliche Ansatz eine (bis auf nummerische Fehler) vollständig korrekte Kollisionsdetektion durchzuführen erwies sich als sehr aufwendig, so dass aufgrund der kürze der Zeit die Implementation schließlich immer weiter vereinfacht wurde. Im Code finden sich jedoch noch Methoden die für eine korrekte Kollisionsdetektion vorgesehen waren (markiert mit dem Schlüsselwort UNUSED).
+
+Als erstes wurde darauf verzichtet, den Radius der Spheren in die Berechnung mit einzubeziehen, da für diesen Fall selbst für Spheren mit hinreichend kleinem Radius bis zu 6 Ebenen auf eine Kollision überprüft werden mussten.
+
+Als nächstes wurde die Berechnung des genauen Ortes an dem eine Sphere auf die Ebene stößt grob approximiert anstatt ihn genau zu berechnen. Der Code dazu befindet sich in *phyPlane::reflect(phySphere *sphere)).
 
 ### Kamera Effekte
 
