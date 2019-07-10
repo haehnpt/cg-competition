@@ -510,6 +510,11 @@ namespace phy {
     }
   }
 
+  // UNUSED
+  //
+  // This would/will be needed for proper collision detection. Returns
+  // the index of the next triangle that a sphere at position @x and
+  // velocity @v will enter.
   int
   phyPlane::getNextTriangle(glm::vec3 x, glm::vec3 direction) {
     int i = getTriangleAt(x);
@@ -538,18 +543,19 @@ namespace phy {
       //   +
       //   1
 
-      // TODO: Exit through a corner
+      // TODO: Exit through a corner (would probably require some
+      // epsilon values).
       if (glm::cross(v0, direction).y < 0
           && glm::cross(direction, v2).y < 0) {
-        // Next exit: between top-left and top-right edge
+        // next exit: between top-left and top-right edge
         dir = up;
       } else if (glm::cross(v2, direction).y < 0
                  && glm::cross(direction, v1).y < 0) {
-        // Next exit: between top-right and bottom-left edge
+        // next exit: between top-right and bottom-left edge
         dir = right;
       } else if (glm::cross(v1, direction).y < 0
                  && glm::cross(direction, v0).y < 0) {
-        // Next exit: between bottom-left and top-left edge
+        // next exit: between bottom-left and top-left edge
         dir = left;
       }
     } else {
@@ -566,14 +572,14 @@ namespace phy {
 
       if (glm::cross(v0, direction).y > 0
           && glm::cross(direction, v2).y > 0) {
-        // Next exit: between bottom-left and bottom-right edge
+        // next exit: between bottom-left and bottom-right edge
       } else if (glm::cross(v2, direction).y > 0
                  && glm::cross(direction, v1).y > 0) {
-        // Next exit: between top right and bottom left edge
+        // next exit: between top right and bottom left edge
         dir = right;
       } else if (glm::cross(v1, direction).y > 0
                  && glm::cross(direction, v0).y > 0) {
-        // Next exit: between bottom left and top left edge
+        // next exit: between bottom left and top left edge
         dir = left;
       }
     }
@@ -581,6 +587,8 @@ namespace phy {
     return getNextTriangle(i, dir);
   }
 
+
+  // NOT IMPLEMENTED YET
   std::vector<int>
   phyPlane::getTrianglesFromTo(float xStart, float zStart, float xEnd, float zEnd) {
     // TODO
@@ -588,8 +596,9 @@ namespace phy {
   }
 
 
-  // x is the position relative to the plane before any
-  // transformations.
+  // Returns true if @x is above the plane. @x must be given in the
+  // initial plane coordinates (before application of the model
+  // matrix).
   bool
   phyPlane::isAbove(glm::vec3 x) {
     int index = getTriangleAt(x);
@@ -610,9 +619,26 @@ namespace phy {
     return glm::dot(x, norm) > glm::dot(v1, norm);
   }
 
-  // v is the velocity relative to the plane BEFORE any plane transformations
-  // reflect the vector @v at the normal of the triangle at position
-  // @pos
+  // Reflects the sphere @s at this plane. @v must be given in the
+  // initial plane coordinates (before application of the model
+  // matrix).
+  //
+  // This code calculates a VERY rough approximation of what would
+  // actually happen. A couple of things to notice:
+  //
+  // 1. The triangle over which the sphere is now, is NOT guaranteed
+  //    to be the one where the sphere hit plane. So this only works
+  //    with reasonable ratios of speed and triangle sizes.
+  //
+  // 2. Even if the triangle is the one where the sphere first hit the
+  //    plane, the code still does NOT take the real point of first
+  //    contact into account. To be accurate, this point would have to
+  //    be calculated to base the reflection calculations on. Again,
+  //    this code works for us since speed of our spheres and our
+  //    triangle sizes behave well [Oh yeah, how scientific! ;)].
+  //
+  // 3. A correct implementation would have to check the complete path
+  //    of the sphere since the last frame for collisions.
   void
   phyPlane::reflect(phySphere *s) {
     if (!useBoundingBox) {
@@ -633,34 +659,30 @@ namespace phy {
                    vbo_data[index * 3 * 10 + 3 + 2],
                    0);
 
-    // std::cout << "pos: " << glm::to_string(pos) << "\n";
-    // std::cout << "vec3(pos): " << glm::to_string(glm::vec3(pos)) << "\n";
-
     if (angular_velocity) {
-      // std::cout << "*angular_velocity: " << glm::to_string(*angular_velocity) << "\n";
-
-      // velocity of the plane in direction of its normal. The plane is
-      // considered to have infinity weight, so we can substract this
-      // speed from @v.
+      // Velocity of the plane in direction of its normal. The plane
+      // is considered to have infinity weight, so we can subtract
+      // this velocity from @v and apply Newton's third law.
       glm::vec4 v_plane = glm::dot(glm::cross(*angular_velocity, glm::vec3(s->x)),
                                    glm::vec3(norm)) * norm;
       s->v -= v_plane;
-
-      // std::cout << "v: " << glm::to_string(s->v)
-      //           << ", v += v_plane: " << glm::to_string(s->v += v_plane) << "\n";
     }
-
-    // More accurate version, but this is also only correct if the
-    // triangle above which the sphere entered the plane is identical
-    // to the triangle above which the sphere is now.
-    // s->moveToPlaneHeight();
 
     // Move the sphere APPROXIMATELY to the point of first
     // contact. This is a very quick but also very poor (if the
-    // incoming angle was not steep) approximation of the point of
-    // first contact of the sphere with the plane.
+    // incoming angle was not steep, the sphere could have entered
+    // many triangles away...) approximation of the point of first
+    // contact of the sphere with the plane.
     s->x.y = vbo_data[index * 3 * 10 + 0 + 1];
 
+    // More accurate but slower version of the above. This is also
+    // only a good approximation if the triangle above which the
+    // sphere entered the plane is identical to the triangle above
+    // which the sphere is now.
+    //
+    // s->moveToPlaneHeight();
+
+    // Reflect v using the plane's normal
     s->v = s->v - 2*glm::dot(norm, s->v) * norm;
   }
 
