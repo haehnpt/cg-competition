@@ -223,7 +223,6 @@ main(int, char* argv[]) {
 			phyplane.set_angular_velocity(nullptr);
 		} else if (frame == PLANE_TILT_START_FRAME + PLANE_TILT_INTERVAL / 2) {
 			ang_vel *= -1;
-			std::cout << "first tilt change at frame " << frame << "\n";
 			// The the first tilt only take (PLANE_TILT_INTERVAL / 2)
 			// frames make tilting symmetric
 		} else if ((frame - (PLANE_TILT_START_FRAME + PLANE_TILT_INTERVAL / 2))
