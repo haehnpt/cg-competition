@@ -243,20 +243,24 @@ void main()
 
 Der Code der zur physikalische Simulation verwendet wurde befindet sich in *src/library/physics.cpp*, die Headerdatei ist entsprechend *include/physics.hpp*.
 
-Die Simulation basiert auf den beiden Klassen *phy::phySphere*, sowie *phy::phyPlane*. Die Simulation verwendet folgenden vereinfachende Annahmen:
+Die Simulation basiert auf den beiden Klassen *phy::phySphere*, sowie *phy::phyPlane*. Die Simulation basiert auf folgenden vereinfachende Annahmen:
 
 - Es gibt keinerlei Reibung (somit auch kein Luftwiderstand)
 - Die Spheren wechselwirken *nicht* untereinander
 
-Ausgangspunkt für eine Plane ist eine 2D-Höhenkarte, die dem Konstruktor übergeben wird, der auf Basis dieser Daten einen vbo mit Vertices und Normalen berechnet.
+Ausgangspunkt für eine Plane ist eine 2D-Höhenkarte, die dem Konstruktor übergeben wird, der auf Basis dieser Daten einen vbo mit Vertices und Normalen berechnet. Aufgrund der systematischen Unterteilung der Ebene und Rechtecke, die wiederum jeweils in zwei Dreiecke unterteilt sind, kann die Bestimmung eines Dreiecks zu einer gegebenen Koordinate in O(1) erfolgen. Siehe dazu die beschreibenden Kommentare im Konstruktor des phyPlane Structs. Ist das Dreieck bekannt kann leicht berechnet werden ob die Koordinate unter oder über der Ebene liegt. Weitere Kommentare zu Berechnung der Kollision, die als elastischer Stoß behandelt wird, befinden sich im Quellcode der Funktion *phyPlane::reflect(phySphere *sphere))*.
 
 Jede Sphere ist einer Plane zugeordnet (in unserem Programm kommt nur eine Plane zum Einsatz), mit der sie physikalisch interagiert. Für jeden Frame werden *phyPlane::step(float deltaT)* und *phySphere::step(float deltaT)* für die Ebene und jede Sphere aufgerufen um den neuen Zustand zu berechnen. Die Berechnung des Resultates der Kollision basiert auf dem elastischen Stoß, wobei die Geschwindigkeit der Sphere, als auch die Geschwindigkeit der Plane (in Richtung ihrer Normalen) bei der Berechnung berücksichtigt werden müssen. Die Simulation des Energieverlustes wird durch eine einfache Reduzierung der Geschwindigkeit nach dem Stoß um einen festen Faktor erzielt.
 
 Der ursprüngliche Ansatz eine (bis auf nummerische Fehler) vollständig korrekte Kollisionsdetektion durchzuführen erwies sich als sehr aufwendig, so dass aufgrund der kürze der Zeit die Implementation schließlich immer weiter vereinfacht wurde. Im Code finden sich jedoch noch Methoden die für eine korrekte Kollisionsdetektion vorgesehen waren (markiert mit dem Schlüsselwort UNUSED).
 
-Als erstes wurde darauf verzichtet, den Radius der Spheren in die Berechnung mit einzubeziehen, da für diesen Fall selbst für Spheren mit hinreichend kleinem Radius bis zu 6 Ebenen auf eine Kollision überprüft werden mussten.
+Als erstes wurde darauf verzichtet, den Radius der Spheren in die Berechnung mit einzubeziehen, da für diesen Fall selbst für Spheren mit hinreichend kleinem Radius bis zu 6 Ebenen auf eine Kollision überprüft werden müssen.
 
-Als nächstes wurde die Berechnung des genauen Ortes an dem eine Sphere auf die Ebene stößt grob approximiert anstatt ihn genau zu berechnen. Der Code dazu befindet sich in *phyPlane::reflect(phySphere *sphere)).
+Als nächstes wurde die Berechnung des genauen Ortes an dem eine Sphere auf die Ebene stößt grob approximiert anstatt ihn genau zu berechnen. Der Code dazu befindet sich in *phyPlane::reflect(phySphere *sphere))*.
+
+Schließlich wurde auch ganz darauf verzichtet alle Dreiecke zwischen der Position im letzten Frame und der aktuellen Position auf Kollision zu überprüfen, da die geringen Geschwindigkeiten in unserem Program dies zuließen. Für hohe Geschwindigkeiten wird jedoch eine Sphere, die etwa wagerecht auf einen Berg trifft und in einem Frame vor und im nächsten Frame hinter dem Berg ist diesen einfach ignorieren.
+
+Insgesamt ist der Code noch *sehr* unaufgeräumt, unvollständig und fehlerhaft und es gibt noch sehr viele Erweiterungsmöglichkeiten. Als einfachstes Beispiel sei hier angeführt, dass auch eine Kollision einer Sphere mit der Rückseite, die in der jetzigen Version nicht korrekt funktioniert, leicht zu implementieren wäre, indem in jedem Frame überprüft wird ob eine Sphere die Seite gewechselt hat.
 
 ### Kamera Effekte
 
