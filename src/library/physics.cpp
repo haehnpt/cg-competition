@@ -245,8 +245,9 @@ namespace phy {
     this->xTileWidth = (xEnd - xStart) / (float)(xNumPoints - 1);
     this->zTileWidth = (zEnd - zStart) / (float)(zNumPoints - 1);
 
-    std::cout << "xTileWidth: " << xTileWidth << ", zTileWidth: " << zTileWidth << "\n";
-    std::cout << "xNumPoints: " << xNumPoints << ", zNumPoints: " << zNumPoints << "\n";
+    std::cout << "phy:: xTileWidth: " << xTileWidth << ", zTileWidth: " << zTileWidth << "\n";
+    std::cout << "phy:: xNumPoints: " << xNumPoints << ", zNumPoints: " << zNumPoints << "\n";
+
     // Set vertex coordinates using the heightMap for the y-value.
     //
     // Each square of the (m-1)*(n-1) squares is separated into two
@@ -284,10 +285,10 @@ namespace phy {
     float deltaZ = (zEnd - zStart) / (zNumPoints - 1);
 
     // DEBUG:
-    std::cout << "heightMap dimension: " << zNumPoints << "x" << xNumPoints << "\n";
-    std::cout << "deltaX = " << deltaX << ", deltaZ  = " << deltaZ << "\n";
-    std::cout << "n_vertices = " << n_vertices << "\n";
-    std::cout << "vbo_data size: " << n_vertices * 10 * sizeof(float) / 1000.f << "K\n";
+    std::cout << "phy:: heightMap dimension: " << zNumPoints << "x" << xNumPoints << "\n";
+    std::cout << "phy:: deltaX = " << deltaX << ", deltaZ  = " << deltaZ << "\n";
+    std::cout << "phy:: n_vertices = " << n_vertices << "\n";
+    std::cout << "phy:: vbo_data size: " << n_vertices * 10 * sizeof(float) / 1000.f << "K\n";
 
     // This for-loop loops over the squares between the data
     // points. (x,z) represents the upper-left vertex of the current
