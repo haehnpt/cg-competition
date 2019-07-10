@@ -662,7 +662,7 @@ namespace phy {
     if (angular_velocity) {
       // Velocity of the plane in direction of its normal. The plane
       // is considered to have infinity weight, so we can subtract
-      // this velocity from @v.
+      // this velocity from @v and apply Newton's third law.
       glm::vec4 v_plane = glm::dot(glm::cross(*angular_velocity, glm::vec3(s->x)),
                                    glm::vec3(norm)) * norm;
       s->v -= v_plane;
@@ -682,6 +682,7 @@ namespace phy {
     //
     // s->moveToPlaneHeight();
 
+    // Reflect v using the plane's normal
     s->v = s->v - 2*glm::dot(norm, s->v) * norm;
   }
 
