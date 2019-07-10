@@ -1,16 +1,16 @@
 #include "terrain.hpp"
 
-/*
-Get heights using "Perlin Noise"
-- range : size of the terrain
-- rigidity : how "rough" shall the terrain look, e.g. very spiky = 2.0
-*/
+// Generate heights using the perlin_noise class
 float * terrain::get_heights(float range, float rigidity)
 {
+	// Create an array of the required size
 	float * heights = new float[resolution * resolution];
+
+	// Instantiate two frequencies of perlin noise
 	perlin_noise noise = perlin_noise(resolution, 1.0, 0.0, 1.3);
 	perlin_noise noise2 = perlin_noise(resolution * 3, 0.333333, 0.0, 1.3);
 
+    // For each vertex, generate a height
 	for (int z = 0; z < resolution; z++)
 	{
 		for (int x = 0; x < resolution; x++)
@@ -25,15 +25,14 @@ float * terrain::get_heights(float range, float rigidity)
 		}
 	}
 
+    // Clear memory
 	noise.clear_gradients();
 	noise2.clear_gradients();
 
 	return heights;
 }
 
-/*
-* Get the normal at a given position (x,z)
-*/
+// Get the normal of the triangle which matches position (x,z)
 glm::vec3 * terrain::get_normal_at_pos(float x, float z)
 {
 	float delta = this->size / (float)resolution;
@@ -51,9 +50,7 @@ glm::vec3 * terrain::get_normal_at_pos(float x, float z)
 	return &(this->terra.faces_normals[index]);
 }
 
-/*
-Clamp the calculated heights to an specified range
-*/
+// Clamp the terrain heights to be in [min_height,max_height]
 void terrain::clamp_heights()
 {
 	for (int i = 0; i < resolution * resolution; i++)
@@ -62,13 +59,7 @@ void terrain::clamp_heights()
 	}
 }
 
-/*
-Build the terrain instance
-- calculate vertices
-- calculate normals
-- calculate texture coordinates
-- set VBO
-*/
+// Build the terrain (create vertices etc.)
 void terrain::build()
 {
 	geometry m;
@@ -174,23 +165,27 @@ void terrain::build()
 	delete[] ibo_data;
 }
 
+// Allocate shader frame locations
 void terrain::get_frame_locations(int shader_program)
 {
 	this->frame_loc = glGetUniformLocation(shader_program, "frame");
 	this->max_frame_loc = glGetUniformLocation(shader_program, "max_frame");
 }
 
+// Set the start and maximum frame
 void terrain::set_frames(int start, int max)
 {
 	this->start_frame = start;
 	this->frames = max;
 }
 
+// Reset the current frame
 void terrain::reset_current_frame()
 {
 	this->current_frame = this->start_frame;
 }
 
+// Increase the current frame
 void terrain::increase_current_frame(int increase)
 {
 	this->current_frame += (this->current_frame < this->frames ? increase : 0);
@@ -203,6 +198,7 @@ int terrain::albedo_loc;
 int terrain::roughness_loc;
 int terrain::ref_index_loc;
 int terrain::terr_model_loc;
+// Render the terrain
 void terrain::render(camera * cam, glm::mat4 proj_matrix, glm::vec3 light_dir)
 {
 	glUseProgram(terrainShaderProgram);
@@ -229,17 +225,7 @@ void terrain::render(camera * cam, glm::mat4 proj_matrix, glm::vec3 light_dir)
 	increase_current_frame();
 }
 
-/*
-Get an new terrain instance
-- size : size of the terrain
-- resolution : resolution of the underlying gradient grid
-- start_frame : starting frame
-- max_frame : maximum frame
-- shader_program :
-- stone : stone texture file name
-- grass : grass - - -
-- snow : snow - - -
-*/
+// Create a new instance of terrain
 terrain::terrain(float size, int resolution, int start_frame, int max_frame, std::string stone, std::string grass, std::string snow)
 {
 	this->size = size;
@@ -254,7 +240,7 @@ terrain::terrain(float size, int resolution, int start_frame, int max_frame, std
 	set_frames(start_frame, max_frame);
 }
 
-
+// Clean up
 terrain::~terrain()
 {
 }
@@ -262,6 +248,7 @@ terrain::~terrain()
 int terrain::stone_loc;
 int terrain::grass_loc;
 int terrain::snow_loc;
+// Allocate shader texture locations
 void terrain::get_texture_locations(int shader_program)
 {
 	stone_loc = glGetUniformLocation(shader_program, "stone_tex");
@@ -269,6 +256,7 @@ void terrain::get_texture_locations(int shader_program)
 	snow_loc = glGetUniformLocation(shader_program, "snow_tex");
 }
 
+// Load the stone, grass and snow textures
 void terrain::load_textures(std::string stone, std::string grass, std::string snow) {
 	int image_width, image_height;
 
@@ -300,6 +288,7 @@ void terrain::load_textures(std::string stone, std::string grass, std::string sn
 	set_texture_wrap_mode(image_tex3, GL_MIRRORED_REPEAT);
 }
 
+// Create textures from raw data
 unsigned terrain::create_texture_rgba32f(int width, int height, float* data) {
 	unsigned handle;
 	glCreateTextures(GL_TEXTURE_2D, 1, &handle);
@@ -310,6 +299,7 @@ unsigned terrain::create_texture_rgba32f(int width, int height, float* data) {
 	return handle;
 }
 
+// Load raw texture data
 float* terrain::load_texture_data(std::string filename, int* width, int* height) {
 	int channels;
 	unsigned char* file_data = stbi_load(filename.c_str(), width, height, &channels, 3);
@@ -332,16 +322,19 @@ float* terrain::load_texture_data(std::string filename, int* width, int* height)
 	return data;
 }
 
+// Set the texture filter mode of a texture
 void terrain::set_texture_filter_mode(unsigned int texture, GLenum mode) {
 	glTextureParameteri(texture, /*GL_TEXTURE_MAG_FILTER*/GL_TEXTURE_MIN_FILTER, mode);
 }
 
+// Set the texture wrap mode of a texture
 void terrain::set_texture_wrap_mode(unsigned int texture, GLenum mode) {
 	glTextureParameteri(texture, GL_TEXTURE_WRAP_S, mode);
 	glTextureParameteri(texture, GL_TEXTURE_WRAP_T, mode);
 }
 
 int terrain::terrainShaderProgram;
+// Create the terrain shader program
 void terrain::create_terrain_shaders()
 {
 	// load and compile shaders and link program
@@ -363,6 +356,7 @@ void terrain::create_terrain_shaders()
 
 }
 
+// Set the model matrix of the terrain
 void terrain::set_model_mat(glm::mat4 mm) {
   terra.transform = mm;
 }
