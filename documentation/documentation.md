@@ -23,15 +23,15 @@ Anzahl von Kugeln im Himmel. Die Kugeln stürzen herunter und landen auf den Geb
 
 Die Landschaft soll aus schneebedeckten Bergen, steinigen Hängen und Wiesen im Flachland bestehen. Es werden verschiedene Texturen verwendet.
 
-(PHYSIK)
+Die Kugeln sollen wild hin und her springen und durch Bewegungen des Terrain weiterhin stimuliert werden.
 
 ### Technisches Konzept
 
 Die in der Story benötigte Umgebung, die bergige Landschaft, wird mit Hilfe von pseudo-zufälligem Noise prozedural erzeugt und durch das Anpassen der Geometrie an die Texturen verfeinert.
 
-(PHYSIK)
+Das Aufspringen der Kugeln wird mit Hilfe einer weiteren, unsichtbaren Physik-Ebene simuliert.
 
-(KAMERA EFFEKTE)
+Es wird ein Motion-Blur-Effekt und eine Tiefenunschärfe appliziert.
 
 Die erzeugten Frames werden mit Hilfe eines Converter-Tools zu einem  Video der gewünschten Qualität zusammengefügt.
 
@@ -264,7 +264,7 @@ Insgesamt ist der Code noch *sehr* unaufgeräumt, unvollständig und fehlerhaft 
 
 ### Kamera Effekte
 
-(SEBASTIAN)
+(KAMERA EFFEKTE: Sebastian, hier darfst du gerne auch etwas zur Dokumentation beitragen)
 
 ### Video Rendering
 
@@ -296,8 +296,6 @@ public:
 ## Resultat
 
 ![](rendering.gif)
-
-(IN HTML DOKUMENTATION GIF DURCH VIDEO ERSETZEN)
 
 Mit den unten aufgeführten Einstellungen wurde das obige Resultat erreicht.
 
