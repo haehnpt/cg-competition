@@ -3,7 +3,7 @@ Repository für das "Computer Animation Festival 2019" des Moduls "Einführung i
 
 ## Softwaredokumentation
 
-Update: Unser Beitrag hat den 1. Platz erreicht! :trophy:
+**Update**: Unser Beitrag hat den **1. Platz** erreicht! :trophy:
 
 Alle relevanten Informationen finden sich hier:
 
