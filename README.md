@@ -1,12 +1,12 @@
 ﻿# Computer Animation Competition
-Repository für die "Computer Animation Competition" des Moduls "Einführung in die Computergrafik und Visualisierung" an der Rheinischen Friedrich-Wilhelms-Universität Bonn im Sommersemester 2019
+Repository für das "Computer Animation Festival 2019" des Moduls "Einführung in die Computergrafik" an der Rheinischen Friedrich-Wilhelms-Universität Bonn im Sommersemester 2019
 
 ## Softwaredokumentation
+
+Update: Unser Beitrag hat den 1. Platz erreicht! :trophy:
 
 Alle relevanten Informationen finden sich hier:
 
 [Softwaredokumentation](documentation/documentation.md)
 
-[Vorschauvideo](https://haehn.me/uni/cg)
-
-![](documentation/rendering.gif)
+[Beitrag in Videoform](https://haehn.me/uni/cg)
