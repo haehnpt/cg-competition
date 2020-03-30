@@ -1,6 +1,10 @@
 ﻿# Computer Animation Festival 2019
 Repository für das "Computer Animation Festival 2019" des Moduls "Einführung in die Computergrafik" an der Rheinischen Friedrich-Wilhelms-Universität Bonn im Sommersemester 2019
 
+## Impressionen
+
+![GIF](documentation/rendering.gif)
+
 ## Softwaredokumentation
 
 **Update**: Unser Beitrag hat den **1. Platz** erreicht! :trophy:
